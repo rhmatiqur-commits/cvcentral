@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — CV Central</title>
+  <meta name="description" content="Your CV Central dashboard — CV score, plan and next steps.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%235B2D8E'/><text x='50' y='68' font-size='48' font-family='monospace' font-weight='bold' fill='%23AAFF00' text-anchor='middle'>CV</text></svg>">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo" aria-label="CV Central home">
+        <span class="logo-mark">CV</span>
+        <span>CV<span class="logo-central">Central</span></span>
+      </a>
+      <nav class="main-nav">
+        <a href="cv-builder.html">CV builder</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="#" id="signOutLink" class="btn btn-ghost btn-sm" hidden>Sign out</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dash-wrap">
+    <div class="container">
+
+      <!-- Sign in -->
+      <div class="dash-login" id="loginPanel">
+        <h1>Welcome back 👋</h1>
+        <p>Enter the email you used on your CV and we'll pull up your dashboard.</p>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginEmail">Email address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required>
+          </div>
+          <button type="submit" class="btn btn-violet" id="loginBtn">Open my dashboard</button>
+        </form>
+        <p style="margin-top:1.25rem;font-size:0.85rem;">
+          No CV yet? <a href="cv-builder.html" style="color:var(--violet);font-weight:700;">Build one free →</a>
+        </p>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="dashPanel" hidden>
+        <div class="dash-head">
+          <div>
+            <h1 id="dashGreeting">Hello!</h1>
+            <p id="dashSub">Here's where your job hunt stands.</p>
+          </div>
+          <a href="cv-builder.html" class="btn btn-primary">Edit my CV</a>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <p class="card-label">CV Score</p>
+            <p class="dash-stat"><span id="dashScore">—</span><small>/100</small></p>
+            <p style="font-size:0.85rem;color:var(--muted);margin-top:0.5rem;" id="dashScoreNote"></p>
+          </div>
+          <div class="dash-card">
+            <p class="card-label">Your plan</p>
+            <p><span class="plan-chip" id="dashPlan">FREE</span></p>
+            <p style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 1rem;">Unlock unlimited cover letters, ATS checks and interview prep.</p>
+            <a href="index.html#pricing" class="btn btn-violet btn-sm">Upgrade to Pro</a>
+          </div>
+          <div class="dash-card">
+            <p class="card-label">Target role</p>
+            <p style="font-weight:800;font-size:1.15rem;letter-spacing:-0.01em;" id="dashRole">—</p>
+            <p style="font-size:0.85rem;color:var(--muted);margin-top:0.35rem;" id="dashIndustry"></p>
+            <p style="font-size:0.8rem;color:var(--muted);margin-top:0.75rem;" id="dashMeta"></p>
+          </div>
+
+          <div class="dash-card span-2">
+            <p class="card-label">Recommended next steps</p>
+            <ul class="dash-list" id="dashImprovements"></ul>
+          </div>
+          <div class="dash-card">
+            <p class="card-label">Top ATS keywords</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.45rem;" id="dashKeywords"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Not found -->
+      <div id="notFoundPanel" class="empty-state" hidden>
+        <p class="big">🔍</p>
+        <p style="font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:0.35rem;">We couldn't find a CV for that email</p>
+        <p style="margin-bottom:1.5rem;">Double-check the spelling, or build your first CV — it takes minutes.</p>
+        <div style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-ghost" id="tryAgainBtn">Try another email</button>
+          <a href="cv-builder.html" class="btn btn-primary">Build my CV free</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;padding:0;">
+        <span>© 2026 CV Central · Powered by Clavent Recruitment</span>
+        <span><a href="#">Privacy Policy</a> · <a href="#">Terms</a> · <a href="#">Contact</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_wvx5-gitH3SZw9qv92vL-g_5lzNIInv';
+
+    var toastEl = document.getElementById('toast');
+    var toastTimer = null;
+    function toast(msg, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3200);
+    }
+
+    function show(panel) {
+      ['loginPanel', 'dashPanel', 'notFoundPanel'].forEach(function (id) {
+        document.getElementById(id).hidden = id !== panel;
+      });
+      document.getElementById('signOutLink').hidden = panel !== 'dashPanel';
+    }
+
+    function fetchCandidate(email) {
+      var url = SUPABASE_URL + '/rest/v1/cv_central_candidates?email=eq.' +
+        encodeURIComponent(email.toLowerCase()) + '&select=*&limit=1';
+      return fetch(url, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Lookup failed (' + res.status + ')');
+        return res.json();
+      }).then(function (rows) { return rows[0] || null; });
+    }
+
+    function renderDashboard(row) {
+      var firstName = (row.name || '').split(' ')[0];
+      document.getElementById('dashGreeting').textContent = firstName ? 'Hello, ' + firstName + ' 👋' : 'Hello! 👋';
+
+      // Score
+      var scoreEl = document.getElementById('dashScore');
+      var note = document.getElementById('dashScoreNote');
+      if (row.cv_score != null) {
+        var target = row.cv_score;
+        var start = performance.now();
+        (function frame(now) {
+          var t = Math.min((now - start) / 1000, 1);
+          scoreEl.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+          if (t < 1) requestAnimationFrame(frame);
+        })(start);
+        note.textContent = target >= 85 ? 'Interview-ready. Nice work.' :
+                           target >= 70 ? 'Solid — a few tweaks from great.' :
+                           'Run the AI enhancement to boost this.';
+      } else {
+        scoreEl.textContent = '—';
+        note.textContent = 'Run “Analyse my CV” in the builder to get scored.';
+      }
+
+      // Plan
+      var plan = (row.plan || 'free').toLowerCase();
+      var chip = document.getElementById('dashPlan');
+      chip.textContent = plan.toUpperCase();
+      chip.className = 'plan-chip ' + plan;
+
+      // Role
+      document.getElementById('dashRole').textContent = row.target_role || 'Not set yet';
+      document.getElementById('dashIndustry').textContent = row.target_industry || '';
+      var meta = [];
+      if (row.location) meta.push('📍 ' + row.location);
+      if (row.created_at) meta.push('Member since ' + new Date(row.created_at).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }));
+      document.getElementById('dashMeta').textContent = meta.join(' · ');
+
+      // AI extras stored in cv_data
+      var ai = (row.cv_data && row.cv_data.ai) || {};
+      var impList = document.getElementById('dashImprovements');
+      impList.innerHTML = '';
+      var improvements = ai.improvements && ai.improvements.length ? ai.improvements : [
+        'Run the AI analysis in the builder for tailored fixes',
+        'Add measurable achievements to each role (numbers win interviews)',
+        'Paste a job description in step 4 to unlock your ATS check'
+      ];
+      improvements.slice(0, 3).forEach(function (imp) {
+        var li = document.createElement('li');
+        li.textContent = imp;
+        impList.appendChild(li);
+      });
+
+      var kwWrap = document.getElementById('dashKeywords');
+      kwWrap.innerHTML = '';
+      var keywords = ai.atsKeywords || [];
+      if (keywords.length) {
+        keywords.slice(0, 5).forEach(function (kw) {
+          var c = document.createElement('span');
+          c.style.cssText = 'font-family:var(--font-mono);font-size:0.8rem;font-weight:600;background:#F2FFD6;color:#3F6212;border:1px solid #DBF7A8;padding:0.3rem 0.75rem;border-radius:999px;';
+          c.textContent = kw;
+          kwWrap.appendChild(c);
+        });
+      } else {
+        kwWrap.innerHTML = '<span style="color:var(--muted);font-size:0.88rem;">Run the AI analysis to see the keywords recruiters scan for.</span>';
+      }
+
+      show('dashPanel');
+    }
+
+    function login(email) {
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Looking you up…';
+      fetchCandidate(email)
+        .then(function (row) {
+          btn.disabled = false;
+          btn.textContent = 'Open my dashboard';
+          if (!row) { show('notFoundPanel'); return; }
+          localStorage.setItem('cvcentral_email', email.toLowerCase());
+          renderDashboard(row);
+          // Touch last_active (fire and forget)
+          fetch(SUPABASE_URL + '/rest/v1/cv_central_candidates?email=eq.' + encodeURIComponent(email.toLowerCase()), {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY
+            },
+            body: JSON.stringify({ last_active: new Date().toISOString() })
+          }).catch(function () {});
+        })
+        .catch(function (err) {
+          console.error(err);
+          btn.disabled = false;
+          btn.textContent = 'Open my dashboard';
+          toast('Couldn’t reach the server — try again in a moment', 'error');
+        });
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = document.getElementById('loginEmail').value.trim();
+      if (!/.+@.+\..+/.test(email)) { toast('That email doesn’t look right', 'error'); return; }
+      login(email);
+    });
+
+    document.getElementById('tryAgainBtn').addEventListener('click', function () {
+      show('loginPanel');
+      document.getElementById('loginEmail').focus();
+    });
+
+    document.getElementById('signOutLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      localStorage.removeItem('cvcentral_email');
+      show('loginPanel');
+      toast('Signed out. See you soon 👋');
+    });
+
+    // Auto-login from a remembered session
+    var remembered = localStorage.getItem('cvcentral_email');
+    if (remembered) {
+      document.getElementById('loginEmail').value = remembered;
+      login(remembered);
+    }
+  })();
+  </script>
+</body>
+</html>

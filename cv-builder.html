@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Builder — CV Central</title>
+  <meta name="description" content="Build an ATS-ready CV in minutes with AI enhancement, scoring and a tailored cover letter.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/builder.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%235B2D8E'/><text x='50' y='68' font-size='48' font-family='monospace' font-weight='bold' fill='%23AAFF00' text-anchor='middle'>CV</text></svg>">
+</head>
+<body class="builder-page">
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo" aria-label="CV Central home">
+        <span class="logo-mark">CV</span>
+        <span>CV<span class="logo-central">Central</span></span>
+      </a>
+      <nav class="main-nav">
+        <a href="dashboard.html">My dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="builder-main">
+    <div class="builder-shell">
+
+      <!-- Progress -->
+      <div class="wizard-progress">
+        <ol class="progress-steps" id="progressSteps">
+          <li data-step="1" class="active"><span class="step-dot">1</span><span class="step-label">Details</span></li>
+          <li data-step="2"><span class="step-dot">2</span><span class="step-label">Experience</span></li>
+          <li data-step="3"><span class="step-dot">3</span><span class="step-label">Education</span></li>
+          <li data-step="4"><span class="step-dot">4</span><span class="step-label">Job target</span></li>
+          <li data-step="5"><span class="step-dot">5</span><span class="step-label">AI &amp; preview</span></li>
+        </ol>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <!-- ============ STEP 1: Personal details ============ -->
+      <section class="wizard-step active" data-step="1">
+        <div class="step-card-panel">
+          <div class="step-title">
+            <span class="step-count">Step 1 of 5</span>
+            <h2>Let's start with you</h2>
+            <p>The basics recruiters see first. Rough notes are fine everywhere — the AI polishes later.</p>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="fullName">Full name</label>
+              <input type="text" id="fullName" placeholder="e.g. Amara Okafor" autocomplete="name">
+              <span class="error-msg">Please enter your name</span>
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+              <span class="error-msg">Please enter a valid email</span>
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" placeholder="07123 456789" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="location">Location <span class="optional">(UK city)</span></label>
+              <input type="text" id="location" placeholder="e.g. Manchester" autocomplete="address-level2">
+            </div>
+            <div class="field">
+              <label for="targetRole">Target job title</label>
+              <input type="text" id="targetRole" placeholder="e.g. Marketing Executive">
+              <span class="error-msg">What role are you going for?</span>
+            </div>
+            <div class="field">
+              <label for="targetIndustry">Target industry</label>
+              <select id="targetIndustry">
+                <option value="">Select an industry…</option>
+                <option>Technology &amp; IT</option>
+                <option>Finance &amp; Banking</option>
+                <option>Healthcare &amp; NHS</option>
+                <option>Marketing &amp; Media</option>
+                <option>Education</option>
+                <option>Engineering &amp; Manufacturing</option>
+                <option>Retail &amp; Hospitality</option>
+                <option>Legal</option>
+                <option>Construction &amp; Trades</option>
+                <option>Public Sector</option>
+                <option>Logistics &amp; Transport</option>
+                <option>Creative &amp; Design</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="summary">Professional summary <span class="optional">(rough version — AI will improve it)</span></label>
+              <textarea id="summary" placeholder="e.g. been in retail 4 years, good with customers, ran the tills and trained 2 new starters, want to move into office admin…"></textarea>
+              <span class="hint">Write like you'd tell a mate. Seriously.</span>
+            </div>
+            <div class="field full">
+              <label for="linkedin">LinkedIn URL <span class="optional">(optional)</span></label>
+              <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourname">
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <span></span>
+          <button class="btn btn-violet" data-next>Next: Experience →</button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 2: Work experience ============ -->
+      <section class="wizard-step" data-step="2">
+        <div class="step-card-panel">
+          <div class="step-title">
+            <span class="step-count">Step 2 of 5</span>
+            <h2>Your work experience</h2>
+            <p>Most recent first. Split what you <em>did</em> from what you <em>achieved</em> — that's where CVs win.</p>
+          </div>
+          <div id="experienceList"></div>
+          <button type="button" class="add-entry-btn" id="addExperience">+ Add another role</button>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" data-prev>← Back</button>
+          <button class="btn btn-violet" data-next>Next: Education →</button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 3: Education & skills ============ -->
+      <section class="wizard-step" data-step="3">
+        <div class="step-card-panel">
+          <div class="step-title">
+            <span class="step-count">Step 3 of 5</span>
+            <h2>Education &amp; skills</h2>
+            <p>Qualifications, skills, languages, certifications — type and press Enter to add tags.</p>
+          </div>
+          <div id="educationList"></div>
+          <button type="button" class="add-entry-btn" id="addEducation" style="margin-bottom:1.5rem;">+ Add another qualification</button>
+
+          <div class="form-grid">
+            <div class="field full">
+              <label for="skillsInput">Skills</label>
+              <div class="tag-input-wrap" data-tags="skills">
+                <input type="text" id="skillsInput" placeholder="e.g. Microsoft Excel — press Enter to add">
+              </div>
+              <span class="hint">Aim for 6–12. Mix technical and people skills.</span>
+            </div>
+            <div class="field">
+              <label for="languagesInput">Languages</label>
+              <div class="tag-input-wrap" data-tags="languages">
+                <input type="text" id="languagesInput" placeholder="e.g. English (native)">
+              </div>
+            </div>
+            <div class="field">
+              <label for="certsInput">Certifications</label>
+              <div class="tag-input-wrap" data-tags="certifications">
+                <input type="text" id="certsInput" placeholder="e.g. Food Hygiene Level 2">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" data-prev>← Back</button>
+          <button class="btn btn-violet" data-next>Next: Job target →</button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 4: Job target ============ -->
+      <section class="wizard-step" data-step="4">
+        <div class="step-card-panel">
+          <div class="step-title">
+            <span class="step-count">Step 4 of 5</span>
+            <h2>The job you're going for</h2>
+            <p>Paste the job description. We use it for your cover letter, template pick, ATS check and interview prep.</p>
+          </div>
+          <div class="form-grid">
+            <div class="field full">
+              <label for="jobDescription">Job description <span class="optional">(paste the whole thing)</span></label>
+              <textarea id="jobDescription" rows="9" placeholder="Paste the full job advert here — responsibilities, requirements, the lot."></textarea>
+            </div>
+            <div class="field">
+              <label for="salaryExpectation">Target salary expectation</label>
+              <select id="salaryExpectation">
+                <option value="">Select a range…</option>
+                <option>Under £20,000</option>
+                <option>£20,000 – £25,000</option>
+                <option>£25,000 – £30,000</option>
+                <option>£30,000 – £40,000</option>
+                <option>£40,000 – £50,000</option>
+                <option>£50,000 – £70,000</option>
+                <option>£70,000 – £100,000</option>
+                <option>£100,000+</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="availableFrom">Available from</label>
+              <select id="availableFrom">
+                <option value="">Select…</option>
+                <option>Immediately</option>
+                <option>1 week notice</option>
+                <option>2 weeks notice</option>
+                <option>1 month notice</option>
+                <option>2 months notice</option>
+                <option>3+ months notice</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" data-prev>← Back</button>
+          <button class="btn btn-violet" data-next>Next: AI magic →</button>
+        </div>
+      </section>
+
+      <!-- ============ STEP 5: AI enhancement & preview ============ -->
+      <section class="wizard-step" data-step="5">
+        <div class="step-card-panel">
+          <div class="step-title">
+            <span class="step-count">Step 5 of 5</span>
+            <h2>AI enhancement &amp; preview</h2>
+            <p>One click. The AI rewrites, scores, checks ATS compatibility and drafts your cover letter.</p>
+          </div>
+
+          <!-- Pre-analysis state -->
+          <div id="analyseIntro" class="analyse-hero">
+            <div class="rocket">🚀</div>
+            <h3>Ready when you are</h3>
+            <p>We'll enhance your summary and bullet points, score your CV out of 100, recommend a template, and write your first cover letter — free.</p>
+            <button class="btn btn-primary btn-lg" id="analyseBtn">Analyse my CV</button>
+          </div>
+
+          <!-- Loading state -->
+          <div id="aiLoading" class="ai-loading" hidden>
+            <div class="loader-orb" role="status" aria-label="Analysing"></div>
+            <p class="loading-message" id="loadingMessage">Reading your CV…</p>
+            <p class="loading-sub">Usually takes 20–40 seconds. Worth it.</p>
+          </div>
+
+          <!-- Error state -->
+          <div id="aiError" class="analyse-hero" hidden>
+            <div class="rocket">😅</div>
+            <h3>That didn't quite work</h3>
+            <p id="aiErrorMsg">Something went wrong on our end — your CV is safe. Give it another go.</p>
+            <button class="btn btn-violet" id="retryBtn">Try again</button>
+          </div>
+
+          <!-- Results -->
+          <div id="aiResults" hidden>
+            <div class="results-grid">
+              <div class="result-card full">
+                <h4>Your CV Score</h4>
+                <div class="big-score-row">
+                  <div class="big-score"><span id="resultScore">0</span><small>/100</small></div>
+                  <div class="score-breakdown" id="scoreBreakdown"></div>
+                </div>
+              </div>
+
+              <div class="result-card">
+                <h4>Top 5 ATS keywords to include</h4>
+                <div class="keyword-chips" id="keywordChips"></div>
+              </div>
+
+              <div class="result-card">
+                <h4>3 improvements to make</h4>
+                <ol class="improvement-list" id="improvementList"></ol>
+              </div>
+
+              <div class="result-card full">
+                <h4>Your cover letter <span style="text-transform:none;letter-spacing:0;">(first one's free ✦)</span></h4>
+                <div class="cover-letter-box" id="coverLetterBox"></div>
+              </div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn btn-ghost" id="copyCoverLetter">Copy cover letter</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV preview -->
+        <div class="step-card-panel" style="margin-top:1.5rem;">
+          <div class="step-title">
+            <h2 style="font-size:1.25rem;">CV preview</h2>
+            <p>Switch templates any time — your content stays put. <span id="recNote"></span></p>
+          </div>
+          <div class="template-picker" id="templatePicker">
+            <button type="button" class="template-btn selected" data-template="professional">
+              <strong>Professional <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Clean single column — finance, legal, corporate</span>
+            </button>
+            <button type="button" class="template-btn" data-template="modern">
+              <strong>Modern <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Two column with skills sidebar — tech, marketing, creative</span>
+            </button>
+            <button type="button" class="template-btn" data-template="graduate">
+              <strong>Graduate <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Education focus — first jobs, graduate schemes</span>
+            </button>
+          </div>
+          <div class="cv-preview-frame">
+            <div id="cvPreview"></div>
+          </div>
+          <div class="result-actions">
+            <button class="btn btn-violet" id="downloadPdf">Download PDF</button>
+            <button class="btn btn-primary" id="saveBtn">Save to CV Central</button>
+          </div>
+          <p class="hint" style="text-align:center;margin-top:0.75rem;color:var(--muted);font-size:0.8rem;">
+            Free downloads include a watermark. <a href="index.html#pricing" style="color:var(--violet);font-weight:600;">Go Pro</a> for a clean PDF.
+          </p>
+        </div>
+
+        <div class="wizard-nav">
+          <button class="btn btn-ghost" data-prev>← Back</button>
+          <span></span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* =========================================================
+       CV Central builder — state, wizard, tags, AI, preview
+       ========================================================= */
+
+    var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_wvx5-gitH3SZw9qv92vL-g_5lzNIInv';
+    var AI_ENDPOINT = '/.netlify/functions/ai';
+
+    var state = {
+      step: 1,
+      personal: {},
+      experience: [],
+      education: [],
+      skills: [],
+      languages: [],
+      certifications: [],
+      jobTarget: {},
+      ai: null,               // full AI result once analysed
+      template: 'professional'
+    };
+
+    // Restore a draft if one exists
+    try {
+      var draft = JSON.parse(localStorage.getItem('cvcentral_draft') || 'null');
+      if (draft && draft.personal) {
+        state = Object.assign(state, draft, { step: 1, ai: draft.ai || null });
+      }
+    } catch (e) { /* corrupt draft — start fresh */ }
+
+    function saveDraft() {
+      try { localStorage.setItem('cvcentral_draft', JSON.stringify(state)); } catch (e) {}
+    }
+
+    /* ---------- Toast ---------- */
+    var toastEl = document.getElementById('toast');
+    var toastTimer = null;
+    function toast(msg, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3200);
+    }
+
+    /* ---------- Wizard navigation ---------- */
+    var TOTAL_STEPS = 5;
+
+    function goToStep(n) {
+      if (n < 1 || n > TOTAL_STEPS) return;
+      state.step = n;
+      document.querySelectorAll('.wizard-step').forEach(function (s) {
+        s.classList.toggle('active', +s.dataset.step === n);
+      });
+      document.querySelectorAll('.progress-steps li').forEach(function (li) {
+        var s = +li.dataset.step;
+        li.classList.toggle('active', s === n);
+        li.classList.toggle('done', s < n);
+        li.querySelector('.step-dot').textContent = s < n ? '✓' : s;
+      });
+      document.getElementById('progressFill').style.width = (n / TOTAL_STEPS * 100) + '%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (n === 5) renderPreview();
+    }
+
+    function validateStep(n) {
+      if (n !== 1) return true;
+      var ok = true;
+      [['fullName', function (v) { return v.trim().length > 1; }],
+       ['email', function (v) { return /.+@.+\..+/.test(v); }],
+       ['targetRole', function (v) { return v.trim().length > 1; }]
+      ].forEach(function (pair) {
+        var el = document.getElementById(pair[0]);
+        var valid = pair[1](el.value);
+        el.closest('.field').classList.toggle('invalid', !valid);
+        if (!valid) ok = false;
+      });
+      if (!ok) toast('A couple of fields need attention 👆', 'error');
+      return ok;
+    }
+
+    document.querySelectorAll('[data-next]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        collectStep(state.step);
+        if (!validateStep(state.step)) return;
+        saveDraft();
+        goToStep(state.step + 1);
+      });
+    });
+    document.querySelectorAll('[data-prev]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        collectStep(state.step);
+        saveDraft();
+        goToStep(state.step - 1);
+      });
+    });
+
+    /* ---------- Step 1: personal fields ---------- */
+    var personalFields = ['fullName', 'email', 'phone', 'location', 'targetRole', 'targetIndustry', 'summary', 'linkedin'];
+
+    function collectPersonal() {
+      personalFields.forEach(function (id) {
+        state.personal[id] = document.getElementById(id).value.trim();
+      });
+    }
+    function hydratePersonal() {
+      personalFields.forEach(function (id) {
+        if (state.personal[id]) document.getElementById(id).value = state.personal[id];
+      });
+    }
+
+    /* ---------- Step 2: experience entries ---------- */
+    var expList = document.getElementById('experienceList');
+
+    function experienceCard(data, index) {
+      var d = data || {};
+      var card = document.createElement('div');
+      card.className = 'entry-card';
+      card.innerHTML =
+        '<div class="entry-head"><h3>ROLE ' + (index + 1) + '</h3>' +
+        '<button type="button" class="remove-entry">Remove</button></div>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label>Job title</label><input type="text" data-f="title" placeholder="e.g. Sales Assistant" value="' + esc(d.title) + '"></div>' +
+          '<div class="field"><label>Company</label><input type="text" data-f="company" placeholder="e.g. Boots" value="' + esc(d.company) + '"></div>' +
+          '<div class="field"><label>Location</label><input type="text" data-f="location" placeholder="e.g. Leeds" value="' + esc(d.location) + '"></div>' +
+          '<div class="field"><label>Start date</label><input type="month" data-f="start" value="' + esc(d.start) + '"></div>' +
+          '<div class="field"><label>End date</label><input type="month" data-f="end" value="' + esc(d.end) + '" ' + (d.current ? 'disabled' : '') + '>' +
+            '<div class="current-role-row"><input type="checkbox" data-f="current" id="cur-' + index + '" ' + (d.current ? 'checked' : '') + '><label for="cur-' + index + '">Current role</label></div></div>' +
+          '<div class="field full"><label>Key responsibilities <span class="optional">(rough notes fine)</span></label>' +
+            '<textarea data-f="responsibilities" placeholder="e.g. served customers, handled cash, sorted deliveries, opened up some mornings">' + esc(d.responsibilities) + '</textarea></div>' +
+          '<div class="field full"><label>Key achievements <span class="optional">(numbers help — sales, time saved, people trained)</span></label>' +
+            '<textarea data-f="achievements" placeholder="e.g. top seller 3 months running, trained 2 new starters, cut stockroom errors">' + esc(d.achievements) + '</textarea></div>' +
+        '</div>';
+
+      card.querySelector('.remove-entry').addEventListener('click', function () {
+        collectExperience();
+        state.experience.splice(indexOf(card, expList), 1);
+        renderExperience();
+        saveDraft();
+      });
+      card.querySelector('[data-f="current"]').addEventListener('change', function (e) {
+        card.querySelector('[data-f="end"]').disabled = e.target.checked;
+        if (e.target.checked) card.querySelector('[data-f="end"]').value = '';
+      });
+      return card;
+    }
+
+    function renderExperience() {
+      expList.innerHTML = '';
+      if (!state.experience.length) state.experience.push({});
+      state.experience.forEach(function (exp, i) {
+        expList.appendChild(experienceCard(exp, i));
+      });
+    }
+
+    function collectExperience() {
+      state.experience = Array.prototype.map.call(expList.children, function (card) {
+        var o = {};
+        card.querySelectorAll('[data-f]').forEach(function (input) {
+          o[input.dataset.f] = input.type === 'checkbox' ? input.checked : input.value.trim();
+        });
+        return o;
+      });
+    }
+
+    document.getElementById('addExperience').addEventListener('click', function () {
+      collectExperience();
+      state.experience.push({});
+      renderExperience();
+      expList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    /* ---------- Step 3: education entries ---------- */
+    var eduList = document.getElementById('educationList');
+    var QUALS = ['GCSE', 'A-Level', 'HND', "Bachelor's", "Master's", 'PhD', 'Professional qualification', 'Other'];
+
+    function educationCard(data, index) {
+      var d = data || {};
+      var card = document.createElement('div');
+      card.className = 'entry-card';
+      var opts = QUALS.map(function (q) {
+        return '<option' + (d.level === q ? ' selected' : '') + '>' + q + '</option>';
+      }).join('');
+      card.innerHTML =
+        '<div class="entry-head"><h3>QUALIFICATION ' + (index + 1) + '</h3>' +
+        '<button type="button" class="remove-entry">Remove</button></div>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label>Qualification type</label><select data-f="level"><option value="">Select…</option>' + opts + '</select></div>' +
+          '<div class="field"><label>Subject / title</label><input type="text" data-f="subject" placeholder="e.g. Business Studies" value="' + esc(d.subject) + '"></div>' +
+          '<div class="field"><label>Institution</label><input type="text" data-f="institution" placeholder="e.g. University of Leeds" value="' + esc(d.institution) + '"></div>' +
+          '<div class="field"><label>Year</label><input type="text" data-f="year" placeholder="e.g. 2023" value="' + esc(d.year) + '"></div>' +
+          '<div class="field"><label>Grade <span class="optional">(optional)</span></label><input type="text" data-f="grade" placeholder="e.g. 2:1, A*, Distinction" value="' + esc(d.grade) + '"></div>' +
+        '</div>';
+      card.querySelector('.remove-entry').addEventListener('click', function () {
+        collectEducation();
+        state.education.splice(indexOf(card, eduList), 1);
+        renderEducation();
+        saveDraft();
+      });
+      return card;
+    }
+
+    function renderEducation() {
+      eduList.innerHTML = '';
+      if (!state.education.length) state.education.push({});
+      state.education.forEach(function (edu, i) {
+        eduList.appendChild(educationCard(edu, i));
+      });
+    }
+
+    function collectEducation() {
+      state.education = Array.prototype.map.call(eduList.children, function (card) {
+        var o = {};
+        card.querySelectorAll('[data-f]').forEach(function (input) {
+          o[input.dataset.f] = input.value.trim();
+        });
+        return o;
+      });
+    }
+
+    document.getElementById('addEducation').addEventListener('click', function () {
+      collectEducation();
+      state.education.push({});
+      renderEducation();
+    });
+
+    /* ---------- Tag inputs ---------- */
+    document.querySelectorAll('.tag-input-wrap').forEach(function (wrap) {
+      var key = wrap.dataset.tags;
+      var input = wrap.querySelector('input');
+
+      function renderTags() {
+        wrap.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
+        state[key].forEach(function (tag, i) {
+          var chip = document.createElement('span');
+          chip.className = 'tag-chip';
+          chip.appendChild(document.createTextNode(tag));
+          var x = document.createElement('button');
+          x.type = 'button';
+          x.setAttribute('aria-label', 'Remove ' + tag);
+          x.textContent = '×';
+          x.addEventListener('click', function () {
+            state[key].splice(i, 1);
+            renderTags();
+            saveDraft();
+          });
+          chip.appendChild(x);
+          wrap.insertBefore(chip, input);
+        });
+      }
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          var v = input.value.trim().replace(/,$/, '');
+          if (v && state[key].indexOf(v) === -1) {
+            state[key].push(v);
+            renderTags();
+            saveDraft();
+          }
+          input.value = '';
+        } else if (e.key === 'Backspace' && !input.value && state[key].length) {
+          state[key].pop();
+          renderTags();
+          saveDraft();
+        }
+      });
+      wrap.addEventListener('click', function () { input.focus(); });
+      renderTags();
+    });
+
+    /* ---------- Step 4: job target ---------- */
+    function collectJobTarget() {
+      state.jobTarget = {
+        description: document.getElementById('jobDescription').value.trim(),
+        salary: document.getElementById('salaryExpectation').value,
+        availableFrom: document.getElementById('availableFrom').value
+      };
+    }
+    function hydrateJobTarget() {
+      if (state.jobTarget.description) document.getElementById('jobDescription').value = state.jobTarget.description;
+      if (state.jobTarget.salary) document.getElementById('salaryExpectation').value = state.jobTarget.salary;
+      if (state.jobTarget.availableFrom) document.getElementById('availableFrom').value = state.jobTarget.availableFrom;
+    }
+
+    function collectStep(n) {
+      if (n === 1) collectPersonal();
+      if (n === 2) collectExperience();
+      if (n === 3) collectEducation();
+      if (n === 4) collectJobTarget();
+    }
+
+    /* ---------- Step 5: AI analysis ---------- */
+    var LOADING_MESSAGES = [
+      'Reading your CV…',
+      'Enhancing bullet points…',
+      'Checking ATS compatibility…',
+      'Generating your score…'
+    ];
+    var loadingTimer = null;
+
+    function startLoadingMessages() {
+      var el = document.getElementById('loadingMessage');
+      var i = 0;
+      el.textContent = LOADING_MESSAGES[0];
+      loadingTimer = setInterval(function () {
+        i = Math.min(i + 1, LOADING_MESSAGES.length - 1);
+        el.classList.add('fade');
+        setTimeout(function () {
+          el.textContent = LOADING_MESSAGES[i];
+          el.classList.remove('fade');
+        }, 300);
+        if (i === LOADING_MESSAGES.length - 1) clearInterval(loadingTimer);
+      }, 6000);
+    }
+
+    function showAnalysisState(which) {
+      ['analyseIntro', 'aiLoading', 'aiError', 'aiResults'].forEach(function (id) {
+        document.getElementById(id).hidden = id !== which;
+      });
+    }
+
+    document.getElementById('analyseBtn').addEventListener('click', runAnalysis);
+    document.getElementById('retryBtn').addEventListener('click', runAnalysis);
+
+    function runAnalysis() {
+      collectStep(state.step);
+      showAnalysisState('aiLoading');
+      startLoadingMessages();
+
+      fetch(AI_ENDPOINT + '?action=enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personal: state.personal,
+          experience: state.experience,
+          education: state.education,
+          skills: state.skills,
+          languages: state.languages,
+          certifications: state.certifications,
+          jobTarget: state.jobTarget
+        })
+      })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().catch(function () { return {}; }).then(function (body) {
+              throw new Error(body.error || ('Server returned ' + res.status));
+            });
+          }
+          return res.json();
+        })
+        .then(function (data) {
+          clearInterval(loadingTimer);
+          state.ai = data;
+          if (data.recommendedTemplate) selectTemplate(data.recommendedTemplate, true);
+          renderResults(data);
+          renderPreview();
+          saveDraft();
+          showAnalysisState('aiResults');
+          toast('Boom — your CV just levelled up 🎉', 'success');
+        })
+        .catch(function (err) {
+          clearInterval(loadingTimer);
+          document.getElementById('aiErrorMsg').textContent =
+            (err && err.message ? err.message + '. ' : '') + 'Your CV is safe — give it another go.';
+          showAnalysisState('aiError');
+        });
+    }
+
+    function renderResults(data) {
+      // Animated score count-up
+      var scoreEl = document.getElementById('resultScore');
+      var target = data.score && data.score.total ? data.score.total : 0;
+      var start = performance.now();
+      (function frame(now) {
+        var t = Math.min((now - start) / 1200, 1);
+        scoreEl.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(frame);
+      })(start);
+
+      // Breakdown bars
+      var breakdown = document.getElementById('scoreBreakdown');
+      breakdown.innerHTML = '';
+      var parts = (data.score && data.score.breakdown) || {};
+      ['formatting', 'keywords', 'achievements', 'ats', 'length'].forEach(function (k) {
+        var v = Math.max(0, Math.min(100, parts[k] || 0));
+        var row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = '<span>' + k + '</span><div class="track"><div class="fill"></div></div><span class="val">' + v + '</span>';
+        breakdown.appendChild(row);
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { row.querySelector('.fill').style.width = v + '%'; });
+        });
+      });
+
+      // Keywords
+      var chips = document.getElementById('keywordChips');
+      chips.innerHTML = '';
+      (data.atsKeywords || []).slice(0, 5).forEach(function (kw) {
+        var c = document.createElement('span');
+        c.className = 'chip';
+        c.textContent = kw;
+        chips.appendChild(c);
+      });
+
+      // Improvements
+      var list = document.getElementById('improvementList');
+      list.innerHTML = '';
+      (data.improvements || []).slice(0, 3).forEach(function (imp, i) {
+        var li = document.createElement('li');
+        var n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = i + 1;
+        li.appendChild(n);
+        li.appendChild(document.createTextNode(imp));
+        list.appendChild(li);
+      });
+
+      // Cover letter
+      document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
+    }
+
+    document.getElementById('copyCoverLetter').addEventListener('click', function () {
+      var text = document.getElementById('coverLetterBox').textContent;
+      if (!text) { toast('Run the analysis first to get your cover letter', 'error'); return; }
+      navigator.clipboard.writeText(text).then(function () {
+        toast('Cover letter copied ✓', 'success');
+      }, function () {
+        toast('Couldn’t copy — select and copy manually', 'error');
+      });
+    });
+
+    /* ---------- Templates & preview ---------- */
+    function selectTemplate(name, isRecommendation) {
+      var valid = ['professional', 'modern', 'graduate'];
+      if (valid.indexOf(name) === -1) name = 'professional';
+      state.template = name;
+      document.querySelectorAll('.template-btn').forEach(function (btn) {
+        var isThis = btn.dataset.template === name;
+        btn.classList.toggle('selected', isThis);
+        if (isRecommendation) {
+          btn.querySelector('.rec-tag').hidden = !isThis;
+        }
+      });
+      if (isRecommendation) {
+        document.getElementById('recNote').innerHTML =
+          '<strong style="color:var(--violet);">The AI recommends “' +
+          name.charAt(0).toUpperCase() + name.slice(1) + '” for this role.</strong>';
+      }
+    }
+
+    document.querySelectorAll('.template-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectTemplate(btn.dataset.template, false);
+        renderPreview();
+        saveDraft();
+      });
+    });
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtDate(ym) {
+      if (!ym) return '';
+      var parts = ym.split('-');
+      var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return (months[+parts[1] - 1] || '') + ' ' + parts[0];
+    }
+
+    // Prefer AI-enhanced content when available
+    function effectiveSummary() {
+      return (state.ai && state.ai.enhanced && state.ai.enhanced.summary) || state.personal.summary || '';
+    }
+    function effectiveExperience() {
+      var enhanced = state.ai && state.ai.enhanced && state.ai.enhanced.experience;
+      return state.experience.map(function (exp, i) {
+        var e = (enhanced && enhanced[i]) || {};
+        return {
+          title: exp.title, company: exp.company, location: exp.location,
+          start: exp.start, end: exp.end, current: exp.current,
+          bullets: e.bullets && e.bullets.length
+            ? e.bullets
+            : splitLines(exp.responsibilities).concat(splitLines(exp.achievements))
+        };
+      });
+    }
+    function splitLines(text) {
+      return String(text || '').split(/\n|(?:\.\s+)/).map(function (s) { return s.trim().replace(/\.$/, ''); }).filter(Boolean);
+    }
+
+    function contactLine() {
+      return [state.personal.email, state.personal.phone, state.personal.location, state.personal.linkedin]
+        .filter(Boolean).join('  ·  ');
+    }
+
+    function expHtml(templateClassFn) {
+      return effectiveExperience().filter(function (e) { return e.title || e.company; }).map(function (e) {
+        var dates = fmtDate(e.start) + (e.current ? ' – Present' : (e.end ? ' – ' + fmtDate(e.end) : ''));
+        return templateClassFn(e, dates);
+      }).join('');
+    }
+
+    function renderPreview() {
+      var el = document.getElementById('cvPreview');
+      var p = state.personal;
+      var name = esc(p.fullName) || '<span class="cv-empty-hint">Your Name</span>';
+      var summary = esc(effectiveSummary());
+      var eduRows = state.education.filter(function (e) { return e.level || e.subject || e.institution; });
+      var html = '';
+
+      if (state.template === 'professional') {
+        html =
+          '<div class="cv-page cv-t1">' + watermark() +
+          '<div class="cv-name">' + name + '</div>' +
+          '<div class="cv-contact">' + esc(contactLine()) + '</div>' +
+          (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+          '<h3>Experience</h3>' +
+          (expHtml(function (e, dates) {
+            return '<div style="margin-bottom:0.7rem;"><div class="cv-role-line"><span>' + esc(e.title) + '</span><span>' + esc(dates) + '</span></div>' +
+              '<div class="cv-company">' + esc(e.company) + (e.location ? ' — ' + esc(e.location) : '') + '</div>' +
+              '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+          }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+          '<h3>Education</h3>' +
+          (eduRows.map(function (e) {
+            return '<div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</span><span>' + esc(e.year) + '</span></div>' +
+              '<div class="cv-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div>';
+          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          (state.skills.length ? '<h3>Skills</h3><p>' + state.skills.map(esc).join('  ·  ') + '</p>' : '') +
+          (state.languages.length ? '<h3>Languages</h3><p>' + state.languages.map(esc).join('  ·  ') + '</p>' : '') +
+          (state.certifications.length ? '<h3>Certifications</h3><p>' + state.certifications.map(esc).join('  ·  ') + '</p>' : '') +
+          '</div>';
+
+      } else if (state.template === 'modern') {
+        html =
+          '<div class="cv-page cv-t2">' + watermark() +
+          '<div class="cv-side">' +
+            '<div class="cv-name">' + name + '</div>' +
+            '<div class="cv-target">' + esc(p.targetRole || '') + '</div>' +
+            '<h3>Contact</h3><p>' + [p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
+            (state.skills.length ? '<h3>Skills</h3><ul>' + state.skills.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+            (state.languages.length ? '<h3>Languages</h3><ul>' + state.languages.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+            (state.certifications.length ? '<h3>Certifications</h3><ul>' + state.certifications.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+          '</div>' +
+          '<div class="cv-body">' +
+            (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+            '<h3>Experience</h3>' +
+            (expHtml(function (e, dates) {
+              return '<div style="margin-bottom:0.7rem;"><div class="cv-role-line">' + esc(e.title) + '</div>' +
+                '<div class="cv-company">' + esc(e.company) + (e.location ? ' — ' + esc(e.location) : '') + '</div>' +
+                '<div class="cv-dates">' + esc(dates) + '</div>' +
+                '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+            }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+            '<h3>Education</h3>' +
+            (eduRows.map(function (e) {
+              return '<div class="cv-role-line">' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</div>' +
+                '<div class="cv-company">' + esc(e.institution) + '</div>' +
+                '<div class="cv-dates">' + esc([e.year, e.grade].filter(Boolean).join(' · ')) + '</div>';
+            }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          '</div></div>';
+
+      } else {
+        html =
+          '<div class="cv-page cv-t3">' + watermark() +
+          '<div class="cv-head"><div class="cv-name">' + name + '</div>' +
+          '<div class="cv-contact">' + esc(contactLine()) + '</div></div>' +
+          (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+          '<h3>Education</h3>' +
+          (eduRows.map(function (e) {
+            return '<div class="cv-edu-row"><strong>' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</strong><span>' + esc(e.year) + '</span></div>' +
+              '<div style="font-size:0.68rem;color:#666;margin-bottom:0.4rem;">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div>';
+          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          '<h3>Experience</h3>' +
+          (expHtml(function (e, dates) {
+            return '<div style="margin-bottom:0.6rem;"><div class="cv-edu-row"><strong>' + esc(e.title) + ' — ' + esc(e.company) + '</strong><span>' + esc(dates) + '</span></div>' +
+              '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+          }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+          (state.skills.length ? '<h3>Skills</h3><div class="cv-skill-chips">' + state.skills.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' : '') +
+          (state.languages.length ? '<h3>Languages</h3><p style="font-size:0.7rem;">' + state.languages.map(esc).join(' · ') + '</p>' : '') +
+          (state.certifications.length ? '<h3>Certifications</h3><p style="font-size:0.7rem;">' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div>';
+      }
+
+      el.innerHTML = html;
+    }
+
+    function watermark() {
+      return '<div class="wm"><span>CV CENTRAL · FREE</span></div>';
+    }
+
+    /* ---------- Download PDF (print-to-PDF of the preview) ---------- */
+    document.getElementById('downloadPdf').addEventListener('click', function () {
+      var page = document.querySelector('#cvPreview .cv-page');
+      if (!page) { toast('Nothing to download yet', 'error'); return; }
+      var win = window.open('', '_blank');
+      if (!win) { toast('Please allow pop-ups to download your CV', 'error'); return; }
+      var styles = '';
+      document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+        styles += '<link rel="stylesheet" href="' + l.href + '">';
+      });
+      win.document.write(
+        '<!DOCTYPE html><html><head><title>' + esc(state.personal.fullName || 'CV') + ' — CV</title>' + styles +
+        '<style>body{background:#fff;padding:0;margin:0;}.cv-page{box-shadow:none;max-width:none;min-height:auto;}@media print{.cv-page{page-break-inside:avoid;}}</style>' +
+        '</head><body>' + page.outerHTML + '</body></html>'
+      );
+      win.document.close();
+      win.focus();
+      setTimeout(function () { win.print(); }, 600);
+      toast('Use “Save as PDF” in the print dialog 📄');
+    });
+
+    /* ---------- Save to Supabase ---------- */
+    document.getElementById('saveBtn').addEventListener('click', function () {
+      collectStep(state.step);
+      if (!state.personal.email) {
+        toast('Add your email in step 1 first', 'error');
+        goToStep(1);
+        return;
+      }
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      var row = {
+        name: state.personal.fullName,
+        email: state.personal.email,
+        phone: state.personal.phone,
+        location: state.personal.location,
+        target_role: state.personal.targetRole,
+        target_industry: state.personal.targetIndustry,
+        cv_data: {
+          personal: state.personal,
+          experience: state.experience,
+          education: state.education,
+          skills: state.skills,
+          languages: state.languages,
+          certifications: state.certifications,
+          jobTarget: state.jobTarget,
+          ai: state.ai,
+          template: state.template
+        },
+        cv_score: state.ai && state.ai.score ? state.ai.score.total : null,
+        plan: 'free',
+        last_active: new Date().toISOString()
+      };
+
+      fetch(SUPABASE_URL + '/rest/v1/cv_central_candidates?on_conflict=email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(row)
+      })
+        .then(function (res) {
+          if (!res.ok) return res.text().then(function (t) { throw new Error(t || 'Save failed'); });
+          localStorage.setItem('cvcentral_email', state.personal.email);
+          toast('Saved to CV Central 🎉 See it on your dashboard', 'success');
+          btn.textContent = 'Saved ✓';
+          setTimeout(function () { btn.textContent = 'Save to CV Central'; btn.disabled = false; }, 2500);
+        })
+        .catch(function (err) {
+          console.error(err);
+          toast('Couldn’t save just now — try again in a minute', 'error');
+          btn.textContent = 'Save to CV Central';
+          btn.disabled = false;
+        });
+    });
+
+    /* ---------- Utilities ---------- */
+    function indexOf(el, parent) {
+      return Array.prototype.indexOf.call(parent.children, el);
+    }
+
+    /* ---------- Init ---------- */
+    hydratePersonal();
+    hydrateJobTarget();
+    renderExperience();
+    renderEducation();
+    if (state.ai) {
+      renderResults(state.ai);
+      showAnalysisState('aiResults');
+      if (state.ai.recommendedTemplate) selectTemplate(state.template || state.ai.recommendedTemplate, true);
+    }
+    goToStep(1);
+  })();
+  </script>
+</body>
+</html>

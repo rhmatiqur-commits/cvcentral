@@ -1,0 +1,27 @@
+# CV Central — Netlify configuration
+
+[build]
+  # Static site — nothing to build, publish the repo root
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Environment variables (set the real values in the Netlify UI:
+# Site settings → Environment variables)
+#
+#   ANTHROPIC_API_KEY = "sk-ant-..."   (required — powers all AI features)
+
+# Friendly redirect so /api/ai also hits the function
+[[redirects]]
+  from = "/api/ai"
+  to = "/.netlify/functions/ai"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
