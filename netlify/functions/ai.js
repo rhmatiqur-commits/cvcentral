@@ -13,8 +13,8 @@
  * Requires env var: ANTHROPIC_API_KEY
  */
 
-// Netlify runs Node 18+, where fetch is global; fall back to node-fetch for older runtimes.
-const fetchFn = typeof fetch === 'function' ? fetch : require('node-fetch');
+// Netlify runs Node 18+, where fetch is global.
+const fetchFn = fetch;
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-sonnet-4-6';

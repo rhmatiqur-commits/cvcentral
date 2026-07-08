@@ -925,7 +925,15 @@
       });
       win.document.write(
         '<!DOCTYPE html><html><head><title>' + esc(state.personal.fullName || 'CV') + ' — CV</title>' + styles +
-        '<style>body{background:#fff;padding:0;margin:0;}.cv-page{box-shadow:none;max-width:none;min-height:auto;}@media print{.cv-page{page-break-inside:avoid;}}</style>' +
+        '<style>' +
+        '@page{size:A4 portrait;margin:20mm 15mm}' +
+        'html{font-size:16pt}' +
+        'body{margin:0;padding:0;background:#fff}' +
+        '.cv-page{width:180mm!important;min-height:257mm!important;max-width:none!important;box-shadow:none!important;margin:0 auto!important}' +
+        '.cv-t2{min-height:257mm!important}' +
+        '.cv-t2 .cv-body h3,.cv-t3 h3{font-size:0.82rem!important}' +
+        '@media print{html{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cv-page{page-break-inside:avoid}}' +
+      '</style>' +
         '</head><body>' + page.outerHTML + '</body></html>'
       );
       win.document.close();
