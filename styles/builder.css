@@ -589,3 +589,84 @@
 }
 
 .cv-empty-hint { color: #999; font-style: italic; }
+
+/* ============================================================
+   Templates 4–8: Corporate, Tech, Creative, Graduate, Executive
+   ============================================================ */
+
+/* --- Template 4: Corporate (navy header, Finance/Legal/Banking) --- */
+.cv-t4 { font-family: Georgia,'Times New Roman',serif; display:flex; flex-direction:column; }
+.cv-t4 .cv-header { background:#1A3A5C; color:#fff; padding:1.3rem 2.1rem; }
+.cv-t4 .cv-header .cv-name { font-size:1.5rem; font-weight:700; letter-spacing:0.02em; }
+.cv-t4 .cv-header .cv-target { font-size:0.67rem; color:#B8D4ED; font-style:italic; margin-top:0.12rem; }
+.cv-t4 .cv-header .cv-contact { font-size:0.63rem; color:rgba(255,255,255,0.72); margin-top:0.28rem; }
+.cv-t4 .cv-body { padding:1.1rem 2.1rem; flex:1; }
+.cv-t4 h3 { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.15em; color:#1A3A5C; border-bottom:1.5px solid #1A3A5C; padding-bottom:0.18rem; margin:0.85rem 0 0.42rem; }
+.cv-t4 .cv-role-line { display:flex; justify-content:space-between; font-weight:700; font-size:0.71rem; }
+.cv-t4 .cv-company { font-style:italic; color:#1A3A5C; font-size:0.65rem; }
+.cv-t4 ul { padding-left:1.1rem; margin-top:0.2rem; }
+.cv-t4 li,.cv-t4 p { font-size:0.69rem; line-height:1.55; }
+
+/* --- Template 5: Tech (dark sidebar, Technology/Engineering) --- */
+.cv-t5 { display:grid; grid-template-columns:185px 1fr; min-height:500px; }
+.cv-t5 .cv-side { background:#0D1117; color:#C9D1D9; padding:1.5rem 1.1rem; font-family:var(--font-mono); }
+.cv-t5 .cv-side .cv-name { font-size:1.1rem; font-weight:700; color:#58A6FF; line-height:1.2; margin-bottom:0.22rem; word-break:break-word; }
+.cv-t5 .cv-side .cv-label { font-size:0.57rem; color:#7EE787; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.85rem; }
+.cv-t5 .cv-side h3 { font-size:0.57rem; text-transform:uppercase; letter-spacing:0.1em; color:#7EE787; margin:0.85rem 0 0.32rem; }
+.cv-t5 .cv-side h3::before { content:"// "; color:#6E7681; }
+.cv-t5 .cv-side p { font-size:0.6rem; line-height:1.55; }
+.cv-t5 .cv-side ul { list-style:none; display:grid; gap:0.18rem; padding:0; }
+.cv-t5 .cv-side li { font-size:0.58rem; padding:0.13rem 0.4rem; background:rgba(88,166,255,0.1); border-left:2px solid #58A6FF; border-radius:2px; }
+.cv-t5 .cv-body { padding:1.5rem 1.35rem; background:#fff; }
+.cv-t5 .cv-body h3 { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:#0D1117; margin:0.85rem 0 0.38rem; display:flex; align-items:center; gap:0.5rem; font-family:var(--font-mono); font-weight:700; }
+.cv-t5 .cv-body h3::after { content:""; flex:1; height:1px; background:#EAEAEA; }
+.cv-t5 .cv-role-line { font-weight:700; font-size:0.7rem; }
+.cv-t5 .cv-company { color:#58A6FF; font-weight:600; font-size:0.64rem; }
+.cv-t5 .cv-dates { color:#888; font-size:0.61rem; font-family:var(--font-mono); }
+.cv-t5 .cv-body ul { padding-left:1rem; margin-top:0.2rem; }
+.cv-t5 .cv-body li,.cv-t5 .cv-body p { font-size:0.67rem; line-height:1.55; }
+
+/* --- Template 6: Creative (gradient accent strip, Marketing/Design/Media) --- */
+.cv-t6 { font-family:var(--font-body); display:flex; flex-direction:column; }
+.cv-t6 .cv-accent-bar { height:6px; background:linear-gradient(90deg,#FF6B35,#F7931E,#FFD700); }
+.cv-t6 .cv-header { padding:1rem 1.8rem 0.8rem; }
+.cv-t6 .cv-name { font-size:1.55rem; font-weight:900; letter-spacing:-0.03em; color:#1A1A2E; line-height:1.1; }
+.cv-t6 .cv-target { font-size:0.7rem; font-weight:700; color:#FF6B35; text-transform:uppercase; letter-spacing:0.08em; margin-top:0.18rem; }
+.cv-t6 .cv-contact { font-size:0.62rem; color:#666; margin-top:0.28rem; }
+.cv-t6 .cv-body { padding:0.55rem 1.8rem; flex:1; border-top:1px solid #F0F0F0; }
+.cv-t6 h3 { font-size:0.67rem; font-weight:800; text-transform:uppercase; letter-spacing:0.15em; color:#FF6B35; margin:0.75rem 0 0.32rem; }
+.cv-t6 .cv-role-line { display:flex; justify-content:space-between; align-items:baseline; font-weight:700; font-size:0.7rem; }
+.cv-t6 .cv-dates-badge { font-size:0.57rem; background:#FFF3EE; color:#FF6B35; border:1px solid #FFCCB3; border-radius:999px; padding:0.08rem 0.48rem; font-weight:600; white-space:nowrap; }
+.cv-t6 .cv-company { color:#888; font-size:0.63rem; margin-bottom:0.13rem; }
+.cv-t6 ul { padding-left:1rem; margin-top:0.18rem; }
+.cv-t6 li,.cv-t6 p { font-size:0.67rem; line-height:1.55; }
+
+/* --- Template 7: Graduate (green, education-first, graduate schemes) --- */
+.cv-t7 { font-family:var(--font-body); padding:1.7rem 1.9rem; }
+.cv-t7 .cv-header { text-align:center; padding-bottom:0.7rem; margin-bottom:0.7rem; border-bottom:2px double #2E7D32; }
+.cv-t7 .cv-name { font-size:1.48rem; font-weight:800; color:#1B5E20; letter-spacing:-0.01em; }
+.cv-t7 .cv-target { font-size:0.68rem; font-weight:600; color:#2E7D32; margin-top:0.13rem; }
+.cv-t7 .cv-contact { font-size:0.63rem; color:#555; margin-top:0.22rem; }
+.cv-t7 h3 { font-size:0.67rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:#1B5E20; background:#E8F5E9; padding:0.17rem 0.72rem; border-radius:3px; margin:0.75rem 0 0.38rem; display:inline-block; }
+.cv-t7 .cv-edu-block { background:#F1F8E9; border-left:3px solid #2E7D32; padding:0.42rem 0.65rem; border-radius:0 3px 3px 0; margin-bottom:0.38rem; }
+.cv-t7 .cv-edu-title { font-weight:700; font-size:0.69rem; color:#1B5E20; }
+.cv-t7 .cv-edu-meta { font-size:0.6rem; color:#555; }
+.cv-t7 .cv-role-line { display:flex; justify-content:space-between; font-weight:700; font-size:0.69rem; }
+.cv-t7 .cv-company { font-size:0.62rem; color:#2E7D32; font-weight:600; }
+.cv-t7 ul { padding-left:1rem; margin-top:0.18rem; }
+.cv-t7 li,.cv-t7 p { font-size:0.66rem; line-height:1.55; }
+.cv-t7 .cv-skill-pills { display:flex; flex-wrap:wrap; gap:0.28rem; }
+.cv-t7 .cv-skill-pills span { font-size:0.6rem; background:#E8F5E9; color:#2E7D32; border:1px solid #A5D6A7; border-radius:999px; padding:0.11rem 0.48rem; font-weight:600; }
+
+/* --- Template 8: Executive (elegant serif, senior/director/C-suite) --- */
+.cv-t8 { font-family:Georgia,'Palatino Linotype',serif; padding:2.3rem 2.6rem; color:#1A1A1A; }
+.cv-t8 .cv-name { font-size:1.6rem; font-weight:400; letter-spacing:0.1em; text-transform:uppercase; line-height:1.1; margin-bottom:0.22rem; }
+.cv-t8 .cv-divider { border:none; border-top:0.5px solid #AAA; margin:0.4rem 0; }
+.cv-t8 .cv-contact { font-size:0.62rem; letter-spacing:0.06em; color:#666; }
+.cv-t8 h3 { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.22em; color:#333; font-weight:400; margin:1.2rem 0 0.55rem; padding-bottom:0.18rem; border-bottom:0.5px solid #CCC; }
+.cv-t8 .cv-role-line { display:flex; justify-content:space-between; font-size:0.7rem; font-weight:700; letter-spacing:0.01em; margin-bottom:0.1rem; }
+.cv-t8 .cv-company { font-size:0.62rem; color:#555; font-style:italic; margin-bottom:0.22rem; }
+.cv-t8 ul { padding-left:1.2rem; margin-top:0.28rem; }
+.cv-t8 li { font-size:0.66rem; line-height:1.7; margin-bottom:0.08rem; }
+.cv-t8 p { font-size:0.66rem; line-height:1.75; }
+.cv-t8 .cv-skills-line { font-size:0.62rem; color:#444; letter-spacing:0.04em; }

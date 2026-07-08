@@ -296,6 +296,26 @@
               <strong>Graduate <span class="rec-tag" hidden>AI pick</span></strong>
               <span>Education focus — first jobs, graduate schemes</span>
             </button>
+            <button type="button" class="template-btn" data-template="corporate">
+              <strong>Corporate <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Navy header — finance, legal, banking</span>
+            </button>
+            <button type="button" class="template-btn" data-template="tech">
+              <strong>Tech <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Dark sidebar — technology, engineering</span>
+            </button>
+            <button type="button" class="template-btn" data-template="creative">
+              <strong>Creative <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Bold accent — marketing, design, media</span>
+            </button>
+            <button type="button" class="template-btn" data-template="graduate2">
+              <strong>Graduate+ <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Education first — grad schemes, entry level</span>
+            </button>
+            <button type="button" class="template-btn" data-template="executive">
+              <strong>Executive <span class="rec-tag" hidden>AI pick</span></strong>
+              <span>Elegant serif — senior, director, C-suite</span>
+            </button>
           </div>
           <div class="cv-preview-frame">
             <div id="cvPreview"></div>
@@ -756,7 +776,7 @@
 
     /* ---------- Templates & preview ---------- */
     function selectTemplate(name, isRecommendation) {
-      var valid = ['professional', 'modern', 'graduate'];
+      var valid = ['professional', 'modern', 'graduate', 'corporate', 'tech', 'creative', 'graduate2', 'executive'];
       if (valid.indexOf(name) === -1) name = 'professional';
       state.template = name;
       document.querySelectorAll('.template-btn').forEach(function (btn) {
@@ -884,7 +904,7 @@
             }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
           '</div></div>';
 
-      } else {
+      } else if (state.template === 'graduate') {
         html =
           '<div class="cv-page cv-t3">' + watermark() +
           '<div class="cv-head"><div class="cv-name">' + name + '</div>' +
@@ -903,6 +923,132 @@
           (state.skills.length ? '<h3>Skills</h3><div class="cv-skill-chips">' + state.skills.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' : '') +
           (state.languages.length ? '<h3>Languages</h3><p style="font-size:0.7rem;">' + state.languages.map(esc).join(' · ') + '</p>' : '') +
           (state.certifications.length ? '<h3>Certifications</h3><p style="font-size:0.7rem;">' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div>';
+
+      } else if (state.template === 'corporate') {
+        html =
+          '<div class="cv-page cv-t4">' + watermark() +
+          '<div class="cv-header">' +
+            '<div class="cv-name">' + name + '</div>' +
+            (p.targetRole ? '<div class="cv-target">' + esc(p.targetRole) + '</div>' : '') +
+            '<div class="cv-contact">' + esc(contactLine()) + '</div>' +
+          '</div>' +
+          '<div class="cv-body">' +
+            (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+            '<h3>Experience</h3>' +
+            (expHtml(function (e, dates) {
+              return '<div style="margin-bottom:0.65rem;"><div class="cv-role-line"><span>' + esc(e.title) + '</span><span>' + esc(dates) + '</span></div>' +
+                '<div class="cv-company">' + esc(e.company) + (e.location ? ' · ' + esc(e.location) : '') + '</div>' +
+                '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+            }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+            '<h3>Education</h3>' +
+            (eduRows.map(function (e) {
+              return '<div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</span><span>' + esc(e.year) + '</span></div>' +
+                '<div class="cv-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div>';
+            }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+            (state.skills.length ? '<h3>Skills</h3><p>' + state.skills.map(esc).join(' · ') + '</p>' : '') +
+            (state.certifications.length ? '<h3>Certifications</h3><p>' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div></div>';
+
+      } else if (state.template === 'tech') {
+        html =
+          '<div class="cv-page cv-t5">' + watermark() +
+          '<div class="cv-side">' +
+            '<div class="cv-name">' + name + '</div>' +
+            '<div class="cv-label">' + esc(p.targetRole || '') + '</div>' +
+            '<h3>Contact</h3><p>' + [p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
+            (state.skills.length ? '<h3>Skills</h3><ul>' + state.skills.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+            (state.languages.length ? '<h3>Languages</h3><ul>' + state.languages.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+            (state.certifications.length ? '<h3>Certs</h3><ul>' + state.certifications.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
+          '</div>' +
+          '<div class="cv-body">' +
+            (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+            '<h3>Experience</h3>' +
+            (expHtml(function (e, dates) {
+              return '<div style="margin-bottom:0.65rem;"><div class="cv-role-line">' + esc(e.title) + '</div>' +
+                '<div class="cv-company">' + esc(e.company) + (e.location ? ' · ' + esc(e.location) : '') + '</div>' +
+                '<div class="cv-dates">' + esc(dates) + '</div>' +
+                '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+            }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+            '<h3>Education</h3>' +
+            (eduRows.map(function (e) {
+              return '<div class="cv-role-line">' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</div>' +
+                '<div class="cv-company">' + esc(e.institution) + '</div>' +
+                '<div class="cv-dates">' + esc([e.year, e.grade].filter(Boolean).join(' · ')) + '</div>';
+            }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          '</div></div>';
+
+      } else if (state.template === 'creative') {
+        html =
+          '<div class="cv-page cv-t6">' + watermark() +
+          '<div class="cv-accent-bar"></div>' +
+          '<div class="cv-header">' +
+            '<div class="cv-name">' + name + '</div>' +
+            (p.targetRole ? '<div class="cv-target">' + esc(p.targetRole) + '</div>' : '') +
+            '<div class="cv-contact">' + esc(contactLine()) + '</div>' +
+          '</div>' +
+          '<div class="cv-body">' +
+            (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+            '<h3>Experience</h3>' +
+            (expHtml(function (e, dates) {
+              return '<div style="margin-bottom:0.6rem;"><div class="cv-role-line"><span>' + esc(e.title) + '</span><span class="cv-dates-badge">' + esc(dates) + '</span></div>' +
+                '<div class="cv-company">' + esc(e.company) + (e.location ? ' · ' + esc(e.location) : '') + '</div>' +
+                '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+            }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+            '<h3>Education</h3>' +
+            (eduRows.map(function (e) {
+              return '<div style="margin-bottom:0.32rem;"><div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</span><span class="cv-dates-badge">' + esc(e.year) + '</span></div>' +
+                '<div class="cv-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
+            }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+            (state.skills.length ? '<h3>Skills</h3><p>' + state.skills.map(esc).join(' · ') + '</p>' : '') +
+            (state.certifications.length ? '<h3>Certifications</h3><p>' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div></div>';
+
+      } else if (state.template === 'graduate2') {
+        html =
+          '<div class="cv-page cv-t7">' + watermark() +
+          '<div class="cv-header">' +
+            '<div class="cv-name">' + name + '</div>' +
+            (p.targetRole ? '<div class="cv-target">' + esc(p.targetRole) + '</div>' : '') +
+            '<div class="cv-contact">' + esc(contactLine()) + '</div>' +
+          '</div>' +
+          '<h3>Education</h3>' +
+          (eduRows.map(function (e) {
+            return '<div class="cv-edu-block">' +
+              '<div class="cv-edu-title">' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</div>' +
+              '<div class="cv-edu-meta">' + esc(e.institution) + (e.year ? ' · ' + esc(e.year) : '') + (e.grade ? ' · ' + esc(e.grade) : '') + '</div>' +
+            '</div>';
+          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+          '<h3>Experience</h3>' +
+          (expHtml(function (e, dates) {
+            return '<div style="margin-bottom:0.55rem;"><div class="cv-role-line"><span>' + esc(e.title) + (e.company ? ' · ' + esc(e.company) : '') + '</span><span>' + esc(dates) + '</span></div>' +
+              '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+          }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+          (state.skills.length ? '<h3>Skills</h3><div class="cv-skill-pills">' + state.skills.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' : '') +
+          (state.certifications.length ? '<h3>Certifications</h3><p>' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div>';
+
+      } else if (state.template === 'executive') {
+        html =
+          '<div class="cv-page cv-t8">' + watermark() +
+          '<div class="cv-name">' + name + '</div>' +
+          '<hr class="cv-divider">' +
+          '<div class="cv-contact">' + esc(contactLine()) + '</div>' +
+          (summary ? '<h3>Profile</h3><p>' + summary + '</p>' : '') +
+          '<h3>Experience</h3>' +
+          (expHtml(function (e, dates) {
+            return '<div style="margin-bottom:0.85rem;"><div class="cv-role-line"><span>' + esc(e.title) + '</span><span>' + esc(dates) + '</span></div>' +
+              '<div class="cv-company">' + esc(e.company) + (e.location ? ', ' + esc(e.location) : '') + '</div>' +
+              '<ul>' + e.bullets.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>';
+          }) || '<p class="cv-empty-hint">Add your work experience in step 2.</p>') +
+          '<h3>Education</h3>' +
+          (eduRows.map(function (e) {
+            return '<div style="margin-bottom:0.45rem;"><div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(', ')) + '</span><span>' + esc(e.year) + '</span></div>' +
+              '<div class="cv-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
+          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          (state.skills.length ? '<h3>Skills</h3><p class="cv-skills-line">' + state.skills.map(esc).join('  ·  ') + '</p>' : '') +
+          (state.certifications.length ? '<h3>Certifications</h3><p class="cv-skills-line">' + state.certifications.map(esc).join('  ·  ') + '</p>' : '') +
           '</div>';
       }
 
@@ -930,8 +1076,8 @@
         'html{font-size:16pt}' +
         'body{margin:0;padding:0;background:#fff}' +
         '.cv-page{width:180mm!important;min-height:257mm!important;max-width:none!important;box-shadow:none!important;margin:0 auto!important}' +
-        '.cv-t2{min-height:257mm!important}' +
-        '.cv-t2 .cv-body h3,.cv-t3 h3{font-size:0.82rem!important}' +
+        '.cv-t2,.cv-t5{min-height:257mm!important}' +
+        '.cv-t2 .cv-body h3,.cv-t3 h3,.cv-t5 .cv-body h3{font-size:0.82rem!important}' +
         '@media print{html{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cv-page{page-break-inside:avoid}}' +
       '</style>' +
         '</head><body>' + page.outerHTML + '</body></html>'
