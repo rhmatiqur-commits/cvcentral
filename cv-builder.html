@@ -1497,5 +1497,34 @@
     }, true); // capture phase fires before the original bubble-phase listener
   })();
   </script>
+
+  <!-- Cookie consent banner -->
+  <div class="cookie-banner" id="cookieBanner" hidden>
+    <div class="cookie-inner">
+      <div class="cookie-logo">
+        <span class="logo-mark" style="width:28px;height:28px;font-size:0.7rem;">CV</span>
+      </div>
+      <p class="cookie-text">We use essential cookies to keep you logged in and analytics cookies to improve CV Central. See our <a href="privacy.html">Privacy Policy</a> for details.</p>
+      <div class="cookie-actions">
+        <button class="btn-cookie-accept" id="cookieAcceptAll">Accept All</button>
+        <button class="btn-cookie-essential" id="cookieEssentialOnly">Essential Only</button>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function() {
+    if (!localStorage.getItem('cvcentral_cookie_choice')) {
+      document.getElementById('cookieBanner').hidden = false;
+    }
+    document.getElementById('cookieAcceptAll').addEventListener('click', function() {
+      localStorage.setItem('cvcentral_cookie_choice', 'all');
+      document.getElementById('cookieBanner').hidden = true;
+    });
+    document.getElementById('cookieEssentialOnly').addEventListener('click', function() {
+      localStorage.setItem('cvcentral_cookie_choice', 'essential');
+      document.getElementById('cookieBanner').hidden = true;
+    });
+  })();
+  </script>
 </body>
 </html>
