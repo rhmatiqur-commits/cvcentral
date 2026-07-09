@@ -19,12 +19,15 @@
         <span class="logo-mark">CV</span>
         <span>CV<span class="logo-central">Central</span></span>
       </a>
-      <nav class="main-nav" aria-label="Main navigation">
+      <nav class="main-nav" aria-label="Main navigation" id="mainNav">
         <a href="#features">Features</a>
         <a href="#how-it-works">How it works</a>
         <a href="#pricing">Pricing</a>
-        <a href="dashboard.html">Sign in</a>
-        <a href="cv-builder.html" class="btn btn-primary btn-sm">Build my CV free</a>
+        <!-- Auth links injected by JS below; defaults shown while loading -->
+        <a href="login.html" id="navSignIn">Sign in</a>
+        <a href="signup.html" class="btn btn-primary btn-sm" id="navSignUp">Sign up free</a>
+        <a href="dashboard.html" class="btn btn-ghost btn-sm" id="navDash" hidden>My dashboard</a>
+        <button id="navSignOut" class="btn btn-ghost btn-sm" hidden>Sign out</button>
       </nav>
     </div>
   </header>
@@ -333,6 +336,25 @@
       }, { threshold: 0.12 });
       els.forEach(function (el) { io.observe(el); });
     })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    cvAuth.getSession().then(function (session) {
+      if (session) {
+        document.getElementById('navSignIn').hidden  = true;
+        document.getElementById('navSignUp').hidden  = true;
+        document.getElementById('navDash').hidden    = false;
+        document.getElementById('navSignOut').hidden = false;
+      }
+    });
+    document.getElementById('navSignOut').addEventListener('click', function () {
+      cvAuth.signOut();
+    });
+  })();
   </script>
 </body>
 </html>

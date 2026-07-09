@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en-GB">
 <head>
   <meta charset="UTF-8">
@@ -337,6 +337,19 @@
               <span>Ultra clean — any industry</span>
             </button>
           </div>
+          <div class="colour-scheme-picker" id="colourSchemePicker">
+            <span class="colour-picker-label">Colour</span>
+            <div class="colour-swatches">
+              <button type="button" class="swatch-btn selected" data-scheme="" title="Template default" aria-label="Template default" style="--sw:conic-gradient(#5B2D8E 0%,#0D9488 30%,#EA580C 55%,#BE123C 75%,#5B2D8E 100%)"></button>
+              <button type="button" class="swatch-btn" data-scheme="violet" title="Violet" aria-label="Violet" style="--sw:#5B2D8E"></button>
+              <button type="button" class="swatch-btn" data-scheme="rose" title="Rose" aria-label="Rose" style="--sw:#BE123C"></button>
+              <button type="button" class="swatch-btn" data-scheme="teal" title="Teal" aria-label="Teal" style="--sw:#0D9488"></button>
+              <button type="button" class="swatch-btn" data-scheme="slate" title="Slate" aria-label="Slate" style="--sw:#475569"></button>
+              <button type="button" class="swatch-btn" data-scheme="amber" title="Amber" aria-label="Amber" style="--sw:#B45309"></button>
+              <button type="button" class="swatch-btn" data-scheme="navy" title="Navy" aria-label="Navy" style="--sw:#1E3A8A"></button>
+              <button type="button" class="swatch-btn" data-scheme="forest" title="Forest" aria-label="Forest" style="--sw:#166534"></button>
+            </div>
+          </div>
           <div class="cv-preview-frame">
             <div id="cvPreview"></div>
           </div>
@@ -382,7 +395,8 @@
       certifications: [],
       jobTarget: {},
       ai: null,               // full AI result once analysed
-      template: 'professional'
+      template: 'professional',
+      colorScheme: null
     };
 
     // Restore a draft if one exists
@@ -392,6 +406,11 @@
         state = Object.assign(state, draft, { step: 1, ai: draft.ai || null });
       }
     } catch (e) { /* corrupt draft — start fresh */ }
+
+    // Sync colour swatch selection with restored state
+    document.querySelectorAll('.swatch-btn').forEach(function (b) {
+      b.classList.toggle('selected', b.dataset.scheme === (state.colorScheme || ''));
+    });
 
     function saveDraft() {
       try { localStorage.setItem('cvcentral_draft', JSON.stringify(state)); } catch (e) {}
@@ -790,7 +809,7 @@
       navigator.clipboard.writeText(text).then(function () {
         toast('Cover letter copied ✓', 'success');
       }, function () {
-        toast('Couldn’t copy — select and copy manually', 'error');
+        toast("Couldn't copy — select and copy manually", 'error');
       });
     });
 
@@ -808,8 +827,8 @@
       });
       if (isRecommendation) {
         document.getElementById('recNote').innerHTML =
-          '<strong style="color:var(--violet);">The AI recommends “' +
-          name.charAt(0).toUpperCase() + name.slice(1) + '” for this role.</strong>';
+          '<strong style="color:var(--violet);">The AI recommends "' +
+          name.charAt(0).toUpperCase() + name.slice(1) + '" for this role.</strong>';
       }
     }
 
@@ -817,6 +836,41 @@
       btn.addEventListener('click', function () {
         selectTemplate(btn.dataset.template, false);
         renderPreview();
+        saveDraft();
+      });
+    });
+
+    /* ---------- Colour schemes ---------- */
+    var COLOR_SCHEMES = {
+      violet: { accent: '#5B2D8E', light: '#F1EAF9' },
+      rose:   { accent: '#BE123C', light: '#FFF1F2' },
+      teal:   { accent: '#0D9488', light: '#F0FDFA' },
+      slate:  { accent: '#475569', light: '#F1F5F9' },
+      amber:  { accent: '#B45309', light: '#FFFBEB' },
+      navy:   { accent: '#1E3A8A', light: '#EFF6FF' },
+      forest: { accent: '#166534', light: '#F0FDF4' }
+    };
+
+    function applySchemeToPage() {
+      var page = document.querySelector('#cvPreview .cv-page');
+      if (!page) return;
+      var cs = state.colorScheme && COLOR_SCHEMES[state.colorScheme];
+      if (cs) {
+        page.style.setProperty('--cv-accent', cs.accent);
+        page.style.setProperty('--cv-accent-light', cs.light);
+      } else {
+        page.style.removeProperty('--cv-accent');
+        page.style.removeProperty('--cv-accent-light');
+      }
+    }
+
+    document.querySelectorAll('.swatch-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.colorScheme = btn.dataset.scheme || null;
+        document.querySelectorAll('.swatch-btn').forEach(function (b) {
+          b.classList.toggle('selected', b === btn);
+        });
+        applySchemeToPage();
         saveDraft();
       });
     });
@@ -1092,7 +1146,7 @@
             '</div>' +
             '<h3>Education</h3>' +
             (eduRows.map(function (e) {
-              return '<div style="margin-bottom:0.4rem;"><div class="cv-tl-header"><span style="font-weight:700;font-size:0.7rem;">' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</span><span style="font-size:0.6rem;color:#5B2D8E;font-weight:600;">' + esc(e.year) + '</span></div>' +
+              return '<div style="margin-bottom:0.4rem;"><div class="cv-tl-header"><span style="font-weight:700;font-size:0.7rem;">' + esc([e.level, e.subject].filter(Boolean).join(' — ')) + '</span><span style="font-size:0.6rem;color:var(--cv-accent,#5B2D8E);font-weight:600;">' + esc(e.year) + '</span></div>' +
                 '<div class="cv-tl-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
             }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
             (state.skills.length ? '<h3>Skills</h3><div class="cv-skills-inline">' + state.skills.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div>' : '') +
@@ -1205,6 +1259,7 @@
       }
 
       el.innerHTML = html;
+      applySchemeToPage();
     }
 
     function watermark() {
@@ -1237,7 +1292,7 @@
       win.document.close();
       win.focus();
       setTimeout(function () { win.print(); }, 600);
-      toast('Use “Save as PDF” in the print dialog 📄');
+      toast('Use "Save as PDF" in the print dialog 📄');
     });
 
     /* ---------- Save to Supabase ---------- */
@@ -1294,7 +1349,7 @@
         })
         .catch(function (err) {
           console.error(err);
-          toast('Couldn’t save just now — try again in a minute', 'error');
+          toast("Couldn't save just now — try again in a minute", 'error');
           btn.textContent = 'Save to CV Central';
           btn.disabled = false;
         });
@@ -1304,6 +1359,12 @@
     function indexOf(el, parent) {
       return Array.prototype.indexOf.call(parent.children, el);
     }
+
+    // Expose current state for the auth-aware save handler (auth.js loads after this IIFE)
+    window._cvGetState = function () {
+      collectStep(state.step);
+      return state;
+    };
 
     /* ---------- Init ---------- */
     hydratePersonal();
@@ -1327,5 +1388,114 @@
       </div>
     </div>
   </footer>
+
+  <!-- Auth gate modal (shown when unauthenticated user tries to save) -->
+  <div class="modal-overlay" id="authModalOverlay" hidden>
+    <div class="modal-card" style="text-align:center;">
+      <button class="modal-close" id="authModalClose" aria-label="Close">&times;</button>
+      <div style="display:inline-flex;align-items:center;gap:0.55rem;font-weight:800;font-size:1.1rem;letter-spacing:-0.02em;margin-bottom:1rem;">
+        <span class="logo-mark" style="width:36px;height:36px;font-size:0.85rem;">CV</span>
+        <span>CV<span style="color:var(--violet);">Central</span></span>
+      </div>
+      <h2>Save your CV</h2>
+      <p>Create a free account to save your CV and access it from any device.</p>
+      <div style="display:grid;gap:0.75rem;margin-top:1.5rem;">
+        <a href="signup.html" class="btn btn-violet">Create free account</a>
+        <a href="login.html" class="btn btn-ghost">I already have an account</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  // Auth-aware save button (replaces the inline Supabase REST save above)
+  (function () {
+    'use strict';
+
+    var overlay = document.getElementById('authModalOverlay');
+
+    document.getElementById('authModalClose').addEventListener('click', function () {
+      overlay.hidden = true;
+    });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.hidden = true;
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') overlay.hidden = true;
+    });
+
+    // Swap the original saveBtn handler with an auth-aware one
+    var saveBtn = document.getElementById('saveBtn');
+    var _origHandler = saveBtn._authWrapped;
+
+    saveBtn.addEventListener('click', async function handleAuthSave(e) {
+      // Stop the original bubble-phase handler from running — we own this click entirely
+      e.stopImmediatePropagation();
+
+      var session = await cvAuth.getSession();
+      if (!session) {
+        overlay.hidden = false;
+        return;
+      }
+
+      // Collect current form state via the builder's own helper
+      var state = window._cvGetState ? window._cvGetState() : null;
+      if (!state) {
+        var toastEl = document.getElementById('toast');
+        toastEl.textContent = 'Fill in step 1 first, then save.';
+        toastEl.className = 'toast show error';
+        setTimeout(function () { toastEl.classList.remove('show'); }, 3500);
+        return;
+      }
+
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      var cvName = (state.personal && state.personal.fullName)
+        ? state.personal.fullName + "'s CV"
+        : 'My CV';
+      var score = state.ai && state.ai.score ? state.ai.score.total : null;
+
+      var res = await cvAuth.saveCV(
+        session.user.id,
+        {
+          personal: state.personal,
+          experience: state.experience,
+          education: state.education,
+          skills: state.skills,
+          languages: state.languages,
+          certifications: state.certifications,
+          jobTarget: state.jobTarget,
+          ai: state.ai,
+          template: state.template
+        },
+        state.template || 'professional',
+        state.colorScheme || null,
+        cvName,
+        score
+      );
+
+      var toastEl = document.getElementById('toast');
+      function showToast(msg, type) {
+        toastEl.textContent = msg;
+        toastEl.className = 'toast show' + (type ? ' ' + type : '');
+        setTimeout(function () { toastEl.classList.remove('show'); }, 3500);
+      }
+
+      if (res.error) {
+        console.error(res.error);
+        showToast('Could not save — try again in a moment.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Save to CV Central';
+      } else {
+        showToast('Saved to CV Central 🎉 See it on your dashboard', 'success');
+        btn.textContent = 'Saved ✓';
+        setTimeout(function () { btn.textContent = 'Save to CV Central'; btn.disabled = false; }, 2500);
+      }
+    }, true); // capture phase fires before the original bubble-phase listener
+  })();
+  </script>
 </body>
 </html>
