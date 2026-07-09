@@ -49,6 +49,20 @@
             <h2>Let's start with you</h2>
             <p>The basics recruiters see first. Rough notes are fine everywhere — the AI polishes later.</p>
           </div>
+
+          <!-- CV Upload prefill -->
+          <div class="upload-prefill-box" id="uploadPrefillBox">
+            <div class="upload-prefill-inner">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--violet-light)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div>
+                <p style="font-weight:700;font-size:0.92rem;margin-bottom:0.15rem;">Already have a CV? Upload it to prefill everything</p>
+                <p style="font-size:0.8rem;color:var(--muted);">PDF or Word (.docx) — your data stays private</p>
+              </div>
+              <label class="btn-upload-cv" for="cvUploadInput">Choose file</label>
+              <input type="file" id="cvUploadInput" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none">
+            </div>
+            <div id="uploadStatus" style="display:none;padding:0.6rem 1rem;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--border);"></div>
+          </div>
           <div class="form-grid">
             <div class="field">
               <label for="fullName">Full name</label>
@@ -100,6 +114,10 @@
             <div class="field full">
               <label for="linkedin">LinkedIn URL <span class="optional">(optional)</span></label>
               <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourname">
+            </div>
+            <div class="field full">
+              <label for="address">Full address <span class="optional">(optional)</span></label>
+              <input type="text" id="address" placeholder="e.g. 14 Park Lane, Birmingham, B1 2AA" autocomplete="street-address">
             </div>
           </div>
         </div>
@@ -478,8 +496,130 @@
       });
     });
 
+    /* ---------- CV Upload prefill ---------- */
+    (function () {
+      var input = document.getElementById('cvUploadInput');
+      var status = document.getElementById('uploadStatus');
+
+      function setStatus(msg, colour) {
+        status.style.display = 'block';
+        status.style.color = colour || 'var(--muted)';
+        status.textContent = msg;
+      }
+
+      async function extractText(file) {
+        var ext = file.name.split('.').pop().toLowerCase();
+
+        if (ext === 'pdf') {
+          if (!window.pdfjsLib) throw new Error('PDF reader not loaded');
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          var arrayBuffer = await file.arrayBuffer();
+          var pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          var pages = [];
+          for (var i = 1; i <= pdf.numPages; i++) {
+            var page = await pdf.getPage(i);
+            var content = await page.getTextContent();
+            pages.push(content.items.map(function (s) { return s.str; }).join(' '));
+          }
+          return pages.join('\n');
+        }
+
+        if (ext === 'docx') {
+          if (!window.mammoth) throw new Error('Word reader not loaded');
+          var result = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+          return result.value;
+        }
+
+        throw new Error('Please upload a PDF or .docx file');
+      }
+
+      function prefillFields(data) {
+        var p = data.personal || {};
+        var map = {
+          fullName: p.fullName, email: p.email, phone: p.phone,
+          location: p.location, address: p.address, linkedin: p.linkedin,
+          summary: p.summary
+        };
+        Object.keys(map).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el && map[id]) el.value = map[id];
+        });
+
+        // Experience
+        if (data.experience && data.experience.length) {
+          state.experience = data.experience.map(function (e) {
+            return {
+              jobTitle: e.jobTitle || '', company: e.company || '',
+              startDate: e.startDate || '', endDate: e.endDate || '',
+              current: !!e.current, description: e.description || ''
+            };
+          });
+          renderExperience();
+        }
+
+        // Education
+        if (data.education && data.education.length) {
+          state.education = data.education.map(function (e) {
+            return {
+              degree: e.degree || '', institution: e.institution || '',
+              startDate: e.startDate || '', endDate: e.endDate || '',
+              grade: e.grade || ''
+            };
+          });
+          renderEducation();
+        }
+
+        // Skills, languages, certifications
+        if (data.skills && data.skills.length) {
+          state.skills = data.skills;
+          renderTags('skills');
+        }
+        if (data.languages && data.languages.length) {
+          state.languages = data.languages;
+          renderTags('languages');
+        }
+        if (data.certifications && data.certifications.length) {
+          state.certifications = data.certifications;
+          renderTags('certifications');
+        }
+      }
+
+      input.addEventListener('change', async function () {
+        var file = this.files && this.files[0];
+        if (!file) return;
+
+        setStatus('Reading your CV…');
+        input.disabled = true;
+
+        try {
+          var text = await extractText(file);
+          if (!text || text.trim().length < 50) throw new Error('Could not read enough text from this file');
+
+          setStatus('Parsing with AI — this takes about 10 seconds…');
+
+          var res = await fetch(AI_ENDPOINT + '?action=parse-cv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+          });
+
+          if (!res.ok) throw new Error('AI parsing failed (' + res.status + ')');
+          var data = await res.json();
+
+          prefillFields(data);
+          setStatus('✓ Fields prefilled from your CV — check and adjust as needed', '#16A34A');
+        } catch (err) {
+          setStatus('⚠ ' + (err.message || 'Could not parse this file — please fill in manually'), '#DC2626');
+        } finally {
+          input.disabled = false;
+          input.value = '';
+        }
+      });
+    })();
+
     /* ---------- Step 1: personal fields ---------- */
-    var personalFields = ['fullName', 'email', 'phone', 'location', 'targetRole', 'targetIndustry', 'summary', 'linkedin'];
+    var personalFields = ['fullName', 'email', 'phone', 'location', 'address', 'targetRole', 'targetIndustry', 'summary', 'linkedin'];
 
     function collectPersonal() {
       personalFields.forEach(function (id) {
@@ -909,7 +1049,7 @@
     }
 
     function contactLine() {
-      return [state.personal.email, state.personal.phone, state.personal.location, state.personal.linkedin]
+      return [state.personal.address, state.personal.email, state.personal.phone, state.personal.location, state.personal.linkedin]
         .filter(Boolean).join('  ·  ');
     }
 
@@ -956,7 +1096,7 @@
           '<div class="cv-side">' +
             '<div class="cv-name">' + name + '</div>' +
             '<div class="cv-target">' + esc(p.targetRole || '') + '</div>' +
-            '<h3>Contact</h3><p>' + [p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
+            '<h3>Contact</h3><p>' + [p.address, p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
             (state.skills.length ? '<h3>Skills</h3><ul>' + state.skills.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
             (state.languages.length ? '<h3>Languages</h3><ul>' + state.languages.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
             (state.certifications.length ? '<h3>Certifications</h3><ul>' + state.certifications.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
@@ -1030,7 +1170,7 @@
           '<div class="cv-side">' +
             '<div class="cv-name">' + name + '</div>' +
             '<div class="cv-label">' + esc(p.targetRole || '') + '</div>' +
-            '<h3>Contact</h3><p>' + [p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
+            '<h3>Contact</h3><p>' + [p.address, p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
             (state.skills.length ? '<h3>Skills</h3><ul>' + state.skills.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
             (state.languages.length ? '<h3>Languages</h3><ul>' + state.languages.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
             (state.certifications.length ? '<h3>Certs</h3><ul>' + state.certifications.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' : '') +
@@ -1160,7 +1300,7 @@
           '<div class="cv-hdr">' +
             '<div><div class="cv-name">' + name + '</div>' +
             (p.targetRole ? '<div class="cv-target">' + esc(p.targetRole) + '</div>' : '') + '</div>' +
-            '<div class="cv-hdr-contact">' + [p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</div>' +
+            '<div class="cv-hdr-contact">' + [p.address, p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</div>' +
           '</div>' +
           (summary ? '<h3>Professional Summary</h3><p>' + summary + '</p>' : '') +
           (state.certifications.length ?
@@ -1408,6 +1548,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script>
   // Auth-aware save button (replaces the inline Supabase REST save above)
   (function () {

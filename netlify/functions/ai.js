@@ -47,7 +47,8 @@ exports.handler = async function (event) {
     'cover-letter': buildCoverLetterPrompt,
     'interview-prep': buildInterviewPrompt,
     'template-recommend': buildTemplatePrompt,
-    'ats-check': buildAtsPrompt
+    'ats-check': buildAtsPrompt,
+    'parse-cv': buildParseCvPrompt
   };
 
   const builder = builders[action];
@@ -226,6 +227,51 @@ function buildTemplatePrompt(p) {
       '',
       'Recommend exactly one CV template for this candidate and job: "professional" (clean single column — finance/legal/corporate), "modern" (two column with skills sidebar — tech/marketing/creative), or "graduate" (education-first — first jobs and graduate schemes).',
       jsonOnly('{ "recommendedTemplate": "professional | modern | graduate", "reason": "one sentence" }')
+    ].join('\n')
+  };
+}
+
+function buildParseCvPrompt(p) {
+  return {
+    maxTokens: 3000,
+    system: 'You are an expert CV parser. Extract structured data from raw CV text accurately. Use British English. Never invent information not present in the text. If a field is not found, return an empty string or empty array.',
+    user: [
+      'Extract all available information from the following CV text and return it as structured JSON.',
+      '',
+      'CV TEXT:',
+      '---',
+      (p.text || '').slice(0, 12000),
+      '---',
+      '',
+      jsonOnly(JSON.stringify({
+        personal: {
+          fullName: 'string',
+          email: 'string',
+          phone: 'string',
+          location: 'string (city only)',
+          address: 'string (full address if present)',
+          linkedin: 'string (URL if present)',
+          summary: 'string (professional summary/profile if present)'
+        },
+        experience: [{
+          jobTitle: 'string',
+          company: 'string',
+          startDate: 'string (e.g. Jan 2020)',
+          endDate: 'string (e.g. Mar 2023 or "Present")',
+          current: 'boolean',
+          description: 'string (responsibilities and achievements as plain text)'
+        }],
+        education: [{
+          degree: 'string (qualification and subject)',
+          institution: 'string',
+          startDate: 'string',
+          endDate: 'string',
+          grade: 'string (grade/result if present)'
+        }],
+        skills: ['string'],
+        languages: ['string (language name only, e.g. "French")'],
+        certifications: ['string']
+      }))
     ].join('\n')
   };
 }

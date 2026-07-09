@@ -101,6 +101,42 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* ---------- CV Upload prefill ---------- */
+
+.upload-prefill-box {
+  background: var(--violet-soft, rgba(91,45,142,0.08));
+  border: 1.5px dashed rgba(91,45,142,0.35);
+  border-radius: 10px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.upload-prefill-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn-upload-cv {
+  background: var(--violet);
+  color: #fff;
+  border: none;
+  padding: 0.48rem 1rem;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: auto;
+  transition: background 0.15s;
+}
+
+.btn-upload-cv:hover { background: var(--violet-light, #7B3FB5); }
+
+/* ---------- Step card ---------- */
+
 .step-card-panel {
   background: var(--surface);
   border: 1px solid var(--border);

@@ -63,6 +63,18 @@
           score: score || null,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,cv_name' });
+    },
+
+    /* Sign in with Google or LinkedIn.
+       provider: 'google' | 'linkedin_oidc' */
+    signInWithProvider: async function (provider) {
+      var redirectTo = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
+        ? 'https://cv-central-uk.netlify.app/dashboard.html'
+        : window.location.origin + '/dashboard.html';
+      return _client.auth.signInWithOAuth({
+        provider: provider,
+        options: { redirectTo: redirectTo }
+      });
     }
   };
 })();

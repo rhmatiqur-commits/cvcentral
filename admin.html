@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin &mdash; CV Central</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%235B2D8E'/><text x='50' y='68' font-size='48' font-family='monospace' font-weight='bold' fill='%23AAFF00' text-anchor='middle'>CV</text></svg>">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+
+    :root {
+      --violet: #5B2D8E;
+      --violet-light: #7B3FB5;
+      --lime: #AAFF00;
+      --ink: #0F0720;
+      --surface: #1a0a2e;
+      --card: #241340;
+      --border: rgba(255,255,255,0.1);
+      --muted: #9B8BB5;
+      --text: #E2D9F3;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--surface);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ---- Password Gate ---- */
+    #passwordGate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .pw-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+
+    .pw-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      background: var(--violet);
+      color: var(--lime);
+      font-weight: 900;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      font-size: 0.75rem;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+
+    .pw-card h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .pw-card p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pw-field {
+      margin-bottom: 0.65rem;
+    }
+
+    .pw-field input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .pw-field input:focus { border-color: var(--violet-light); }
+
+    .pw-error {
+      color: #F87171;
+      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      min-height: 1.2em;
+      text-align: left;
+    }
+
+    .btn-unlock {
+      background: var(--violet);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+
+    .btn-unlock:hover { background: var(--violet-light); }
+
+    /* ---- Admin App ---- */
+    #adminApp { min-height: 100vh; }
+
+    /* Header */
+    .admin-header {
+      background: var(--ink);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .admin-brand-text {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .admin-badge {
+      background: rgba(170,255,0,0.12);
+      color: var(--lime);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.07em;
+      border: 1px solid rgba(170,255,0,0.28);
+    }
+
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    #lastUpdated {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .btn-sm-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.38rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-sm-ghost:hover { color: var(--text); border-color: var(--muted); }
+
+    .btn-sm-danger {
+      background: transparent;
+      color: #F87171;
+      border: 1px solid rgba(248,113,113,0.3);
+      padding: 0.38rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-sm-danger:hover { background: rgba(248,113,113,0.08); }
+
+    /* Main */
+    .admin-main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* RLS Warning */
+    .rls-banner {
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 10px;
+      padding: 0.85rem 1.15rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.82rem;
+      color: #FCD34D;
+      display: none;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 0.45rem;
+    }
+
+    .stat-value {
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-sub { font-size: 0.73rem; color: var(--muted); }
+
+    /* Controls */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 180px;
+      max-width: 300px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.58rem 0.8rem 0.58rem 2.1rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input:focus { border-color: var(--violet-light); }
+    .search-input::placeholder { color: var(--muted); }
+
+    .filter-select {
+      padding: 0.58rem 0.8rem;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.875rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .filter-select:focus { border-color: var(--violet-light); }
+
+    .btn-export {
+      background: var(--lime);
+      color: #000;
+      border: none;
+      padding: 0.58rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .btn-export:hover { background: #99EE00; }
+
+    .results-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+    }
+
+    thead th {
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+
+    .td-name { font-weight: 600; color: var(--text); }
+    .td-email { color: var(--muted); font-size: 0.8rem; }
+    .td-muted { color: var(--muted); font-size: 0.8rem; }
+    .td-num { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .plan-chip {
+      display: inline-block;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .plan-chip.free     { background: rgba(155,139,181,0.15); color: #C4B5E3; }
+    .plan-chip.trial    { background: rgba(251,191,36,0.15); color: #FCD34D; }
+    .plan-chip.pro      { background: rgba(91,45,142,0.25); color: #C4A3E8; border: 1px solid rgba(91,45,142,0.45); }
+    .plan-chip.premium  { background: rgba(170,255,0,0.1); color: var(--lime); border: 1px solid rgba(170,255,0,0.28); }
+
+    .btn-view {
+      background: rgba(91,45,142,0.22);
+      color: #C4A3E8;
+      border: 1px solid rgba(91,45,142,0.38);
+      padding: 0.32rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-view:hover { background: rgba(91,45,142,0.42); }
+
+    .special-row td {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,5,20,0.82);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+      z-index: 200;
+      overflow-y: auto;
+    }
+
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.15rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title { font-size: 1rem; font-weight: 700; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.3rem;
+      line-height: 1;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .modal-body { padding: 1.15rem 1.4rem; }
+
+    .cv-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.95rem 1.1rem;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cv-info { flex: 1; min-width: 160px; }
+
+    .cv-name {
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .cv-meta {
+      font-size: 0.73rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .score-badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .score-badge.high { background: rgba(74,222,128,0.12); color: #4ADE80; }
+    .score-badge.mid  { background: rgba(251,191,36,0.12); color: #FCD34D; }
+    .score-badge.low  { background: rgba(248,113,113,0.12); color: #F87171; }
+    .score-badge.none { background: rgba(155,139,181,0.1); color: var(--muted); }
+
+    .btn-dl {
+      background: rgba(170,255,0,0.08);
+      color: var(--lime);
+      border: 1px solid rgba(170,255,0,0.25);
+      padding: 0.38rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-dl:hover { background: rgba(170,255,0,0.16); }
+
+    .modal-empty {
+      text-align: center;
+      padding: 2.5rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--violet-light);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====== Password Gate ====== -->
+  <div id="passwordGate">
+    <div class="pw-card">
+      <div class="pw-logo">
+        <span class="logo-mark">CV</span>
+        <span>CV&nbsp;<span style="color:var(--muted);font-weight:600;">Central</span></span>
+      </div>
+      <h1>Admin Access</h1>
+      <p>Founder-only. Enter the admin password to continue.</p>
+      <form id="pwForm" novalidate>
+        <div class="pw-field">
+          <input type="password" id="pwInput" placeholder="Admin password" autocomplete="current-password" autofocus>
+        </div>
+        <p class="pw-error" id="pwError"></p>
+        <button type="submit" class="btn-unlock">Unlock Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== Admin App ====== -->
+  <div id="adminApp" hidden>
+
+    <header class="admin-header">
+      <div class="admin-brand">
+        <span class="logo-mark">CV</span>
+        <span class="admin-brand-text">CV Central</span>
+        <span class="admin-badge">ADMIN</span>
+      </div>
+      <div class="admin-header-actions">
+        <span id="lastUpdated"></span>
+        <button class="btn-sm-ghost" id="refreshBtn">Refresh</button>
+        <button class="btn-sm-danger" id="lockBtn">Lock</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+
+      <!-- RLS notice (shown when 0 rows returned) -->
+      <div class="rls-banner" id="rlsBanner">
+        <strong>No data returned.</strong>
+        This page uses your active Supabase session with Row Level Security enabled.
+        To see candidate data, log into CV Central in this browser first, then return here.
+        Full multi-user admin access requires a service-role Edge Function &mdash; the anon key cannot bypass RLS.
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p class="stat-label">Total Candidates</p>
+          <p class="stat-value" id="statCandidates">&mdash;</p>
+          <p class="stat-sub">registered accounts</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Total CVs Saved</p>
+          <p class="stat-value" id="statCVs">&mdash;</p>
+          <p class="stat-sub">across all accounts</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">CVs Saved Today</p>
+          <p class="stat-value" id="statToday">&mdash;</p>
+          <p class="stat-sub" id="statTodayDate"></p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Top Template</p>
+          <p class="stat-value" style="font-size:1.35rem;" id="statTemplate">&mdash;</p>
+          <p class="stat-sub">most popular</p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search name or email&hellip;">
+        </div>
+        <select class="filter-select" id="planFilter">
+          <option value="all">All plans</option>
+          <option value="free">Free</option>
+          <option value="trial">Trial</option>
+          <option value="pro">Pro</option>
+          <option value="premium">Premium</option>
+        </select>
+        <select class="filter-select" id="sortSelect">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="most-cvs">Most CVs</option>
+          <option value="a-z">A &mdash; Z</option>
+        </select>
+        <button class="btn-export" id="exportBtn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export CSV
+        </button>
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+
+      <!-- Candidates table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Plan</th>
+              <th>Registered</th>
+              <th>CVs</th>
+              <th>Last active</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="special-row">
+              <td colspan="7"><span class="spinner"></span> Loading candidates&hellip;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ====== CVs Modal ====== -->
+  <div class="modal-overlay" id="cvsModal" hidden>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">CVs</h2>
+        <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function() {
+
+    var ADMIN_PASSWORD = 'CVCentral2026!';
+    var SESSION_KEY = 'cvcentral_admin_unlocked';
+    var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4emttYXZrenFrbm9naG9wd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjI5MjMsImV4cCI6MjA5ODMzODkyM30.ZiQSoZ2bTErHX-zHa6QQ-P2TD5eNgoPfB--Bpnk9R5I';
+
+    var sb = null;
+    var allProfiles = [];
+    var allCVs = [];
+    var cvsByUser = {};
+    var filtered = [];
+
+    /* ---- Auth gate ---- */
+    function showPasswordGate() {
+      document.getElementById('passwordGate').hidden = false;
+      document.getElementById('adminApp').hidden = true;
+    }
+
+    function showAdminApp() {
+      document.getElementById('passwordGate').hidden = true;
+      document.getElementById('adminApp').hidden = false;
+    }
+
+    document.getElementById('pwForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var pw = document.getElementById('pwInput').value;
+      if (pw === ADMIN_PASSWORD) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        document.getElementById('pwError').textContent = '';
+        showAdminApp();
+        init();
+      } else {
+        document.getElementById('pwError').textContent = 'Incorrect password.';
+        document.getElementById('pwInput').value = '';
+        document.getElementById('pwInput').focus();
+      }
+    });
+
+    document.getElementById('lockBtn').addEventListener('click', function() {
+      sessionStorage.removeItem(SESSION_KEY);
+      showPasswordGate();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+      loadData();
+    });
+
+    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+      showAdminApp();
+      init();
+    } else {
+      showPasswordGate();
+    }
+
+    /* ---- Init ---- */
+    async function init() {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      await loadData();
+    }
+
+    /* ---- Data ---- */
+    async function loadData() {
+      document.getElementById('tableBody').innerHTML =
+        '<tr class="special-row"><td colspan="7"><span class="spinner"></span> Loading candidates…</td></tr>';
+      document.getElementById('rlsBanner').style.display = 'none';
+
+      try {
+        var profRes = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+        if (profRes.error) throw profRes.error;
+        allProfiles = profRes.data || [];
+
+        var cvRes = await sb.from('saved_cvs').select('*').order('updated_at', { ascending: false });
+        if (cvRes.error) throw cvRes.error;
+        allCVs = cvRes.data || [];
+
+        cvsByUser = {};
+        allCVs.forEach(function(cv) {
+          if (!cvsByUser[cv.user_id]) cvsByUser[cv.user_id] = [];
+          cvsByUser[cv.user_id].push(cv);
+        });
+
+        if (allProfiles.length === 0) {
+          document.getElementById('rlsBanner').style.display = 'block';
+        }
+
+        updateStats();
+        applyFilters();
+
+        var now = new Date();
+        document.getElementById('lastUpdated').textContent =
+          'Updated ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+      } catch (err) {
+        console.error('Admin data error:', err);
+        document.getElementById('tableBody').innerHTML =
+          '<tr class="special-row"><td colspan="7">Failed to load data: ' + esc(err.message || 'Unknown error') + '</td></tr>';
+      }
+    }
+
+    /* ---- Stats ---- */
+    function updateStats() {
+      document.getElementById('statCandidates').textContent = allProfiles.length;
+      document.getElementById('statCVs').textContent = allCVs.length;
+
+      var today = new Date().toISOString().slice(0, 10);
+      var todayCount = allCVs.filter(function(cv) {
+        return cv.updated_at && cv.updated_at.slice(0, 10) === today;
+      }).length;
+      document.getElementById('statToday').textContent = todayCount;
+      document.getElementById('statTodayDate').textContent =
+        new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      var tplCounts = {};
+      allCVs.forEach(function(cv) {
+        var t = (cv.template || 'unknown').toLowerCase();
+        tplCounts[t] = (tplCounts[t] || 0) + 1;
+      });
+      var keys = Object.keys(tplCounts);
+      if (keys.length) {
+        var top = keys.sort(function(a, b) { return tplCounts[b] - tplCounts[a]; })[0];
+        document.getElementById('statTemplate').textContent =
+          top.charAt(0).toUpperCase() + top.slice(1);
+      } else {
+        document.getElementById('statTemplate').textContent = '--';
+      }
+    }
+
+    /* ---- Filter / Sort / Render ---- */
+    function applyFilters() {
+      var search = document.getElementById('searchInput').value.trim().toLowerCase();
+      var plan = document.getElementById('planFilter').value;
+      var sort = document.getElementById('sortSelect').value;
+
+      filtered = allProfiles.filter(function(p) {
+        var name = (p.full_name || '').toLowerCase();
+        var email = (p.email || '').toLowerCase();
+        var matchSearch = !search || name.indexOf(search) !== -1 || email.indexOf(search) !== -1;
+        var matchPlan = plan === 'all' || (p.plan || 'free').toLowerCase() === plan;
+        return matchSearch && matchPlan;
+      });
+
+      filtered.sort(function(a, b) {
+        if (sort === 'newest') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+        if (sort === 'oldest') {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        if (sort === 'most-cvs') {
+          return (cvsByUser[b.id] || []).length - (cvsByUser[a.id] || []).length;
+        }
+        if (sort === 'a-z') {
+          var an = (a.full_name || a.email || '').toLowerCase();
+          var bn = (b.full_name || b.email || '').toLowerCase();
+          return an < bn ? -1 : an > bn ? 1 : 0;
+        }
+        return 0;
+      });
+
+      document.getElementById('resultsCount').textContent =
+        filtered.length + ' of ' + allProfiles.length + ' candidates';
+
+      renderTable();
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('tableBody');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr class="special-row"><td colspan="7">No candidates match your filters.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+
+      filtered.forEach(function(p) {
+        var userCVs = cvsByUser[p.id] || [];
+        var lastCV = userCVs[0];
+        var plan = (p.plan || 'free').toLowerCase();
+
+        var regDate = p.created_at
+          ? new Date(p.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '--';
+
+        var lastActive = lastCV && lastCV.updated_at
+          ? timeAgo(new Date(lastCV.updated_at))
+          : (p.created_at ? timeAgo(new Date(p.created_at)) : '--');
+
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td class="td-name">' + esc(p.full_name || '--') + '</td>' +
+          '<td class="td-email">' + esc(p.email || '--') + '</td>' +
+          '<td><span class="plan-chip ' + plan + '">' + plan.toUpperCase() + '</span></td>' +
+          '<td class="td-muted">' + regDate + '</td>' +
+          '<td class="td-num">' + userCVs.length + '</td>' +
+          '<td class="td-muted">' + lastActive + '</td>' +
+          '<td>' +
+            '<button class="btn-view" data-uid="' + p.id + '" data-uname="' + esc(p.full_name || p.email || 'Unknown') + '">' +
+              'View CVs' +
+            '</button>' +
+          '</td>';
+
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll('.btn-view').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openCVsModal(this.dataset.uid, this.dataset.uname);
+        });
+      });
+    }
+
+    /* ---- CVs Modal ---- */
+    function openCVsModal(userId, userName) {
+      var modal = document.getElementById('cvsModal');
+      var title = document.getElementById('modalTitle');
+      var body = document.getElementById('modalBody');
+
+      title.textContent = userName + ' — Saved CVs';
+      body.innerHTML = '';
+
+      var userCVs = cvsByUser[userId] || [];
+
+      if (userCVs.length === 0) {
+        body.innerHTML = '<p class="modal-empty">No CVs saved for this candidate.</p>';
+        modal.hidden = false;
+        return;
+      }
+
+      userCVs.forEach(function(cv) {
+        var score = cv.score != null ? cv.score : null;
+        var scoreCls = score == null ? 'none' : score >= 85 ? 'high' : score >= 70 ? 'mid' : 'low';
+        var scoreText = score != null ? score + '/100' : 'Not scored';
+
+        var savedDate = cv.updated_at
+          ? new Date(cv.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          : '--';
+
+        var div = document.createElement('div');
+        div.className = 'cv-item';
+        div.innerHTML =
+          '<div class="cv-info">' +
+            '<p class="cv-name">' + esc(cv.cv_name || 'Untitled CV') + '</p>' +
+            '<div class="cv-meta">' +
+              '<span>Template: <strong>' + esc(cv.template || '--') + '</strong></span>' +
+              '<span>Saved: ' + savedDate + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<span class="score-badge ' + scoreCls + '">' + scoreText + '</span>' +
+          '<button class="btn-dl" data-cvid="' + cv.id + '">Download data</button>';
+
+        body.appendChild(div);
+      });
+
+      body.querySelectorAll('.btn-dl').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cvId = String(this.dataset.cvid);
+          var cv = allCVs.find(function(c) { return String(c.id) === cvId; });
+          if (cv) downloadCVData(cv, userName);
+        });
+      });
+
+      modal.hidden = false;
+    }
+
+    document.getElementById('modalClose').addEventListener('click', function() {
+      document.getElementById('cvsModal').hidden = true;
+    });
+
+    document.getElementById('cvsModal').addEventListener('click', function(e) {
+      if (e.target === this) this.hidden = true;
+    });
+
+    /* ---- CV Data Download ---- */
+    function downloadCVData(cv, ownerName) {
+      var data = cv.cv_data || {};
+      var lines = [];
+
+      lines.push('CV CENTRAL - CV DATA EXPORT');
+      lines.push('===========================');
+      lines.push('CV Name  : ' + (cv.cv_name || 'Untitled'));
+      lines.push('Owner    : ' + ownerName);
+      lines.push('Template : ' + (cv.template || '--'));
+      lines.push('Score    : ' + (cv.score != null ? cv.score + '/100' : 'Not scored'));
+      lines.push('Saved    : ' + (cv.updated_at ? new Date(cv.updated_at).toLocaleString('en-GB') : '--'));
+      lines.push('');
+
+      var personal = data.personal || {};
+      if (Object.keys(personal).length) {
+        lines.push('PERSONAL DETAILS');
+        lines.push('----------------');
+        if (personal.fullName)        lines.push('Name           : ' + personal.fullName);
+        if (personal.email)           lines.push('Email          : ' + personal.email);
+        if (personal.phone)           lines.push('Phone          : ' + personal.phone);
+        if (personal.location)        lines.push('Location       : ' + personal.location);
+        if (personal.linkedin)        lines.push('LinkedIn       : ' + personal.linkedin);
+        if (personal.targetRole)      lines.push('Target role    : ' + personal.targetRole);
+        if (personal.targetIndustry)  lines.push('Industry       : ' + personal.targetIndustry);
+        lines.push('');
+      }
+
+      var summary = data.summary || '';
+      if (summary) {
+        lines.push('PROFESSIONAL SUMMARY');
+        lines.push('--------------------');
+        lines.push(summary);
+        lines.push('');
+      }
+
+      var experience = data.experience || [];
+      if (experience.length) {
+        lines.push('EXPERIENCE');
+        lines.push('----------');
+        experience.forEach(function(exp, i) {
+          lines.push((i + 1) + '. ' + (exp.jobTitle || '') + ' at ' + (exp.company || ''));
+          if (exp.startDate || exp.endDate) {
+            lines.push('   ' + (exp.startDate || '') + ' - ' + (exp.endDate || 'Present'));
+          }
+          if (exp.description) lines.push('   ' + exp.description);
+          lines.push('');
+        });
+      }
+
+      var education = data.education || [];
+      if (education.length) {
+        lines.push('EDUCATION');
+        lines.push('---------');
+        education.forEach(function(edu, i) {
+          lines.push((i + 1) + '. ' + (edu.degree || '') + ' - ' + (edu.institution || ''));
+          if (edu.startDate || edu.endDate) {
+            lines.push('   ' + (edu.startDate || '') + ' - ' + (edu.endDate || ''));
+          }
+          lines.push('');
+        });
+      }
+
+      var skills = data.skills || [];
+      if (skills.length) {
+        lines.push('SKILLS');
+        lines.push('------');
+        lines.push(Array.isArray(skills) ? skills.join(', ') : String(skills));
+        lines.push('');
+      }
+
+      var ai = data.ai || {};
+      if (ai.atsKeywords && ai.atsKeywords.length) {
+        lines.push('ATS KEYWORDS');
+        lines.push('------------');
+        lines.push(ai.atsKeywords.join(', '));
+        lines.push('');
+      }
+
+      lines.push('---');
+      lines.push('Exported from CV Central Admin on ' + new Date().toLocaleString('en-GB'));
+
+      var text = lines.join('\n');
+      var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = (cv.cv_name || 'cv-data').replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /* ---- CSV Export ---- */
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      if (filtered.length === 0) return;
+
+      var rows = [['Name', 'Email', 'Plan', 'Registered', 'CVs Saved', 'Last Active', 'Target Role']];
+
+      filtered.forEach(function(p) {
+        var userCVs = cvsByUser[p.id] || [];
+        var lastCV = userCVs[0];
+        var lastActive = lastCV && lastCV.updated_at
+          ? new Date(lastCV.updated_at).toLocaleDateString('en-GB')
+          : (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : '');
+
+        var targetRole = '';
+        if (lastCV && lastCV.cv_data && lastCV.cv_data.personal) {
+          targetRole = lastCV.cv_data.personal.targetRole || '';
+        }
+
+        rows.push([
+          p.full_name || '',
+          p.email || '',
+          (p.plan || 'free').toUpperCase(),
+          p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : '',
+          userCVs.length,
+          lastActive,
+          targetRole
+        ]);
+      });
+
+      var csv = rows.map(function(row) {
+        return row.map(function(cell) {
+          var s = String(cell);
+          if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1) {
+            s = '"' + s.replace(/"/g, '""') + '"';
+          }
+          return s;
+        }).join(',');
+      }).join('\n');
+
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'cvcentral-candidates-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    /* ---- Control Listeners ---- */
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('planFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortSelect').addEventListener('change', applyFilters);
+
+    /* ---- Helpers ---- */
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function timeAgo(date) {
+      var diff = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (diff < 60)     return 'just now';
+      if (diff < 3600)   return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400)  return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+  })();
+  </script>
+
+</body>
+</html>

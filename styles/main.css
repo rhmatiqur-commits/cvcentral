@@ -602,6 +602,30 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
   color: var(--muted);
 }
+.price-card .tier-price-alt {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.saving-badge {
+  background: rgba(170,255,0,0.12);
+  color: #7BC424;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(170,255,0,0.3);
+}
+.trial-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 0.5rem;
+}
 .price-card .tier-blurb {
   color: var(--muted);
   font-size: 0.9rem;
