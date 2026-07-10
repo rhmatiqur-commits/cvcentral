@@ -69,6 +69,7 @@ async function revolut(method, path, body) {
       'Authorization': 'Bearer ' + process.env.REVOLUT_API_KEY,
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Revolut-Api-Version': '2024-09-01',
     },
     body: body ? JSON.stringify(body) : undefined,
   });
