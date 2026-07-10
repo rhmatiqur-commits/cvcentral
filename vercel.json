@@ -1,9 +1,8 @@
 {
   "version": 2,
   "functions": {
-    "api/ai.js": {
-      "maxDuration": 60
-    }
+    "api/ai.js": { "maxDuration": 60 },
+    "api/chat.js": { "maxDuration": 15 }
   },
   "headers": [
     {
