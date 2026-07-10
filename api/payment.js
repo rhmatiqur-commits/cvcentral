@@ -134,12 +134,20 @@ async function registerWebhook(req, res) {
 }
 
 async function testKey(req, res) {
+  const results = {};
   try {
-    const data = await revolut('GET', '/orders?limit=1');
-    return res.status(200).json({ ok: true, sample: data });
-  } catch (err) {
-    return res.status(200).json({ ok: false, error: err.message });
-  }
+    results.orders = await revolut('GET', '/orders?limit=1');
+    results.ordersOk = true;
+  } catch (err) { results.ordersErr = err.message; }
+  try {
+    results.customers = await revolut('GET', '/customers?limit=1');
+    results.customersOk = true;
+  } catch (err) { results.customersErr = err.message; }
+  try {
+    results.subs = await revolut('GET', '/subscriptions?limit=1');
+    results.subsOk = true;
+  } catch (err) { results.subsErr = err.message; }
+  return res.status(200).json(results);
 }
 
 /* ─────────────────────────────────────────────────────────────
