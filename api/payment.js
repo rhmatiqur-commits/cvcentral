@@ -155,11 +155,6 @@ async function getUserByRevolutCustomerId(revolutCustomerId) {
 ───────────────────────────────────────────────────────────── */
 
 async function setupPlans(req, res) {
-  // Simple admin guard — only callable with the API key in body
-  if ((req.body || {}).admin_key !== process.env.REVOLUT_API_KEY) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
   const results = {};
 
   for (const [key, plan] of Object.entries(PLANS)) {
