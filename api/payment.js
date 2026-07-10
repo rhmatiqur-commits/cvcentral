@@ -18,51 +18,10 @@
 const REVOLUT_BASE = 'https://merchant.revolut.com/api/1.0';
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://exzkmavkzqknoghopwhq.supabase.co';
 
-// Plan definitions
-const PLANS = {
-  pro_monthly: {
-    name: 'CV Central Pro — Monthly',
-    amount: 599,   // £5.99 in pence
-    currency: 'GBP',
-    interval: 'MONTH',
-    interval_count: 1,
-  },
-  pro_annual: {
-    name: 'CV Central Pro — Annual',
-    amount: 4900,  // £49.00
-    currency: 'GBP',
-    interval: 'YEAR',
-    interval_count: 1,
-  },
-  premium_monthly: {
-    name: 'CV Central Premium — Monthly',
-    amount: 1099,  // £10.99
-    currency: 'GBP',
-    interval: 'MONTH',
-    interval_count: 1,
-  },
-  premium_annual: {
-    name: 'CV Central Premium — Annual',
-    amount: 9900,  // £99.00
-    currency: 'GBP',
-    interval: 'YEAR',
-    interval_count: 1,
-  },
-  pro_trial: {
-    name: 'CV Central Pro — 3-Day Trial',
-    amount: 199,   // £1.99 trial
-    currency: 'GBP',
-    interval: 'MONTH',
-    interval_count: 1,
-    trial_days: 3,
-  }
-};
-
 // Plan key → Supabase plan value
 const PLAN_TO_TIER = {
   pro_monthly: 'pro',
   pro_annual: 'pro',
-  pro_trial: 'pro',
   premium_monthly: 'premium',
   premium_annual: 'premium',
 };

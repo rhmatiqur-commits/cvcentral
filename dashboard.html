@@ -347,20 +347,7 @@
       </div>
 
       <!-- Plan cards -->
-      <div style="padding:1.25rem 2rem 1.75rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-
-        <!-- Trial -->
-        <div class="upgrade-card" data-plan="pro_trial" style="border:1.5px dashed var(--border);border-radius:14px;padding:1.25rem;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onclick="window._selectPlan('pro_trial')">
-          <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Try it first</p>
-          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);">£1.99</p>
-          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);">3 days, then £5.99/mo</p>
-          <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
-            <li>✅ All Pro features</li>
-            <li>✅ Cancel anytime</li>
-            <li>✅ No surprise charges</li>
-          </ul>
-          <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="event.stopPropagation();window._checkout('pro_trial')">Start trial</button>
-        </div>
+      <div style="padding:1.25rem 2rem 1.75rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
 
         <!-- Pro -->
         <div class="upgrade-card" data-plan-monthly="pro_monthly" data-plan-annual="pro_annual" style="border:2px solid #5B2D8E;border-radius:14px;padding:1.25rem;cursor:pointer;background:#FAF8FF;position:relative;overflow:hidden;transition:box-shadow 0.15s;" onclick="window._checkoutCurrent('pro')">
