@@ -87,6 +87,7 @@ module.exports = async (req, res) => {
 
   try {
     if (action === 'setup-plans')      return await setupPlans(req, res);
+    if (action === 'test-key')         return await testKey(req, res);
     if (action === 'create-checkout')  return await createCheckout(req, res);
     if (action === 'get-subscription') return await getSubscription(req, res);
     if (action === 'cancel')           return await cancelSubscription(req, res);
@@ -148,6 +149,19 @@ async function updateUserPlan(userId, plan, subscriptionId) {
 async function getUserByRevolutCustomerId(revolutCustomerId) {
   const rows = await supabaseQuery('profiles?revolut_customer_id=eq.' + revolutCustomerId);
   return Array.isArray(rows) ? rows[0] : null;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   0. Test key
+───────────────────────────────────────────────────────────── */
+
+async function testKey(req, res) {
+  try {
+    const data = await revolut('GET', '/orders?limit=1');
+    return res.status(200).json({ ok: true, sample: data });
+  } catch (err) {
+    return res.status(200).json({ ok: false, error: err.message });
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
