@@ -47,6 +47,7 @@ module.exports = async (req, res) => {
   try {
     if (action === 'setup-plans')      return await setupPlans(req, res);
     if (action === 'test-key')         return await testKey(req, res);
+    if (action === 'register-webhook') return await registerWebhook(req, res);
     if (action === 'create-checkout')  return await createCheckout(req, res);
     if (action === 'get-subscription') return await getSubscription(req, res);
     if (action === 'cancel')           return await cancelSubscription(req, res);
@@ -111,8 +112,33 @@ async function getUserByRevolutCustomerId(revolutCustomerId) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   0. Test key
+   0. Test key + Register webhook
 ───────────────────────────────────────────────────────────── */
+
+async function registerWebhook(req, res) {
+  const url = 'https://cvcentral-iota.vercel.app/api/payment?action=webhook';
+  try {
+    // List existing webhooks first to avoid duplicates
+    const existing = await revolut('GET', '/webhooks');
+    const alreadyExists = Array.isArray(existing) && existing.some(w => w.url === url);
+    if (alreadyExists) {
+      return res.status(200).json({ ok: true, message: 'Webhook already registered', webhooks: existing });
+    }
+    const created = await revolut('POST', '/webhooks', {
+      url,
+      events: [
+        'SUBSCRIPTION_ACTIVATED',
+        'SUBSCRIPTION_RENEWED',
+        'SUBSCRIPTION_CANCELLED',
+        'SUBSCRIPTION_EXPIRED',
+        'SUBSCRIPTION_PAYMENT_FAILED',
+      ]
+    });
+    return res.status(200).json({ ok: true, webhook: created });
+  } catch (err) {
+    return res.status(200).json({ ok: false, error: err.message });
+  }
+}
 
 async function testKey(req, res) {
   try {
