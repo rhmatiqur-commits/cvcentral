@@ -522,13 +522,32 @@
     // Handle ?payment=success redirect from Revolut
     var params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
-      // Show success toast (toast fn may not be ready yet — delay)
-      setTimeout(function() {
-        if (window._showToast) window._showToast('🎉 Payment successful! Your plan will update shortly.', 'success');
-        else alert('Payment successful! Your plan is being activated.');
-      }, 500);
+      // Confirm payment and update plan — retry a few times to allow Revolut to process
+      var confirmAttempts = 0;
+      async function tryConfirm() {
+        if (!currentUserId) { setTimeout(tryConfirm, 1000); return; }
+        confirmAttempts++;
+        try {
+          var r = await fetch('/api/payment?action=confirm-payment', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ userId: currentUserId })
+          });
+          var d = await r.json();
+          if (d.updated && d.plan !== 'free') {
+            if (window._showToast) window._showToast('🎉 You\'re now on the ' + d.plan.charAt(0).toUpperCase() + d.plan.slice(1) + ' plan!', 'success');
+            setTimeout(function() { location.reload(); }, 2000);
+          } else if (confirmAttempts < 5) {
+            setTimeout(tryConfirm, 3000); // retry after 3s
+          } else {
+            if (window._showToast) window._showToast('Payment received! Your plan will activate shortly.', 'success');
+          }
+        } catch(e) {
+          if (confirmAttempts < 3) setTimeout(tryConfirm, 3000);
+        }
+      }
+      setTimeout(tryConfirm, 2000);
     }
     if (params.get('payment') === 'cancelled') {
       window.history.replaceState({}, '', window.location.pathname);

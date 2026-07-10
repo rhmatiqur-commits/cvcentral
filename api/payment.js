@@ -50,6 +50,7 @@ module.exports = async (req, res) => {
     if (action === 'register-webhook') return await registerWebhook(req, res);
     if (action === 'create-checkout')  return await createCheckout(req, res);
     if (action === 'get-subscription') return await getSubscription(req, res);
+    if (action === 'confirm-payment')  return await confirmPayment(req, res);
     if (action === 'cancel')           return await cancelSubscription(req, res);
     return res.status(400).json({ error: 'Unknown action: ' + action });
   } catch (err) {
@@ -310,6 +311,49 @@ async function getSubscription(req, res) {
     plan: profile.plan || 'free',
     subscription: subscriptionDetails,
   });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4b. Confirm payment on return from checkout
+       Called when user lands back on dashboard after paying.
+       Looks up their subscription via Revolut and updates Supabase.
+───────────────────────────────────────────────────────────── */
+
+async function confirmPayment(req, res) {
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  // Get profile to find Revolut customer ID
+  const rows = await supabaseQuery(
+    'profiles?id=eq.' + userId + '&select=revolut_customer_id,plan'
+  );
+  const profile = Array.isArray(rows) ? rows[0] : null;
+  if (!profile || !profile.revolut_customer_id) {
+    return res.status(200).json({ plan: 'free', updated: false });
+  }
+
+  try {
+    // List subscriptions for this customer
+    const subs = await revolut('GET', '/subscriptions?customer_id=' + profile.revolut_customer_id);
+    if (!Array.isArray(subs) || subs.length === 0) {
+      return res.status(200).json({ plan: profile.plan || 'free', updated: false });
+    }
+
+    // Find the most recent active subscription
+    const active = subs.find(s => s.state === 'ACTIVE' || s.state === 'active') || subs[0];
+    const planKey = (active.metadata && active.metadata.planKey) || '';
+    const tier = PLAN_TO_TIER[planKey] || 'pro';
+
+    if (active.state === 'ACTIVE' || active.state === 'active') {
+      await updateUserPlan(userId, tier, active.id);
+      return res.status(200).json({ plan: tier, updated: true, subscription: active });
+    }
+
+    return res.status(200).json({ plan: profile.plan || 'free', updated: false });
+  } catch (err) {
+    console.error('confirmPayment error:', err.message);
+    return res.status(200).json({ plan: profile.plan || 'free', updated: false, error: err.message });
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
