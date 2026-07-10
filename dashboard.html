@@ -23,7 +23,7 @@
         <a href="cv-builder.html">CV builder</a>
         <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
         <span id="user-name" style="font-size:0.85rem;color:var(--muted);font-weight:500;"></span>
-        <a href="index.html#pricing" id="upgradeLink" hidden class="btn btn-primary btn-sm">Upgrade</a>
+        <button id="upgradeLink" hidden class="btn btn-primary btn-sm" onclick="window._openUpgradeModal && window._openUpgradeModal()">Upgrade</button>
         <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none">Sign out</button>
       </nav>
     </div>
@@ -61,8 +61,9 @@
           <div class="dash-card">
             <p class="card-label">Your plan</p>
             <p><span class="plan-chip" id="dashPlan">FREE</span></p>
-            <p style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 1rem;">Unlock unlimited cover letters, ATS checks and interview prep.</p>
-            <a href="index.html#pricing" class="btn btn-violet btn-sm">Upgrade to Pro</a>
+            <p style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 1rem;" id="planDesc">Unlock unlimited cover letters, ATS checks and interview prep.</p>
+            <button id="upgradePlanBtn" class="btn btn-violet btn-sm" style="display:none">Upgrade to Pro</button>
+            <button id="managePlanBtn" class="btn btn-ghost btn-sm" style="display:none">Manage subscription</button>
           </div>
           <div class="dash-card">
             <p class="card-label">Target role</p>
@@ -169,6 +170,17 @@
       document.getElementById('planBadgeWrap').hidden = false;
       if (plan === 'free') document.getElementById('upgradeLink').hidden = false;
 
+      // Payment buttons
+      if (plan === 'free') {
+        document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
+        document.getElementById('planDesc').textContent = 'Unlock unlimited cover letters, ATS checks and interview prep.';
+      } else {
+        document.getElementById('managePlanBtn').style.display = 'inline-flex';
+        document.getElementById('planDesc').textContent =
+          plan === 'premium' ? 'You have full access to all CV Central features.' :
+          'You have access to all Pro features. Upgrade to Premium for priority support.';
+      }
+
       var cvData   = savedCV ? (savedCV.cv_data || {}) : {};
       var personal = cvData.personal || {};
       var ai       = cvData.ai || {};
@@ -235,13 +247,21 @@
       navBadge.textContent = plan.toUpperCase();
       navBadge.className = 'plan-badge ' + plan;
       document.getElementById('planBadgeWrap').hidden = false;
-      if (plan === 'free') document.getElementById('upgradeLink').hidden = false;
+      if (plan === 'free') {
+        document.getElementById('upgradeLink').hidden = false;
+        document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
+      } else {
+        document.getElementById('managePlanBtn').style.display = 'inline-flex';
+      }
       document.getElementById('dashPanel').hidden = true;
       document.getElementById('emptyPanel').hidden = false;
     }
 
     /* ---------- Load profile and CV data ---------- */
     var userId = user.id;
+
+    // Expose toast globally for payment success message
+    window._showToast = toast;
 
     try {
       var profRes = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
@@ -260,6 +280,10 @@
         .maybeSingle();
 
       if (cvRes.error) throw cvRes.error;
+
+      // Init payment flow with user info
+      var fullName = (profile.full_name) || (user.user_metadata && user.user_metadata.full_name) || '';
+      if (window._paymentInit) window._paymentInit(userId, user.email, fullName);
 
       cvRes.data ? renderDashboard(profile, cvRes.data) : renderEmpty(profile);
 
@@ -301,6 +325,230 @@
     });
   })();
   </script>
+  <!-- ── Upgrade Modal ──────────────────────────────────────── -->
+  <div id="upgradeModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(26,26,46,0.55);backdrop-filter:blur(4px);padding:1rem;overflow-y:auto;" role="dialog" aria-modal="true" aria-labelledby="upgradeModalTitle">
+    <div style="max-width:760px;margin:2rem auto;background:#fff;border-radius:20px;border:1px solid var(--border);box-shadow:0 24px 64px -12px rgba(91,45,142,0.22);overflow:hidden;">
+
+      <!-- Header -->
+      <div style="background:#5B2D8E;padding:1.75rem 2rem 1.5rem;position:relative;">
+        <button id="closeUpgradeModal" aria-label="Close" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">&#215;</button>
+        <p style="margin:0 0 0.25rem;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.6);text-transform:uppercase;">Upgrade CV Central</p>
+        <h2 id="upgradeModalTitle" style="margin:0;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Land more interviews</h2>
+        <p style="margin:0.5rem 0 0;font-size:0.9rem;color:rgba(255,255,255,0.75);">Unlimited AI tools, cover letters in 10 languages, ATS optimisation, and more.</p>
+      </div>
+
+      <!-- Billing toggle -->
+      <div style="padding:1.5rem 2rem 0;display:flex;align-items:center;gap:0.75rem;">
+        <span id="toggleMonthly" style="font-size:0.88rem;font-weight:600;color:var(--ink);">Monthly</span>
+        <button id="billingToggle" aria-checked="false" role="switch" style="width:44px;height:24px;border-radius:999px;background:#E0D4F5;border:none;cursor:pointer;position:relative;transition:background 0.2s;" onclick="window._toggleBilling()">
+          <span id="billingThumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#5B2D8E;transition:transform 0.2s;display:block;"></span>
+        </button>
+        <span id="toggleAnnual" style="font-size:0.88rem;font-weight:600;color:var(--muted);">Annual <span style="color:#5B2D8E;font-size:0.78rem;font-weight:700;background:#EDE9F8;padding:0.15rem 0.45rem;border-radius:6px;">Save ~30%</span></span>
+      </div>
+
+      <!-- Plan cards -->
+      <div style="padding:1.25rem 2rem 1.75rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+
+        <!-- Trial -->
+        <div class="upgrade-card" data-plan="pro_trial" style="border:1.5px dashed var(--border);border-radius:14px;padding:1.25rem;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onclick="window._selectPlan('pro_trial')">
+          <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Try it first</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);">£1.99</p>
+          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);">3 days, then £5.99/mo</p>
+          <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
+            <li>✅ All Pro features</li>
+            <li>✅ Cancel anytime</li>
+            <li>✅ No surprise charges</li>
+          </ul>
+          <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="event.stopPropagation();window._checkout('pro_trial')">Start trial</button>
+        </div>
+
+        <!-- Pro -->
+        <div class="upgrade-card" data-plan-monthly="pro_monthly" data-plan-annual="pro_annual" style="border:2px solid #5B2D8E;border-radius:14px;padding:1.25rem;cursor:pointer;background:#FAF8FF;position:relative;overflow:hidden;transition:box-shadow 0.15s;" onclick="window._checkoutCurrent('pro')">
+          <span style="position:absolute;top:0;left:0;right:0;background:#5B2D8E;color:#AAFF00;font-size:0.68rem;font-weight:800;letter-spacing:0.1em;text-align:center;padding:0.3rem;text-transform:uppercase;">Most popular</span>
+          <p style="margin:1.5rem 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5B2D8E;">Pro</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="proPrice">£5.99</p>
+          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="proPeriod">per month</p>
+          <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
+            <li>✅ Unlimited AI CV generation</li>
+            <li>✅ Cover letters in 10 languages</li>
+            <li>✅ ATS score + keyword check</li>
+            <li>✅ Interview prep</li>
+            <li>✅ AI help chatbot</li>
+          </ul>
+          <button class="btn btn-violet btn-sm" style="width:100%;" id="proBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('pro')">Get Pro</button>
+        </div>
+
+        <!-- Premium -->
+        <div class="upgrade-card" data-plan-monthly="premium_monthly" data-plan-annual="premium_annual" style="border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onclick="window._checkoutCurrent('premium')">
+          <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Premium</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£10.99</p>
+          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="premiumPeriod">per month</p>
+          <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
+            <li>✅ Everything in Pro</li>
+            <li>✅ Priority support</li>
+            <li>✅ Early access to new features</li>
+            <li>✅ Multi-CV storage (10 CVs)</li>
+          </ul>
+          <button class="btn btn-ghost btn-sm" style="width:100%;" id="premiumBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('premium')">Get Premium</button>
+        </div>
+      </div>
+
+      <p style="text-align:center;font-size:0.77rem;color:var(--muted);padding:0 2rem 1.5rem;">Secure payment via Revolut &bull; Cancel anytime &bull; VAT may apply</p>
+    </div>
+  </div>
+
+  <!-- ── Cancel Confirmation Modal ───────────────────────── -->
+  <div id="cancelModal" style="display:none;position:fixed;inset:0;z-index:201;background:rgba(26,26,46,0.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:1rem;" role="dialog">
+    <div style="max-width:400px;width:100%;background:#fff;border-radius:16px;padding:2rem;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.18);">
+      <p style="font-size:2rem;margin:0 0 0.5rem;">😔</p>
+      <h3 style="margin:0 0 0.5rem;font-size:1.15rem;font-weight:800;color:var(--ink);">Cancel your subscription?</h3>
+      <p style="font-size:0.88rem;color:var(--muted);margin:0 0 1.5rem;line-height:1.6;">You'll lose access to Pro/Premium features at the end of your billing period.</p>
+      <div style="display:flex;gap:0.75rem;">
+        <button id="confirmCancel" class="btn btn-sm" style="flex:1;background:#EF4444;color:#fff;border:none;cursor:pointer;">Yes, cancel</button>
+        <button id="dismissCancel" class="btn btn-ghost btn-sm" style="flex:1;">Keep my plan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ── Payment / upgrade UI ────────────────────────────────
+  (function() {
+    var isAnnual = false;
+    var currentUserId = null;
+    var currentUserEmail = null;
+    var currentUserName = null;
+
+    // Expose so dashboard code can set user info
+    window._paymentInit = function(userId, email, name) {
+      currentUserId = userId;
+      currentUserEmail = email;
+      currentUserName = name;
+    };
+
+    // Toggle billing period
+    window._toggleBilling = function() {
+      isAnnual = !isAnnual;
+      var thumb = document.getElementById('billingThumb');
+      var toggle = document.getElementById('billingToggle');
+      var monthly = document.getElementById('toggleMonthly');
+      var annual = document.getElementById('toggleAnnual');
+      thumb.style.transform = isAnnual ? 'translateX(20px)' : '';
+      toggle.setAttribute('aria-checked', isAnnual ? 'true' : 'false');
+      toggle.style.background = isAnnual ? '#5B2D8E' : '#E0D4F5';
+      thumb.style.background = isAnnual ? '#AAFF00' : '#5B2D8E';
+      monthly.style.color = isAnnual ? 'var(--muted)' : 'var(--ink)';
+      annual.style.color = isAnnual ? 'var(--ink)' : 'var(--muted)';
+
+      document.getElementById('proPrice').textContent    = isAnnual ? '£49' : '£5.99';
+      document.getElementById('proPeriod').textContent   = isAnnual ? 'per year (save £22.88)' : 'per month';
+      document.getElementById('premiumPrice').textContent = isAnnual ? '£99' : '£10.99';
+      document.getElementById('premiumPeriod').textContent = isAnnual ? 'per year (save £32.88)' : 'per month';
+      document.getElementById('proBtnLabel').textContent = isAnnual ? 'Get Pro Annual' : 'Get Pro';
+      document.getElementById('premiumBtnLabel').textContent = isAnnual ? 'Get Premium Annual' : 'Get Premium';
+    };
+
+    // Choose the right plan key based on billing toggle
+    window._checkoutCurrent = function(tier) {
+      var planKey = tier === 'pro'
+        ? (isAnnual ? 'pro_annual' : 'pro_monthly')
+        : (isAnnual ? 'premium_annual' : 'premium_monthly');
+      window._checkout(planKey);
+    };
+
+    // Hit the API and redirect to Revolut checkout
+    window._checkout = async function(planKey) {
+      if (!currentUserId) { alert('Please refresh and try again.'); return; }
+      var btn = event && event.target;
+      if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
+      try {
+        var res = await fetch('/api/payment?action=create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUserId,
+            email: currentUserEmail,
+            fullName: currentUserName || currentUserEmail,
+            planKey: planKey,
+          })
+        });
+        var data = await res.json();
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          alert('Payment setup failed: ' + (data.error || 'Unknown error'));
+          if (btn) { btn.disabled = false; btn.textContent = 'Try again'; }
+        }
+      } catch (e) {
+        alert('Network error — please try again.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Try again'; }
+      }
+    };
+
+    // Open modal
+    window._openUpgradeModal = function() {
+      document.getElementById('upgradeModal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    };
+
+    // Close modal
+    document.getElementById('closeUpgradeModal').addEventListener('click', function() {
+      document.getElementById('upgradeModal').style.display = 'none';
+      document.body.style.overflow = '';
+    });
+    document.getElementById('upgradeModal').addEventListener('click', function(e) {
+      if (e.target === this) { this.style.display = 'none'; document.body.style.overflow = ''; }
+    });
+
+    // Upgrade / Manage buttons
+    document.getElementById('upgradePlanBtn').addEventListener('click', window._openUpgradeModal);
+    document.getElementById('managePlanBtn').addEventListener('click', function() {
+      document.getElementById('cancelModal').style.display = 'flex';
+    });
+
+    // Cancel confirmation
+    document.getElementById('confirmCancel').addEventListener('click', async function() {
+      if (!currentUserId) return;
+      this.disabled = true; this.textContent = 'Cancelling…';
+      try {
+        var res = await fetch('/api/payment?action=cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId })
+        });
+        var data = await res.json();
+        if (data.cancelled) {
+          document.getElementById('cancelModal').style.display = 'none';
+          location.reload();
+        } else {
+          alert('Could not cancel: ' + (data.error || 'Please contact support'));
+          this.disabled = false; this.textContent = 'Yes, cancel';
+        }
+      } catch(e) {
+        alert('Network error — please try again.');
+        this.disabled = false; this.textContent = 'Yes, cancel';
+      }
+    });
+    document.getElementById('dismissCancel').addEventListener('click', function() {
+      document.getElementById('cancelModal').style.display = 'none';
+    });
+
+    // Handle ?payment=success redirect from Revolut
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      // Show success toast (toast fn may not be ready yet — delay)
+      setTimeout(function() {
+        if (window._showToast) window._showToast('🎉 Payment successful! Your plan will update shortly.', 'success');
+        else alert('Payment successful! Your plan is being activated.');
+      }, 500);
+    }
+    if (params.get('payment') === 'cancelled') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  })();
+  </script>
+
   <script src="js/chatbot.js"></script>
 </body>
 </html>
