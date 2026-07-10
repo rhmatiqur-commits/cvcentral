@@ -124,6 +124,10 @@ function jsonOnly(schemaDescription) {
 /* ---------------- Prompt builders ---------------- */
 
 function buildEnhancePrompt(p) {
+  var lang = p.coverLetterLanguage || 'English';
+  var langInstruction = lang === 'English'
+    ? 'Write the cover letter in British English.'
+    : 'Write the cover letter entirely in ' + lang + ' — no English text in the cover letter itself.';
   return {
     maxTokens: 6000,
     system: UK_STYLE,
@@ -135,7 +139,7 @@ function buildEnhancePrompt(p) {
       '2. For each experience entry, rewrite responsibilities and achievements into 3–5 strong, ATS-friendly bullet points (action verb first, quantify where the data allows).',
       '3. Score the CV out of 100 with a breakdown for: formatting, keywords, achievements, ats, length (each 0–100). Base keywords/ats on the job description if provided, otherwise on the target role.',
       '4. Recommend exactly one template: "professional" (finance/legal/corporate), "modern" (tech/marketing/creative), or "graduate" (first jobs, graduate schemes, limited experience).',
-      '5. Write a tailored UK-style cover letter (~250 words) addressed for the job description if given, otherwise for the target role. Use the candidate\'s real name.',
+      '5. Write a tailored cover letter (~250 words) addressed for the job description if given, otherwise for the target role. Use the candidate\'s real name. ' + langInstruction,
       '6. List the top 5 ATS keywords the candidate should include, drawn from the job description or typical adverts for the target role.',
       '7. Give 3 specific, actionable improvements to raise the score.',
       '',
@@ -172,13 +176,17 @@ function buildScorePrompt(p) {
 }
 
 function buildCoverLetterPrompt(p) {
+  var lang = p.coverLetterLanguage || 'English';
+  var langInstruction = lang === 'English'
+    ? 'Write in British English.'
+    : 'Write entirely in ' + lang + '. Do not include any English text in the cover letter itself.';
   return {
     maxTokens: 1500,
     system: UK_STYLE,
     user: [
       cvSummaryBlock(p),
       '',
-      'Write a tailored UK-style cover letter (~250 words) for the job description in jobTarget.description (or the target role if no description). Confident, specific, no clichés like "I am writing to apply".',
+      'Write a tailored cover letter (~250 words) for the job description in jobTarget.description (or the target role if no description). Confident, specific, no clichés like "I am writing to apply". ' + langInstruction,
       jsonOnly('{ "coverLetter": "string" }')
     ].join('\n')
   };
