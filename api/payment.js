@@ -124,16 +124,7 @@ async function registerWebhook(req, res) {
     if (alreadyExists) {
       return res.status(200).json({ ok: true, message: 'Webhook already registered', webhooks: existing });
     }
-    const created = await revolut('POST', '/webhooks', {
-      url,
-      events: [
-        'SUBSCRIPTION_ACTIVATED',
-        'SUBSCRIPTION_RENEWED',
-        'SUBSCRIPTION_CANCELLED',
-        'SUBSCRIPTION_EXPIRED',
-        'SUBSCRIPTION_PAYMENT_FAILED',
-      ]
-    });
+    const created = await revolut('POST', '/webhooks', { url });
     return res.status(200).json({ ok: true, webhook: created });
   } catch (err) {
     return res.status(200).json({ ok: false, error: err.message });
