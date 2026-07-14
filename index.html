@@ -596,6 +596,13 @@ function setPricing(mode, el){
   },{threshold:0.12});
   document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
 })();
+
+// Redirect to dashboard if OAuth token lands on homepage
+(function(){
+  if(window.location.hash && window.location.hash.indexOf('access_token=') > -1){
+    window.location.replace('dashboard.html' + window.location.hash);
+  }
+})();
 </script>
 </body>
 </html>
