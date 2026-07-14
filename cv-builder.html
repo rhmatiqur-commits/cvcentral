@@ -10,7 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/builder.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%235B2D8E'/><text x='50' y='68' font-size='48' font-family='monospace' font-weight='bold' fill='%23AAFF00' text-anchor='middle'>CV</text></svg>">
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="builder-page">
 
@@ -50,22 +51,60 @@
             <p>The basics recruiters see first. Rough notes are fine everywhere — the AI polishes later.</p>
           </div>
 
-          <!-- CV Upload prefill -->
+          <!-- CV Upload / LinkedIn prefill -->
           <div class="upload-prefill-box" id="uploadPrefillBox">
-            <div class="upload-prefill-inner">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--violet-light)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <div>
-                <p style="font-weight:700;font-size:0.92rem;margin-bottom:0.15rem;">Already have a CV? Upload it to prefill everything</p>
-                <p style="font-size:0.8rem;color:var(--muted);">PDF or Word (.docx) — your data stays private</p>
+
+            <!-- Tab switcher -->
+            <div style="display:flex;border-bottom:1px solid var(--border);background:rgba(91,45,142,0.04);">
+              <button id="tabCvUpload" onclick="window._switchPrefillTab('cv')" style="flex:1;padding:0.65rem 1rem;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--violet);border-bottom:2px solid var(--violet);">
+                📄 Upload CV
+              </button>
+              <button id="tabLinkedin" onclick="window._switchPrefillTab('li')" style="flex:1;padding:0.65rem 1rem;font-size:0.82rem;font-weight:700;border:none;cursor:pointer;background:transparent;color:var(--muted);border-bottom:2px solid transparent;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#0A66C2" style="vertical-align:-1px;margin-right:4px;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>Import LinkedIn
+              </button>
+            </div>
+
+            <!-- CV Upload panel -->
+            <div id="panelCvUpload">
+              <div class="upload-prefill-inner">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--violet-light)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div>
+                  <p style="font-weight:700;font-size:0.92rem;margin-bottom:0.15rem;">Already have a CV? Upload it to prefill everything</p>
+                  <p style="font-size:0.8rem;color:var(--muted);">PDF or Word (.docx) — your data stays private</p>
+                </div>
+                <label class="btn-upload-cv" for="cvUploadInput">Choose file</label>
+                <input type="file" id="cvUploadInput" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none">
               </div>
-              <label class="btn-upload-cv" for="cvUploadInput">Choose file</label>
-              <input type="file" id="cvUploadInput" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none">
+              <div id="uploadStatus" style="display:none;padding:0.6rem 1rem;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--border);"></div>
+              <div style="padding:0.55rem 1rem 0.65rem;background:rgba(91,45,142,0.04);border-top:1px dashed rgba(91,45,142,0.18);display:flex;align-items:flex-start;gap:0.5rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p style="margin:0;font-size:0.75rem;color:var(--muted);line-height:1.5;"><strong style="color:var(--ink);">Heads up:</strong> Extraction results vary depending on your CV's format. Complex layouts, tables, or scanned PDFs may not import perfectly. Always review and correct the prefilled fields before continuing.</p>
+              </div>
             </div>
-            <div id="uploadStatus" style="display:none;padding:0.6rem 1rem;font-size:0.82rem;color:var(--muted);border-top:1px solid var(--border);"></div>
-            <div style="padding:0.55rem 1rem 0.65rem;background:rgba(91,45,142,0.04);border-top:1px dashed rgba(91,45,142,0.18);display:flex;align-items:flex-start;gap:0.5rem;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <p style="margin:0;font-size:0.75rem;color:var(--muted);line-height:1.5;"><strong style="color:var(--ink);">Heads up:</strong> Extraction results vary depending on your CV's format. Complex layouts, tables, or scanned PDFs may not import perfectly. Always review and correct the prefilled fields before continuing.</p>
+
+            <!-- LinkedIn Import panel -->
+            <div id="panelLinkedin" style="display:none;">
+              <div style="padding:1rem 1.1rem 0.75rem;display:flex;flex-direction:column;gap:0.65rem;">
+                <p style="margin:0;font-weight:700;font-size:0.92rem;">Import your LinkedIn profile in 3 steps</p>
+                <ol style="margin:0;padding-left:1.25rem;font-size:0.82rem;color:var(--muted);line-height:1.8;">
+                  <li>Go to <a href="https://www.linkedin.com/mypreferences/d/download-my-data" target="_blank" rel="noopener" style="color:var(--violet);font-weight:600;">LinkedIn Data Export</a></li>
+                  <li>Choose <strong style="color:var(--ink);">"Want something in particular?"</strong> → tick <em>Profile, Positions, Education, Skills</em> → Request archive</li>
+                  <li>Download the ZIP LinkedIn emails you, then upload it below</li>
+                </ol>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                  <label class="btn-upload-cv" for="liZipInput" id="liZipLabel" style="background:#0A66C2;border-color:#0A66C2;color:#fff;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:5px;vertical-align:-1px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload LinkedIn ZIP
+                  </label>
+                  <input type="file" id="liZipInput" accept=".zip,application/zip" style="display:none">
+                  <span id="liStatus" style="font-size:0.8rem;color:var(--muted);"></span>
+                </div>
+              </div>
+              <div style="padding:0.55rem 1rem 0.65rem;background:rgba(10,102,194,0.04);border-top:1px dashed rgba(10,102,194,0.2);display:flex;align-items:flex-start;gap:0.5rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px;color:var(--muted)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p style="margin:0;font-size:0.75rem;color:var(--muted);line-height:1.5;">LinkedIn may take a few minutes to prepare your archive. The ZIP is processed entirely in your browser — nothing is sent to our servers.</p>
+              </div>
             </div>
+
           </div>
           <div class="form-grid">
             <div class="field">
@@ -634,6 +673,193 @@
         } finally {
           input.disabled = false;
           input.value = '';
+        }
+      });
+    })();
+
+    /* ---------- Prefill tab switcher ---------- */
+    window._switchPrefillTab = function(tab) {
+      var isCv = tab === 'cv';
+      document.getElementById('panelCvUpload').style.display = isCv ? '' : 'none';
+      document.getElementById('panelLinkedin').style.display = isCv ? 'none' : '';
+      document.getElementById('tabCvUpload').style.color = isCv ? 'var(--violet)' : 'var(--muted)';
+      document.getElementById('tabCvUpload').style.borderBottomColor = isCv ? 'var(--violet)' : 'transparent';
+      document.getElementById('tabLinkedin').style.color = isCv ? 'var(--muted)' : '#0A66C2';
+      document.getElementById('tabLinkedin').style.borderBottomColor = isCv ? 'transparent' : '#0A66C2';
+    };
+
+    /* ---------- LinkedIn ZIP import ---------- */
+    (function () {
+      var zipInput = document.getElementById('liZipInput');
+      var liStatus = document.getElementById('liStatus');
+
+      function setLiStatus(msg, colour) {
+        liStatus.textContent = msg;
+        liStatus.style.color = colour || 'var(--muted)';
+      }
+
+      // Simple CSV parser (handles double-quoted fields)
+      function parseCSV(text) {
+        var rows = [];
+        var lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+        lines.forEach(function (line) {
+          if (!line.trim()) return;
+          var row = [], cur = '', inQ = false;
+          for (var i = 0; i < line.length; i++) {
+            var ch = line[i];
+            if (ch === '"') { inQ = !inQ; }
+            else if (ch === ',' && !inQ) { row.push(cur.trim()); cur = ''; }
+            else { cur += ch; }
+          }
+          row.push(cur.trim());
+          rows.push(row);
+        });
+        return rows;
+      }
+
+      function getCol(header, row, keyword) {
+        var idx = header.findIndex(function (h) {
+          return h.toLowerCase().replace(/[^a-z ]/g, '').includes(keyword.toLowerCase());
+        });
+        return idx >= 0 ? (row[idx] || '').trim() : '';
+      }
+
+      // LinkedIn dates: "Jan 2020", "Jan 1, 2020", "2020-01", or plain "2020"
+      function fmtDate(s) {
+        if (!s) return '';
+        var mo = { jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12' };
+        var m = s.match(/([a-zA-Z]+)\s+(\d{4})/);
+        if (m) return (mo[m[1].toLowerCase().slice(0,3)] || '01') + '/' + m[2];
+        m = s.match(/(\d{4})-(\d{2})/);
+        if (m) return m[2] + '/' + m[1];
+        m = s.match(/(\d{4})/);
+        if (m) return '01/' + m[1];
+        return s;
+      }
+
+      async function parseLinkedInZip(file) {
+        var zip = await JSZip.loadAsync(file);
+        var data = { personal: {}, experience: [], education: [], skills: [], languages: [], certifications: [] };
+
+        // Find file in zip (case-insensitive)
+        function findFile(pattern) {
+          var keys = Object.keys(zip.files);
+          var key = keys.find(function (k) { return new RegExp(pattern, 'i').test(k.split('/').pop()); });
+          return key ? zip.files[key] : null;
+        }
+
+        async function readCSV(pattern) {
+          var f = findFile(pattern);
+          if (!f) return null;
+          var text = await f.async('text');
+          var rows = parseCSV(text);
+          if (rows.length < 2) return null;
+          return { header: rows[0], rows: rows.slice(1) };
+        }
+
+        // Basic info / Profile
+        var basic = await readCSV('Basic_Info|Profile');
+        if (basic) {
+          var r = basic.rows[0];
+          var h = basic.header;
+          var firstName = getCol(h, r, 'first name');
+          var lastName = getCol(h, r, 'last name');
+          data.personal.fullName = (firstName + ' ' + lastName).trim() || getCol(h, r, 'full name');
+          data.personal.summary = getCol(h, r, 'summary') || getCol(h, r, 'headline');
+          var geo = getCol(h, r, 'geo') || getCol(h, r, 'location') || getCol(h, r, 'country');
+          if (geo) data.personal.location = geo;
+        }
+
+        // Positions (work experience)
+        var pos = await readCSV('Positions');
+        if (pos) {
+          pos.rows.forEach(function (r) {
+            var finished = getCol(pos.header, r, 'finished on');
+            data.experience.push({
+              jobTitle:    getCol(pos.header, r, 'title'),
+              company:     getCol(pos.header, r, 'company name'),
+              startDate:   fmtDate(getCol(pos.header, r, 'started on')),
+              endDate:     finished ? fmtDate(finished) : '',
+              current:     !finished,
+              description: getCol(pos.header, r, 'description'),
+            });
+          });
+        }
+
+        // Education
+        var edu = await readCSV('Education');
+        if (edu) {
+          edu.rows.forEach(function (r) {
+            data.education.push({
+              institution: getCol(edu.header, r, 'school name'),
+              degree:      getCol(edu.header, r, 'degree name'),
+              startDate:   fmtDate(getCol(edu.header, r, 'start date')),
+              endDate:     fmtDate(getCol(edu.header, r, 'end date')),
+              grade:       getCol(edu.header, r, 'notes') || getCol(edu.header, r, 'grade'),
+            });
+          });
+        }
+
+        // Skills
+        var sk = await readCSV('Skills');
+        if (sk) {
+          data.skills = sk.rows.map(function (r) {
+            return getCol(sk.header, r, 'name');
+          }).filter(Boolean);
+        }
+
+        // Languages
+        var lang = await readCSV('Languages');
+        if (lang) {
+          data.languages = lang.rows.map(function (r) {
+            var name = getCol(lang.header, r, 'name');
+            var prof = getCol(lang.header, r, 'proficiency');
+            return prof ? name + ' (' + prof + ')' : name;
+          }).filter(Boolean);
+        }
+
+        // Certifications
+        var cert = await readCSV('Certifications');
+        if (cert) {
+          data.certifications = cert.rows.map(function (r) {
+            return getCol(cert.header, r, 'name');
+          }).filter(Boolean);
+        }
+
+        return data;
+      }
+
+      zipInput.addEventListener('change', async function () {
+        var file = this.files && this.files[0];
+        if (!file) return;
+        if (!file.name.toLowerCase().endsWith('.zip')) {
+          setLiStatus('Please upload a .zip file from LinkedIn.', '#DC2626'); return;
+        }
+
+        setLiStatus('Reading LinkedIn export…');
+        zipInput.disabled = true;
+
+        try {
+          if (typeof JSZip === 'undefined') throw new Error('ZIP library not loaded — please refresh the page');
+          var data = await parseLinkedInZip(file);
+
+          var hasData = data.personal.fullName || data.experience.length || data.education.length;
+          if (!hasData) throw new Error('No recognisable LinkedIn data found in this ZIP. Make sure you downloaded the correct archive.');
+
+          prefillFields(data);
+
+          var summary = [];
+          if (data.personal.fullName) summary.push('name');
+          if (data.experience.length) summary.push(data.experience.length + ' job' + (data.experience.length > 1 ? 's' : ''));
+          if (data.education.length) summary.push(data.education.length + ' education entr' + (data.education.length > 1 ? 'ies' : 'y'));
+          if (data.skills.length) summary.push(data.skills.length + ' skill' + (data.skills.length > 1 ? 's' : ''));
+
+          setLiStatus('✓ Imported: ' + summary.join(', ') + ' — check and adjust below', '#16A34A');
+        } catch (err) {
+          setLiStatus('⚠ ' + (err.message || 'Could not parse this ZIP'), '#DC2626');
+        } finally {
+          zipInput.disabled = false;
+          zipInput.value = '';
         }
       });
     })();
@@ -1452,283 +1678,4 @@
           (eduRows.map(function (e) {
             return '<div style="margin-bottom:0.6rem;"><div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(', ')) + '</span><span>' + esc(e.year) + '</span></div>' +
               '<div class="cv-company">' + esc(e.institution) + (e.grade ? '  ·  ' + esc(e.grade) : '') + '</div></div>';
-          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
-          (state.skills.length ? '<h3>Skills</h3><p class="cv-skills-minimal">' + state.skills.map(esc).join('   ·   ') + '</p>' : '') +
-          (state.certifications.length ? '<h3>Certifications</h3><p class="cv-skills-minimal">' + state.certifications.map(esc).join('   ·   ') + '</p>' : '') +
-          (state.languages.length ? '<h3>Languages</h3><p class="cv-skills-minimal">' + state.languages.map(esc).join('   ·   ') + '</p>' : '') +
-          '</div>';
-      }
-
-      el.innerHTML = html;
-      applySchemeToPage();
-    }
-
-    function watermark() {
-      return '<div class="wm"><span>CV CENTRAL · FREE</span></div>';
-    }
-
-    /* ---------- Download PDF (print-to-PDF of the preview) ---------- */
-    document.getElementById('downloadPdf').addEventListener('click', function () {
-      var page = document.querySelector('#cvPreview .cv-page');
-      if (!page) { toast('Nothing to download yet', 'error'); return; }
-      var win = window.open('', '_blank');
-      if (!win) { toast('Please allow pop-ups to download your CV', 'error'); return; }
-      var styles = '';
-      document.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
-        styles += '<link rel="stylesheet" href="' + l.href + '">';
-      });
-      win.document.write(
-        '<!DOCTYPE html><html><head><title>' + esc(state.personal.fullName || 'CV') + ' — CV</title>' + styles +
-        '<style>' +
-        '@page{size:A4 portrait;margin:20mm 15mm}' +
-        'html{font-size:16pt}' +
-        'body{margin:0;padding:0;background:#fff}' +
-        '.cv-page{width:180mm!important;min-height:257mm!important;max-width:none!important;box-shadow:none!important;margin:0 auto!important}' +
-        '.cv-t2,.cv-t5,.cv-t9,.cv-t11{min-height:257mm!important}' +
-        '.cv-t2 .cv-body h3,.cv-t3 h3,.cv-t5 .cv-body h3{font-size:0.82rem!important}' +
-        '@media print{html{-webkit-print-color-adjust:exact;print-color-adjust:exact}.cv-page{page-break-inside:avoid}}' +
-      '</style>' +
-        '</head><body>' + page.outerHTML + '</body></html>'
-      );
-      win.document.close();
-      win.focus();
-      setTimeout(function () { win.print(); }, 600);
-      toast('Use "Save as PDF" in the print dialog 📄');
-    });
-
-    /* ---------- Save to Supabase ---------- */
-    document.getElementById('saveBtn').addEventListener('click', function () {
-      collectStep(state.step);
-      if (!state.personal.email) {
-        toast('Add your email in step 1 first', 'error');
-        goToStep(1);
-        return;
-      }
-      var btn = this;
-      btn.disabled = true;
-      btn.textContent = 'Saving…';
-
-      var row = {
-        name: state.personal.fullName,
-        email: state.personal.email,
-        phone: state.personal.phone,
-        location: state.personal.location,
-        target_role: state.personal.targetRole,
-        target_industry: state.personal.targetIndustry,
-        cv_data: {
-          personal: state.personal,
-          experience: state.experience,
-          education: state.education,
-          skills: state.skills,
-          languages: state.languages,
-          certifications: state.certifications,
-          jobTarget: state.jobTarget,
-          ai: state.ai,
-          template: state.template
-        },
-        cv_score: state.ai && state.ai.score ? state.ai.score.total : null,
-        plan: 'free',
-        last_active: new Date().toISOString()
-      };
-
-      fetch(SUPABASE_URL + '/rest/v1/cv_central_candidates?on_conflict=email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify(row)
-      })
-        .then(function (res) {
-          if (!res.ok) return res.text().then(function (t) { throw new Error(t || 'Save failed'); });
-          localStorage.setItem('cvcentral_email', state.personal.email);
-          toast('Saved to CV Central 🎉 See it on your dashboard', 'success');
-          btn.textContent = 'Saved ✓';
-          setTimeout(function () { btn.textContent = 'Save to CV Central'; btn.disabled = false; }, 2500);
-        })
-        .catch(function (err) {
-          console.error(err);
-          toast("Couldn't save just now — try again in a minute", 'error');
-          btn.textContent = 'Save to CV Central';
-          btn.disabled = false;
-        });
-    });
-
-    /* ---------- Utilities ---------- */
-    function indexOf(el, parent) {
-      return Array.prototype.indexOf.call(parent.children, el);
-    }
-
-    // Expose current state for the auth-aware save handler (auth.js loads after this IIFE)
-    window._cvGetState = function () {
-      collectStep(state.step);
-      return state;
-    };
-
-    /* ---------- Init ---------- */
-    hydratePersonal();
-    hydrateJobTarget();
-    renderExperience();
-    renderEducation();
-    if (state.ai) {
-      renderResults(state.ai);
-      showAnalysisState('aiResults');
-      if (state.ai.recommendedTemplate) selectTemplate(state.template || state.ai.recommendedTemplate, true);
-    }
-    goToStep(1);
-  })();
-  </script>
-
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-bottom">
-        <span>© 2026 CV Central is a trading name of Clavent Ltd, Registered in England and Wales, Company Registration Number: 17278057.</span>
-        <span><a href="privacy.html" style="color:inherit;">Privacy Policy</a> · <a href="terms.html" style="color:inherit;">Terms</a> · <a href="mailto:info@cvcentral.io" style="color:inherit;">Contact</a></span>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Auth gate modal (shown when unauthenticated user tries to save) -->
-  <div class="modal-overlay" id="authModalOverlay" hidden>
-    <div class="modal-card" style="text-align:center;">
-      <button class="modal-close" id="authModalClose" aria-label="Close">&times;</button>
-      <div style="display:inline-flex;align-items:center;gap:0.55rem;font-weight:800;font-size:1.1rem;letter-spacing:-0.02em;margin-bottom:1rem;">
-        <span class="logo-mark" style="width:36px;height:36px;font-size:0.85rem;">CV</span>
-        <span>CV<span style="color:var(--violet);">Central</span></span>
-      </div>
-      <h2>Save your CV</h2>
-      <p>Create a free account to save your CV and access it from any device.</p>
-      <div style="display:grid;gap:0.75rem;margin-top:1.5rem;">
-        <a href="signup.html" class="btn btn-violet">Create free account</a>
-        <a href="login.html" class="btn btn-ghost">I already have an account</a>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-  <script>
-  // Auth-aware save button (replaces the inline Supabase REST save above)
-  (function () {
-    'use strict';
-
-    var overlay = document.getElementById('authModalOverlay');
-
-    document.getElementById('authModalClose').addEventListener('click', function () {
-      overlay.hidden = true;
-    });
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) overlay.hidden = true;
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') overlay.hidden = true;
-    });
-
-    // Swap the original saveBtn handler with an auth-aware one
-    var saveBtn = document.getElementById('saveBtn');
-    var _origHandler = saveBtn._authWrapped;
-
-    saveBtn.addEventListener('click', async function handleAuthSave(e) {
-      // Stop the original bubble-phase handler from running — we own this click entirely
-      e.stopImmediatePropagation();
-
-      var session = await cvAuth.getSession();
-      if (!session) {
-        overlay.hidden = false;
-        return;
-      }
-
-      // Collect current form state via the builder's own helper
-      var state = window._cvGetState ? window._cvGetState() : null;
-      if (!state) {
-        var toastEl = document.getElementById('toast');
-        toastEl.textContent = 'Fill in step 1 first, then save.';
-        toastEl.className = 'toast show error';
-        setTimeout(function () { toastEl.classList.remove('show'); }, 3500);
-        return;
-      }
-
-      var btn = this;
-      btn.disabled = true;
-      btn.textContent = 'Saving…';
-
-      var cvName = (state.personal && state.personal.fullName)
-        ? state.personal.fullName + "'s CV"
-        : 'My CV';
-      var score = state.ai && state.ai.score ? state.ai.score.total : null;
-
-      var res = await cvAuth.saveCV(
-        session.user.id,
-        {
-          personal: state.personal,
-          experience: state.experience,
-          education: state.education,
-          skills: state.skills,
-          languages: state.languages,
-          certifications: state.certifications,
-          jobTarget: state.jobTarget,
-          ai: state.ai,
-          template: state.template
-        },
-        state.template || 'professional',
-        state.colorScheme || null,
-        cvName,
-        score
-      );
-
-      var toastEl = document.getElementById('toast');
-      function showToast(msg, type) {
-        toastEl.textContent = msg;
-        toastEl.className = 'toast show' + (type ? ' ' + type : '');
-        setTimeout(function () { toastEl.classList.remove('show'); }, 3500);
-      }
-
-      if (res.error) {
-        console.error(res.error);
-        showToast('Could not save — try again in a moment.', 'error');
-        btn.disabled = false;
-        btn.textContent = 'Save to CV Central';
-      } else {
-        showToast('Saved to CV Central 🎉 See it on your dashboard', 'success');
-        btn.textContent = 'Saved ✓';
-        setTimeout(function () { btn.textContent = 'Save to CV Central'; btn.disabled = false; }, 2500);
-      }
-    }, true); // capture phase fires before the original bubble-phase listener
-  })();
-  </script>
-
-  <!-- Cookie consent banner -->
-  <div class="cookie-banner" id="cookieBanner" hidden>
-    <div class="cookie-inner">
-      <div class="cookie-logo">
-        <span class="logo-mark" style="width:28px;height:28px;font-size:0.7rem;">CV</span>
-      </div>
-      <p class="cookie-text">We use essential cookies to keep you logged in and analytics cookies to improve CV Central. See our <a href="privacy.html">Privacy Policy</a> for details.</p>
-      <div class="cookie-actions">
-        <button class="btn-cookie-accept" id="cookieAcceptAll">Accept All</button>
-        <button class="btn-cookie-essential" id="cookieEssentialOnly">Essential Only</button>
-      </div>
-    </div>
-  </div>
-  <script>
-  (function() {
-    if (!localStorage.getItem('cvcentral_cookie_choice')) {
-      document.getElementById('cookieBanner').hidden = false;
-    }
-    document.getElementById('cookieAcceptAll').addEventListener('click', function() {
-      localStorage.setItem('cvcentral_cookie_choice', 'all');
-      document.getElementById('cookieBanner').hidden = true;
-    });
-    document.getElementById('cookieEssentialOnly').addEventListener('click', function() {
-      localStorage.setItem('cvcentral_cookie_choice', 'essential');
-      document.getElementById('cookieBanner').hidden = true;
-    });
-  })();
-  </script>
-  <script src="js/chatbot.js"></script>
-</body>
-</html>
+          }).join(''

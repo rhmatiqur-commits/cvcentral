@@ -69,7 +69,7 @@
        provider: 'google' | 'linkedin_oidc' */
     signInWithProvider: async function (provider) {
       var redirectTo = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-        ? 'https://cvcentral-iota.vercel.app/dashboard.html'
+        ? 'https://cvcentral.io/dashboard.html'
         : window.location.origin + '/dashboard.html';
       return _client.auth.signInWithOAuth({
         provider: provider,
