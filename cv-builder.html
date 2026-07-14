@@ -610,9 +610,14 @@
         if (data.experience && data.experience.length) {
           state.experience = data.experience.map(function (e) {
             return {
-              jobTitle: e.jobTitle || '', company: e.company || '',
-              startDate: e.startDate || '', endDate: e.endDate || '',
-              current: !!e.current, description: e.description || ''
+              title: e.title || e.jobTitle || '',
+              company: e.company || '',
+              location: e.location || '',
+              start: e.start || e.startDate || '',
+              end: e.end || e.endDate || '',
+              current: !!e.current,
+              responsibilities: e.responsibilities || e.description || '',
+              achievements: e.achievements || ''
             };
           });
           renderExperience();
@@ -622,8 +627,10 @@
         if (data.education && data.education.length) {
           state.education = data.education.map(function (e) {
             return {
-              degree: e.degree || '', institution: e.institution || '',
-              startDate: e.startDate || '', endDate: e.endDate || '',
+              level: e.level || '',
+              subject: e.subject || e.degree || '',
+              institution: e.institution || '',
+              year: e.year || e.endDate || e.startDate || '',
               grade: e.grade || ''
             };
           });
@@ -1302,6 +1309,10 @@
         saveDraft();
       });
     });
+
+    function watermark() {
+      return '<div class="wm"><span>CV CENTRAL</span></div>';
+    }
 
     function esc(s) {
       return String(s == null ? '' : s)
