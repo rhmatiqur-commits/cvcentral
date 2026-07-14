@@ -1657,12 +1657,21 @@
           (eduRows.map(function (e) {
             return '<div style="margin-bottom:0.45rem;"><div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(', ')) + '</span><span>' + esc(e.year) + '</span></div>' +
               '<div class="cv-company">' + esc(e.institution) + (e.grade ? ' · ' + esc(e.grade) : '') + '</div></div>';
+     
           }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
-          (state.skills.length ? '<h3>Research Skills &amp; Methods</h3><p style="font-size:0.67rem;">' + state.skills.map(esc).join(' · ') + '</p>' : '') +
-          (state.languages.length ? '<h3>Languages</h3><p style="font-size:0.67rem;">' + state.languages.map(esc).join(' · ') + '</p>' : '') +
+          (state.skills.length ? '<h3>Skills &amp; Expertise</h3><p>' + state.skills.map(esc).join(' · ') + '</p>' : '') +
+          (state.languages.length ? '<h3>Languages</h3><p>' + state.languages.map(esc).join(' · ') + '</p>' : '') +
           '</div>';
+      }
 
-      } else if (state.template === 'minimal') {
+      el.innerHTML = html;
+    }
+
+  })();
+  </script>
+</body>
+</html>
+tate.template === 'minimal') {
         html =
           '<div class="cv-page cv-t13">' + watermark() +
           '<div class="cv-name">' + name + '</div>' +
