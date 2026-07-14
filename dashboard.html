@@ -363,6 +363,8 @@
             <li>✅ AI help chatbot</li>
           </ul>
           <button class="btn btn-violet btn-sm" style="width:100%;" id="proBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('pro')">Get Pro</button>
+          <button class="btn btn-sm" style="width:100%;margin-top:0.5rem;background:#F0EBF9;color:#5B2D8E;border:1.5px solid #D9CCF0;font-weight:700;cursor:pointer;border-radius:10px;padding:0.55rem;" id="proTrialBtn" onclick="event.stopPropagation();window._checkoutTrial('pro')">✨ Try 14 days for £1.99</button>
+          <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.35rem;" id="proTrialNote">then £5.99/month — cancel anytime</p>
         </div>
 
         <!-- Premium -->
@@ -377,10 +379,12 @@
             <li>✅ Multi-CV storage (10 CVs)</li>
           </ul>
           <button class="btn btn-ghost btn-sm" style="width:100%;" id="premiumBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('premium')">Get Premium</button>
+          <button class="btn btn-sm" style="width:100%;margin-top:0.5rem;background:#F0EBF9;color:#5B2D8E;border:1.5px solid #D9CCF0;font-weight:700;cursor:pointer;border-radius:10px;padding:0.55rem;" id="premiumTrialBtn" onclick="event.stopPropagation();window._checkoutTrial('premium')">✨ Try 14 days for £1.99</button>
+          <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.35rem;" id="premiumTrialNote">then £10.99/month — cancel anytime</p>
         </div>
       </div>
 
-      <p style="text-align:center;font-size:0.77rem;color:var(--muted);padding:0 2rem 1.5rem;">Secure payment via Revolut &bull; Cancel anytime &bull; VAT may apply</p>
+      <p style="text-align:center;font-size:0.77rem;color:var(--muted);padding:0 2rem 1.5rem;">Secure payment via Stripe &bull; Cancel anytime &bull; VAT may apply</p>
     </div>
   </div>
 
@@ -432,6 +436,8 @@
       document.getElementById('premiumPeriod').textContent = isAnnual ? 'per year (save £32.88)' : 'per month';
       document.getElementById('proBtnLabel').textContent = isAnnual ? 'Get Pro Annual' : 'Get Pro';
       document.getElementById('premiumBtnLabel').textContent = isAnnual ? 'Get Premium Annual' : 'Get Premium';
+      document.getElementById('proTrialNote').textContent = isAnnual ? 'then £49/year — cancel anytime' : 'then £5.99/month — cancel anytime';
+      document.getElementById('premiumTrialNote').textContent = isAnnual ? 'then £99/year — cancel anytime' : 'then £10.99/month — cancel anytime';
     };
 
     // Choose the right plan key based on billing toggle
@@ -439,6 +445,14 @@
       var planKey = tier === 'pro'
         ? (isAnnual ? 'pro_annual' : 'pro_monthly')
         : (isAnnual ? 'premium_annual' : 'premium_monthly');
+      window._checkout(planKey);
+    };
+
+    // Trial checkout — £1.99 for 14 days, then converts to chosen plan
+    window._checkoutTrial = function(tier) {
+      var planKey = tier === 'pro'
+        ? (isAnnual ? 'pro_annual_trial' : 'pro_monthly_trial')
+        : (isAnnual ? 'premium_annual_trial' : 'premium_monthly_trial');
       window._checkout(planKey);
     };
 
@@ -488,8 +502,26 @@
 
     // Upgrade / Manage buttons
     document.getElementById('upgradePlanBtn').addEventListener('click', window._openUpgradeModal);
-    document.getElementById('managePlanBtn').addEventListener('click', function() {
-      document.getElementById('cancelModal').style.display = 'flex';
+    document.getElementById('managePlanBtn').addEventListener('click', async function() {
+      if (!currentUserId) return;
+      this.disabled = true; this.textContent = 'Loading…';
+      try {
+        var r = await fetch('/api/payment?action=create-portal', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ userId: currentUserId })
+        });
+        var d = await r.json();
+        if (d.portal_url) {
+          window.location.href = d.portal_url;
+        } else {
+          alert('Could not open billing portal: ' + (d.error || 'Please contact support'));
+          this.disabled = false; this.textContent = 'Manage subscription';
+        }
+      } catch(e) {
+        alert('Network error — please try again.');
+        this.disabled = false; this.textContent = 'Manage subscription';
+      }
     });
 
     // Cancel confirmation
@@ -519,11 +551,12 @@
       document.getElementById('cancelModal').style.display = 'none';
     });
 
-    // Handle ?payment=success redirect from Revolut
+    // Handle ?payment=success redirect from Stripe Checkout
     var params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
+      var stripeSessionId = params.get('session_id') || null;
       window.history.replaceState({}, '', window.location.pathname);
-      // Confirm payment and update plan — retry a few times to allow Revolut to process
+      // Confirm payment and update plan — retry a few times to allow Stripe to process
       var confirmAttempts = 0;
       async function tryConfirm() {
         if (!currentUserId) { setTimeout(tryConfirm, 1000); return; }
@@ -532,7 +565,7 @@
           var r = await fetch('/api/payment?action=confirm-payment', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ userId: currentUserId })
+            body: JSON.stringify({ userId: currentUserId, sessionId: stripeSessionId })
           });
           var d = await r.json();
           if (d.updated && d.plan !== 'free') {
