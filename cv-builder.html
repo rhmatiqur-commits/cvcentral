@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles/builder.css">
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="builder-page">
 
@@ -1678,4 +1679,17 @@
           (eduRows.map(function (e) {
             return '<div style="margin-bottom:0.6rem;"><div class="cv-role-line"><span>' + esc([e.level, e.subject].filter(Boolean).join(', ')) + '</span><span>' + esc(e.year) + '</span></div>' +
               '<div class="cv-company">' + esc(e.institution) + (e.grade ? '  ·  ' + esc(e.grade) : '') + '</div></div>';
-          }).join(''
+          }).join('') || '<p class="cv-empty-hint">Add your education in step 3.</p>') +
+          (state.skills.length ? '<h3>Skills</h3><p>' + state.skills.map(esc).join(' · ') + '</p>' : '') +
+          (state.languages.length ? '<h3>Languages</h3><p>' + state.languages.map(esc).join(' · ') + '</p>' : '') +
+          (state.certifications.length ? '<h3>Certifications</h3><p>' + state.certifications.map(esc).join(' · ') + '</p>' : '') +
+          '</div>';
+      }
+
+      el.innerHTML = html;
+    }
+
+  })();
+  </script>
+</body>
+</html>
