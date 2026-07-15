@@ -582,7 +582,21 @@
           for (var i = 1; i <= pdf.numPages; i++) {
             var page = await pdf.getPage(i);
             var content = await page.getTextContent();
-            pages.push(content.items.map(function (s) { return s.str; }).join(' '));
+            // Group items by Y position to reconstruct lines
+            var lineMap = {};
+            content.items.forEach(function(item) {
+              if (!item.str || !item.str.trim()) return;
+              var y = Math.round(item.transform[5]);
+              var x = item.transform[4];
+              if (!lineMap[y]) lineMap[y] = [];
+              lineMap[y].push({ x: x, str: item.str });
+            });
+            // Sort lines top-to-bottom (Y descends in PDF coords), words left-to-right
+            var sortedYs = Object.keys(lineMap).map(Number).sort(function(a,b){ return b - a; });
+            var pageLines = sortedYs.map(function(y) {
+              return lineMap[y].sort(function(a,b){ return a.x - b.x; }).map(function(t){ return t.str; }).join(' ').trim();
+            }).filter(Boolean);
+            pages.push(pageLines.join('\n'));
           }
           return pages.join('\n');
         }
@@ -658,30 +672,46 @@
         var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
         var result = { personal: {}, experience: [], education: [], skills: [], languages: [], certifications: [] };
 
-        // Email
-        var emailM = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
-        if (emailM) result.personal.email = emailM[0];
+        // Email — most reliable field
+        var emailM = text.match(/[\w.+\-]+@[\w\-]+(?:\.[a-zA-Z]{2,})+/);
+        if (emailM) result.personal.email = emailM[0].toLowerCase();
 
-        // Phone
-        var phoneM = text.match(/(\+?[\d\s\-().]{7,20})/);
-        if (phoneM) result.personal.phone = phoneM[0].trim();
+        // Phone — UK and international formats
+        var phoneM = text.match(/(?:\+44|0044|0)[\s\-.]?(?:\d[\s\-.]?){9,10}|\+?\d[\d\s\-().]{8,17}\d/);
+        if (phoneM) result.personal.phone = phoneM[0].replace(/\s+/g, ' ').trim();
 
         // LinkedIn
-        var liM = text.match(/linkedin\.com\/in\/([\w-]+)/i);
+        var liM = text.match(/linkedin\.com\/in\/([\w\-]+)/i);
         if (liM) result.personal.linkedin = 'https://linkedin.com/in/' + liM[1];
 
-        // Name — first non-empty line that isn't an email/phone/URL
-        for (var i = 0; i < Math.min(5, lines.length); i++) {
+        // Website / portfolio
+        var webM = text.match(/(?:github\.com|portfolio|website)[:\s]*(https?:\/\/[\w.\-\/]+|[\w.\-]+\.(?:com|io|co\.uk|dev))/i);
+        if (webM) result.personal.website = webM[1];
+
+        // Name — look in first 8 lines for something that looks like a person's name
+        // Skip lines containing @, digits at start, URLs, or very short/long strings
+        for (var i = 0; i < Math.min(8, lines.length); i++) {
           var l = lines[i];
-          if (l && !/[@\d\+\(]/.test(l.charAt(0)) && l.length < 60 && l.split(' ').length <= 5) {
+          if (!l) continue;
+          // Skip if contains email
+          if (l.indexOf('@') > -1) continue;
+          // Skip if starts with digit or special char
+          if (/^[\d\+\(\-\|•]/.test(l)) continue;
+          // Skip if it looks like an address or URL
+          if (/https?:|linkedin|github|www\./i.test(l)) continue;
+          // Skip very short or very long
+          if (l.length < 3 || l.length > 60) continue;
+          // Must look like 1-4 words, mostly letters
+          var words = l.split(/\s+/).filter(Boolean);
+          if (words.length >= 1 && words.length <= 5 && /^[A-Za-z\-\'\s]+$/.test(l)) {
             result.personal.fullName = l;
             break;
           }
         }
 
-        // Location
-        var locM = text.match(/([A-Z][a-z]+(?:[\s,]+[A-Z][a-z]+)*,\s*(?:UK|England|Scotland|Wales|London|United Kingdom|[A-Z]{2}))/);
-        if (locM) result.personal.location = locM[0];
+        // Location — UK-aware
+        var locM = text.match(/([A-Z][a-zA-Z\s]+,\s*(?:UK|England|Scotland|Wales|Northern Ireland|United Kingdom))|([A-Z][a-z]+(?:[,\s]+[A-Z][a-z]+)*,\s*[A-Z]{1,2}\d[\d\w]?\s*\d[A-Z]{2})/);
+        if (locM) result.personal.location = (locM[1] || locM[2]).trim();
 
         // Detect section headings
         var sectionMap = {};
