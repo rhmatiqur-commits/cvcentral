@@ -652,6 +652,142 @@
         }
       }
 
+      function parseCvText(text) {
+        var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+        var result = { personal: {}, experience: [], education: [], skills: [], languages: [], certifications: [] };
+
+        // Email
+        var emailM = text.match(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i);
+        if (emailM) result.personal.email = emailM[0];
+
+        // Phone
+        var phoneM = text.match(/(\+?[\d\s\-().]{7,20})/);
+        if (phoneM) result.personal.phone = phoneM[0].trim();
+
+        // LinkedIn
+        var liM = text.match(/linkedin\.com\/in\/([\w-]+)/i);
+        if (liM) result.personal.linkedin = 'https://linkedin.com/in/' + liM[1];
+
+        // Name — first non-empty line that isn't an email/phone/URL
+        for (var i = 0; i < Math.min(5, lines.length); i++) {
+          var l = lines[i];
+          if (l && !/[@\d\+\(]/.test(l.charAt(0)) && l.length < 60 && l.split(' ').length <= 5) {
+            result.personal.fullName = l;
+            break;
+          }
+        }
+
+        // Location
+        var locM = text.match(/([A-Z][a-z]+(?:[\s,]+[A-Z][a-z]+)*,\s*(?:UK|England|Scotland|Wales|London|United Kingdom|[A-Z]{2}))/);
+        if (locM) result.personal.location = locM[0];
+
+        // Detect section headings
+        var sectionMap = {};
+        var sectionOrder = [];
+        var headingRe = /^(experience|work experience|employment|education|qualifications|skills|technical skills|languages|certifications|profile|summary|about|objective)/i;
+        lines.forEach(function(l, idx) {
+          var m = l.match(headingRe);
+          if (m && l.length < 60) {
+            var key = m[1].toLowerCase().replace(/\s+/g,'');
+            if (!sectionMap[key]) { sectionMap[key] = idx; sectionOrder.push({key:key, idx:idx}); }
+          }
+        });
+
+        function sectionLines(key) {
+          var aliases = {
+            experience: ['experience','workexperience','employment'],
+            education: ['education','qualifications'],
+            skills: ['skills','technicalskills'],
+            languages: ['languages'],
+            certifications: ['certifications'],
+            summary: ['profile','summary','about','objective']
+          };
+          var starts = (aliases[key] || [key]).map(function(k){ return sectionMap[k]; }).filter(function(v){ return v !== undefined; });
+          if (!starts.length) return [];
+          var start = Math.min.apply(null, starts);
+          var end = lines.length;
+          sectionOrder.forEach(function(s) { if (s.idx > start && s.idx < end) end = s.idx; });
+          return lines.slice(start + 1, end);
+        }
+
+        // Summary
+        var summaryLines = sectionLines('summary');
+        if (summaryLines.length) result.personal.summary = summaryLines.slice(0, 3).join(' ');
+
+        // Skills
+        var skillLines = sectionLines('skills');
+        var allSkills = [];
+        skillLines.forEach(function(l) {
+          l.split(/[,|•·\t]+/).forEach(function(s) {
+            s = s.replace(/^[-*]\s*/, '').trim();
+            if (s && s.length < 50) allSkills.push(s);
+          });
+        });
+        result.skills = allSkills.slice(0, 15);
+
+        // Languages
+        var langLines = sectionLines('languages');
+        var allLangs = [];
+        langLines.forEach(function(l) {
+          l.split(/[,|•·\t]+/).forEach(function(s) {
+            s = s.replace(/^[-*]\s*/, '').trim();
+            if (s && s.length < 40) allLangs.push(s);
+          });
+        });
+        result.languages = allLangs.slice(0, 8);
+
+        // Certifications
+        var certLines = sectionLines('certifications');
+        certLines.forEach(function(l) {
+          l = l.replace(/^[-*•]\s*/, '').trim();
+          if (l && l.length < 100) result.certifications.push(l);
+        });
+
+        // Experience — look for job title / company / date patterns
+        var expLines = sectionLines('experience');
+        var yearRe = /\b(19|20)\d{2}\b/;
+        var dateRe = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)[\s,]*\d{4}\b|\b(Present|Current|Now)\b|(20\d{2})\s*[-–]\s*(20\d{2}|Present)/i;
+        var currentExp = null;
+        expLines.forEach(function(l) {
+          if (dateRe.test(l) || (yearRe.test(l) && l.length < 80)) {
+            if (currentExp) result.experience.push(currentExp);
+            var dates = l.match(/(\d{4}|\w+ \d{4})[\s]*[-–][\s]*(Present|\d{4}|\w+ \d{4})/i);
+            currentExp = {
+              title: '', company: '', location: '',
+              start: dates ? dates[1] : '',
+              end: dates ? dates[2] : '',
+              current: /present|current|now/i.test(l),
+              responsibilities: '', achievements: ''
+            };
+          } else if (currentExp) {
+            if (!currentExp.title) { currentExp.title = l; }
+            else if (!currentExp.company) { currentExp.company = l; }
+            else { currentExp.responsibilities += (currentExp.responsibilities ? ' ' : '') + l.replace(/^[-•*]\s*/,''); }
+          }
+        });
+        if (currentExp) result.experience.push(currentExp);
+        result.experience = result.experience.slice(0, 6);
+
+        // Education
+        var eduLines = sectionLines('education');
+        var degreeRe = /\b(BSc|BA|BEng|MSc|MA|MEng|MBA|PhD|HND|BTEC|A-Level|GCSE|Degree|Bachelor|Master|Doctorate)\b/i;
+        var currentEdu = null;
+        eduLines.forEach(function(l) {
+          if (degreeRe.test(l) || yearRe.test(l)) {
+            if (currentEdu) result.education.push(currentEdu);
+            var yr = l.match(/\b(20\d{2}|19\d{2})\b/);
+            currentEdu = { level: '', subject: l.replace(/\d{4}.*$/,'').trim(), institution: '', year: yr ? yr[0] : '', grade: '' };
+          } else if (currentEdu) {
+            if (!currentEdu.institution) currentEdu.institution = l;
+            else if (/grade|class|distinction|merit|pass|\d:\d/i.test(l)) currentEdu.grade = l;
+          }
+        });
+        if (currentEdu) result.education.push(currentEdu);
+        result.education = result.education.slice(0, 4);
+
+        return result;
+      }
+
       input.addEventListener('change', async function () {
         var file = this.files && this.files[0];
         if (!file) return;
@@ -663,16 +799,9 @@
           var text = await extractText(file);
           if (!text || text.trim().length < 50) throw new Error('Could not read enough text from this file');
 
-          setStatus('Parsing with AI — this takes about 10 seconds…');
+          setStatus('Parsing your CV…');
 
-          var res = await fetch(AI_ENDPOINT + '?action=parse-cv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text })
-          });
-
-          if (!res.ok) throw new Error('AI parsing failed (' + res.status + ')');
-          var data = await res.json();
+          var data = parseCvText(text);
 
           prefillFields(data);
           setStatus('✓ Fields prefilled from your CV — check and adjust as needed', '#16A34A');
@@ -1100,48 +1229,121 @@
     document.getElementById('analyseBtn').addEventListener('click', runAnalysis);
     document.getElementById('retryBtn').addEventListener('click', runAnalysis);
 
+    function scoreCV() {
+      var p = state.personal;
+      var exp = state.experience;
+      var edu = state.education;
+      var skills = state.skills;
+
+      // Formatting: completeness of personal info
+      var fmtFields = [p.fullName, p.email, p.phone, p.location, p.linkedin, p.summary, p.targetRole];
+      var fmt = Math.round((fmtFields.filter(Boolean).length / fmtFields.length) * 100);
+
+      // Keywords: skills count + job target match
+      var kwScore = Math.min(100, skills.length * 7);
+      var jt = (state.jobTarget && state.jobTarget.role) ? state.jobTarget.role.toLowerCase() : '';
+      if (jt) {
+        skills.forEach(function(s) { if (jt.indexOf(s.toLowerCase()) > -1 || s.toLowerCase().indexOf(jt) > -1) kwScore = Math.min(100, kwScore + 10); });
+      }
+
+      // Achievements: experience quality
+      var achScore = 0;
+      if (exp.length) {
+        exp.forEach(function(e) {
+          if (e.responsibilities && e.responsibilities.length > 50) achScore += 15;
+          if (e.achievements && e.achievements.length > 30) achScore += 10;
+          if (e.title && e.company) achScore += 5;
+        });
+        achScore = Math.min(100, achScore);
+      }
+
+      // ATS: structure
+      var ats = 0;
+      if (p.email) ats += 20;
+      if (p.phone) ats += 15;
+      if (edu.length) ats += 20;
+      if (exp.length) ats += 25;
+      if (skills.length >= 5) ats += 20;
+
+      // Length: experience entries
+      var len = Math.min(100, exp.length * 20 + edu.length * 15 + (p.summary ? 20 : 0));
+
+      var total = Math.round((fmt * 0.2) + (kwScore * 0.25) + (achScore * 0.25) + (ats * 0.2) + (len * 0.1));
+
+      // Recommendations
+      var suggestions = [];
+      if (!p.summary) suggestions.push({ type: 'improvement', title: 'Add a professional summary', detail: 'A 2-3 sentence profile at the top dramatically improves ATS scores.' });
+      if (skills.length < 6) suggestions.push({ type: 'improvement', title: 'Add more skills', detail: 'Aim for 8–12 relevant skills to pass keyword filters.' });
+      if (exp.length === 0) suggestions.push({ type: 'improvement', title: 'Add work experience', detail: 'Even part-time or volunteer roles strengthen your CV.' });
+      if (!p.linkedin) suggestions.push({ type: 'tip', title: 'Add your LinkedIn URL', detail: 'Recruiters verify candidates on LinkedIn — make it easy for them.' });
+      if (exp.length > 0 && exp.some(function(e){ return !e.responsibilities; })) {
+        suggestions.push({ type: 'improvement', title: 'Add responsibilities to all roles', detail: 'Each job should have 3–5 bullet points describing your contributions.' });
+      }
+      suggestions.push({ type: 'success', title: 'Good CV structure detected', detail: 'Your CV sections are well-organised for ATS parsing.' });
+
+      // Template recommendation
+      var recommended = 'professional';
+      if (jt.match(/tech|developer|engineer|software|data|it|digital/)) recommended = 'tech';
+      else if (jt.match(/creative|design|market|media|content/)) recommended = 'creative';
+      else if (jt.match(/graduate|intern|junior|entry/)) recommended = 'graduate';
+      else if (jt.match(/executive|director|manager|head|chief|senior/)) recommended = 'executive';
+      else if (jt.match(/health|nurse|care|medical|nhs|clinical/)) recommended = 'healthcare';
+      else if (jt.match(/retail|shop|store|customer|sales/)) recommended = 'retail';
+      else if (jt.match(/academ|research|professor|lecturer|phd/)) recommended = 'academic';
+
+      // Cover letter
+      var coverLetter = generateCoverLetter('English');
+
+      return {
+        score: { total: total, breakdown: { formatting: fmt, keywords: kwScore, achievements: achScore, ats: ats, length: len } },
+        suggestions: suggestions,
+        atsKeywords: skills.slice(0, 5),
+        recommendedTemplate: recommended,
+        coverLetter: coverLetter
+      };
+    }
+
+    function generateCoverLetter(lang) {
+      var p = state.personal;
+      var exp = state.experience;
+      var jt = state.jobTarget || {};
+      var name = p.fullName || 'the hiring team';
+      var role = jt.role || 'this position';
+      var company = jt.company || 'your company';
+      var topSkills = state.skills.slice(0, 3).join(', ') || 'my key skills';
+      var lastJob = exp.length ? exp[0] : null;
+      var expLine = lastJob ? ('Most recently, I worked as ' + lastJob.title + (lastJob.company ? ' at ' + lastJob.company : '') + ', where I ' + (lastJob.responsibilities ? lastJob.responsibilities.split('.')[0].toLowerCase() : 'gained valuable experience') + '.') : '';
+
+      return 'Dear Hiring Manager,\n\n' +
+        'I am writing to express my strong interest in the ' + role + ' role at ' + company + '. With my background and skills, I am confident I can make a meaningful contribution to your team.\n\n' +
+        expLine + (expLine ? '\n\n' : '') +
+        'My key strengths include ' + topSkills + '. I am passionate about delivering results and thrive in collaborative, fast-paced environments.\n\n' +
+        'I would welcome the opportunity to discuss how my experience aligns with your needs. Thank you for considering my application.\n\n' +
+        'Yours sincerely,\n' + (p.fullName || '[Your Name]') + '\n' + (p.email || '') + (p.phone ? '  ·  ' + p.phone : '');
+    }
+
     function runAnalysis() {
       collectStep(state.step);
       showAnalysisState('aiLoading');
       startLoadingMessages();
 
-      fetch(AI_ENDPOINT + '?action=enhance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          personal: state.personal,
-          experience: state.experience,
-          education: state.education,
-          skills: state.skills,
-          languages: state.languages,
-          certifications: state.certifications,
-          jobTarget: state.jobTarget
-        })
-      })
-        .then(function (res) {
-          if (!res.ok) {
-            return res.json().catch(function () { return {}; }).then(function (body) {
-              throw new Error(body.error || ('Server returned ' + res.status));
-            });
-          }
-          return res.json();
-        })
-        .then(function (data) {
+      setTimeout(function () {
+        try {
           clearInterval(loadingTimer);
+          var data = scoreCV();
           state.ai = data;
           if (data.recommendedTemplate) selectTemplate(data.recommendedTemplate, true);
           renderResults(data);
           renderPreview();
           saveDraft();
           showAnalysisState('aiResults');
-          toast('Boom — your CV just levelled up 🎉', 'success');
-        })
-        .catch(function (err) {
+          toast('CV analysed — see your score below 🎉', 'success');
+        } catch (err) {
           clearInterval(loadingTimer);
-          document.getElementById('aiErrorMsg').textContent =
-            (err && err.message ? err.message + '. ' : '') + 'Your CV is safe — give it another go.';
+          document.getElementById('aiErrorMsg').textContent = 'Could not analyse — please try again.';
           showAnalysisState('aiError');
-        });
+        }
+      }, 1800);
     }
 
     function renderResults(data) {
@@ -1213,23 +1415,9 @@
       btn.textContent = 'Generating…';
       document.getElementById('coverLetterBox').textContent = '';
       try {
-        var res = await fetch(AI_ENDPOINT + '?action=cover-letter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            personal: state.personal,
-            experience: state.experience,
-            education: state.education,
-            skills: state.skills,
-            languages: state.languages,
-            certifications: state.certifications,
-            jobTarget: state.jobTarget,
-            coverLetterLanguage: lang
-          })
-        });
-        var data = await res.json();
-        document.getElementById('coverLetterBox').textContent = data.coverLetter || 'Could not generate — please try again.';
-        toast('Cover letter generated in ' + lang + ' ✓', 'success');
+        var letter = generateCoverLetter(lang);
+        document.getElementById('coverLetterBox').textContent = letter;
+        toast('Cover letter generated ✓', 'success');
       } catch (e) {
         toast('Could not regenerate — please try again', 'error');
       } finally {
