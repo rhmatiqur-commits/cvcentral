@@ -1673,7 +1673,6 @@
           (state.skills.length ? '<h3>Skills &amp; Expertise</h3><p>' + state.skills.map(esc).join(' · ') + '</p>' : '') +
           (state.languages.length ? '<h3>Languages</h3><p>' + state.languages.map(esc).join(' · ') + '</p>' : '') +
           '</div>';
-      }
       } else if (state.template === 'minimal') {
         html =
           '<div class="cv-page cv-t13">' + watermark() +
@@ -1701,7 +1700,6 @@
       el.innerHTML = html;
     }
 
-  })();
   </script>
 </body>
 </html>
