@@ -580,4 +580,14 @@
             if (window._showToast) window._showToast('Payment received! Your plan will activate shortly.', 'success');
           }
         } catch(e) {
- 
+          console.warn("[confirm-payment]", e);
+        }
+      }
+      tryConfirm();
+    }
+
+  })();
+  </script>
+
+</body>
+</html>
