@@ -1436,6 +1436,86 @@
       });
     });
 
+    /* ---------- Download PDF ---------- */
+    document.getElementById('downloadPdf').addEventListener('click', function () {
+      var previewEl = document.getElementById('cvPreview');
+      if (!previewEl || !previewEl.innerHTML.trim()) {
+        toast('Build your CV first — nothing to download yet', 'error');
+        return;
+      }
+
+      var name = (state.personal && state.personal.fullName) ? state.personal.fullName.replace(/\s+/g, '_') : 'CV';
+      var cvHtml = previewEl.innerHTML;
+
+      // Collect cv-specific styles from the page
+      var cvStyles = '';
+      Array.from(document.styleSheets).forEach(function(sheet) {
+        try {
+          Array.from(sheet.cssRules || []).forEach(function(rule) {
+            var text = rule.cssText || '';
+            if (text.indexOf('.cv-') > -1 || text.indexOf('.wm') > -1 || text.indexOf('cv-page') > -1) {
+              cvStyles += text + '\n';
+            }
+          });
+        } catch(e) {}
+      });
+
+      var printWindow = window.open('', '_blank');
+      printWindow.document.write(
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + name + '_CV</title>' +
+        '<style>' +
+        'body{margin:0;padding:20px;font-family:Inter,Arial,sans-serif;background:#fff;color:#000;}' +
+        '.wm{position:absolute;bottom:20px;right:20px;opacity:0.08;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#000;pointer-events:none;}' +
+        cvStyles +
+        '@media print{body{padding:0;margin:0;}@page{margin:0;size:A4;}}' +
+        '</style></head><body>' +
+        cvHtml +
+        '<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>' +
+        '</body></html>'
+      );
+      printWindow.document.close();
+      toast('Print dialog opened — save as PDF ✓', 'success');
+    });
+
+    /* ---------- Save to CV Central ---------- */
+    document.getElementById('saveBtn').addEventListener('click', async function () {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      try {
+        var session = await cvAuth.getSession();
+        if (!session) {
+          toast('Sign in to save your CV', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Save to CV Central';
+          return;
+        }
+
+        collectStep(state.step);
+        var cvName = (state.personal && state.personal.fullName)
+          ? state.personal.fullName + '\'s CV'
+          : 'My CV';
+
+        var res = await cvAuth.saveCV(
+          session.user.id,
+          { personal: state.personal, experience: state.experience, education: state.education, skills: state.skills, languages: state.languages, certifications: state.certifications, jobTarget: state.jobTarget },
+          state.template,
+          state.colorScheme,
+          cvName,
+          state.ai && state.ai.score ? state.ai.score.total : null
+        );
+
+        if (res.error) throw res.error;
+        toast('CV saved to your account ✓', 'success');
+      } catch (err) {
+        toast((err && err.message) || 'Could not save — please try again', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save to CV Central';
+      }
+    });
+
     /* ---------- Templates & preview ---------- */
     function selectTemplate(name, isRecommendation) {
       var valid = ['professional', 'modern', 'graduate', 'corporate', 'tech', 'creative', 'graduate2', 'executive', 'timeline', 'healthcare', 'retail', 'academic', 'minimal'];
