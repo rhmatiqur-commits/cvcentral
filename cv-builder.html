@@ -1674,15 +1674,7 @@
           (state.languages.length ? '<h3>Languages</h3><p>' + state.languages.map(esc).join(' · ') + '</p>' : '') +
           '</div>';
       }
-
-      el.innerHTML = html;
-    }
-
-  })();
-  </script>
-</body>
-</html>
-tate.template === 'minimal') {
+      } else if (state.template === 'minimal') {
         html =
           '<div class="cv-page cv-t13">' + watermark() +
           '<div class="cv-name">' + name + '</div>' +
