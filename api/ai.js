@@ -15,7 +15,8 @@
  */
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-6';
+const MODEL_HEAVY = 'claude-sonnet-4-6';      // writing, rewriting, complex reasoning
+const MODEL_LIGHT = 'claude-haiku-4-5-20251001'; // parsing, scoring, simple extraction
 
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -45,7 +46,8 @@ module.exports = async (req, res) => {
 
   try {
     const prompt = builder(payload);
-    const result = await callClaude(prompt.system, prompt.user, prompt.maxTokens || 4000);
+    const model = prompt.model || MODEL_HEAVY;
+    const result = await callClaude(prompt.system, prompt.user, prompt.maxTokens || 4000, model);
     const parsed = extractJson(result);
     if (!parsed) return res.status(502).json({ error: 'The AI returned an unexpected format. Please try again.' });
     return res.status(200).json(parsed);
@@ -57,7 +59,7 @@ module.exports = async (req, res) => {
 
 /* ---------------- Anthropic call ---------------- */
 
-async function callClaude(system, user, maxTokens) {
+async function callClaude(system, user, maxTokens, model) {
   const response = await fetch(ANTHROPIC_URL, {
     method: 'POST',
     headers: {
@@ -66,7 +68,7 @@ async function callClaude(system, user, maxTokens) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: model || MODEL_HEAVY,
       max_tokens: maxTokens,
       system: system,
       messages: [{ role: 'user', content: user }]
@@ -165,6 +167,7 @@ function buildEnhancePrompt(p) {
 
 function buildScorePrompt(p) {
   return {
+    model: MODEL_LIGHT,
     maxTokens: 1500,
     system: UK_STYLE,
     user: [
@@ -208,6 +211,7 @@ function buildInterviewPrompt(p) {
 
 function buildTemplatePrompt(p) {
   return {
+    model: MODEL_LIGHT,
     maxTokens: 600,
     system: UK_STYLE,
     user: [
@@ -221,6 +225,7 @@ function buildTemplatePrompt(p) {
 
 function buildAtsPrompt(p) {
   return {
+    model: MODEL_LIGHT,
     maxTokens: 2000,
     system: UK_STYLE,
     user: [
@@ -234,6 +239,7 @@ function buildAtsPrompt(p) {
 
 function buildParseCvPrompt(p) {
   return {
+    model: MODEL_LIGHT,
     maxTokens: 3000,
     system: 'You are an expert CV parser. Extract structured data from raw CV text accurately. Use British English. Never invent information not present in the text. If a field is not found, return an empty string or empty array.',
     user: [
