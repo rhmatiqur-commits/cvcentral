@@ -483,7 +483,7 @@
 
       <!-- Header -->
       <div style="background:#5B2D8E;padding:1.75rem 2rem 1.5rem;position:relative;">
-        <button id="closeUpgradeModal" aria-label="Close" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">&#215;</button>
+        <button id="closeUpgradeModal" aria-label="Close" style="position:absolute;top:0.75rem;right:0.75rem;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:10px;width:44px;height:44px;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">&#215;</button>
         <p style="margin:0 0 0.25rem;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.6);text-transform:uppercase;">Upgrade CV Central</p>
         <h2 id="upgradeModalTitle" style="margin:0;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Land more interviews</h2>
         <p style="margin:0.5rem 0 0;font-size:0.9rem;color:rgba(255,255,255,0.75);">Unlimited AI tools, cover letters in 10 languages, ATS optimisation, and more.</p>
@@ -524,8 +524,8 @@
         <div style="border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;background:#FAFAFA;opacity:0.72;position:relative;overflow:hidden;">
           <div style="position:absolute;top:12px;right:12px;background:#E0D4F5;color:#5B2D8E;font-size:0.7rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:6px;">Coming Soon</div>
           <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Premium</p>
-          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);">£10.99</p>
-          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);">per month</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£10.99</p>
+          <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="premiumPeriod">per month</p>
           <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
             <li>⏳ Everything in Pro</li>
             <li>⏳ Unlimited CV storage (fair use)</li>
@@ -533,7 +533,8 @@
             <li>⏳ Priority support</li>
             <li>⏳ Early access to new features</li>
           </ul>
-          <button class="btn btn-ghost btn-sm" style="width:100%;opacity:0.5;cursor:not-allowed;" disabled>Coming soon</button>
+          <button class="btn btn-ghost btn-sm" style="width:100%;opacity:0.5;cursor:not-allowed;margin-bottom:0.5rem;" disabled id="premiumBtnLabel">Coming soon</button>
+          <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin:0;" id="premiumTrialNote"></p>
         </div>
       </div>
 
@@ -661,13 +662,16 @@
       document.body.style.overflow = 'hidden';
     };
 
-    // Close modal
-    document.getElementById('closeUpgradeModal').addEventListener('click', function() {
+    // Close modal — touchend fallback covers iOS where click can misfire on small targets
+    function closeUpgradeModal() {
       document.getElementById('upgradeModal').style.display = 'none';
       document.body.style.overflow = '';
-    });
+    }
+    var closeBtn = document.getElementById('closeUpgradeModal');
+    closeBtn.addEventListener('click', closeUpgradeModal);
+    closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); closeUpgradeModal(); });
     document.getElementById('upgradeModal').addEventListener('click', function(e) {
-      if (e.target === this) { this.style.display = 'none'; document.body.style.overflow = ''; }
+      if (e.target === this) closeUpgradeModal();
     });
 
     // Upgrade / Manage buttons
