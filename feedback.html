@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback — CV Central</title>
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0A0A14; --bg-card:#10101C; --lime:#AAFF00; --lime-dim:rgba(170,255,0,0.08);
+      --violet:#5B2D8E; --violet-bright:#7B4DB8;
+      --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
+      --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
+      --font:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+      --radius:12px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+    .card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:40px;width:100%;max-width:520px;position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--lime));}
+    .logo{display:flex;justify-content:center;margin-bottom:28px;}
+    h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;text-align:center;margin-bottom:6px;}
+    .sub{font-size:0.88rem;color:var(--text-2);text-align:center;margin-bottom:32px;}
+    label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-2);margin-bottom:6px;letter-spacing:0.02em;}
+    .field{margin-bottom:18px;}
+    input,select,textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border-bright);border-radius:var(--radius);padding:11px 14px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;transition:border-color 0.2s;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(170,255,0,0.4);}
+    select option{background:var(--bg-card);}
+    textarea{resize:vertical;min-height:120px;line-height:1.6;}
+    .rating-row{display:flex;gap:8px;}
+    .star{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;transition:all 0.15s;user-select:none;}
+    .star:hover,.star.active{background:var(--lime-dim);border-color:rgba(170,255,0,0.4);}
+    .btn{width:100%;padding:13px;background:var(--lime);color:#0A0A00;font-weight:700;font-size:0.95rem;border:none;border-radius:var(--radius);cursor:pointer;margin-top:8px;transition:background 0.2s,opacity 0.2s;}
+    .btn:hover{background:#C4FF33;}
+    .btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .msg{display:none;text-align:center;padding:16px;border-radius:var(--radius);font-size:0.88rem;margin-top:16px;}
+    .msg.success{background:rgba(170,255,0,0.08);border:1px solid rgba(170,255,0,0.25);color:var(--lime);}
+    .msg.error{background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);color:#FF9090;}
+    .back{display:block;text-align:center;font-size:0.82rem;color:var(--text-3);margin-top:20px;text-decoration:none;transition:color 0.2s;}
+    .back:hover{color:var(--text-2);}
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <img src="assets/logo.svg" alt="CV Central" height="32">
+  </div>
+  <h1>Share your feedback</h1>
+  <p class="sub">Help us improve CV Central. Every message goes straight to the team.</p>
+
+  <form id="feedbackForm">
+    <div class="field">
+      <label>Your name <span style="color:var(--text-3)">(optional)</span></label>
+      <input type="text" id="fname" placeholder="e.g. James">
+    </div>
+    <div class="field">
+      <label>Your email <span style="color:var(--text-3)">(optional)</span></label>
+      <input type="email" id="femail" placeholder="so we can follow up">
+    </div>
+    <div class="field">
+      <label>Type of feedback</label>
+      <select id="ftype">
+        <option value="general">General feedback</option>
+        <option value="bug">Bug report</option>
+        <option value="feature">Feature request</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>How would you rate CV Central?</label>
+      <div class="rating-row" id="starRow">
+        <div class="star" data-v="1">⭐</div>
+        <div class="star" data-v="2">⭐</div>
+        <div class="star" data-v="3">⭐</div>
+        <div class="star" data-v="4">⭐</div>
+        <div class="star" data-v="5">⭐</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Your message *</label>
+      <textarea id="fmessage" placeholder="Tell us what you think, what's broken, or what you'd love to see next…"></textarea>
+    </div>
+    <button class="btn" type="submit" id="submitBtn">Send feedback</button>
+  </form>
+
+  <div class="msg success" id="successMsg">✅ Thanks! We got your feedback and really appreciate it.</div>
+  <div class="msg error" id="errorMsg">Something went wrong. Please try again.</div>
+
+  <a href="index.html" class="back">← Back to CV Central</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4emttYXZrenFrbm9naG9wd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjI5MjMsImV4cCI6MjA5ODMzODkyM30.ZiQSoZ2bTErHX-zHa6QQ-P2TD5eNgoPfB--Bpnk9R5I';
+  var db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Star rating
+  var rating = 0;
+  document.querySelectorAll('.star').forEach(function(star) {
+    star.addEventListener('click', function() {
+      rating = parseInt(this.dataset.v);
+      document.querySelectorAll('.star').forEach(function(s) {
+        s.classList.toggle('active', parseInt(s.dataset.v) <= rating);
+      });
+    });
+  });
+
+  document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var msg = document.getElementById('fmessage').value.trim();
+    if (!msg) { document.getElementById('fmessage').focus(); return; }
+
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    var payload = {
+      name: document.getElementById('fname').value.trim() || null,
+      email: document.getElementById('femail').value.trim() || null,
+      type: document.getElementById('ftype').value,
+      message: msg,
+      rating: rating || null,
+      page: document.referrer || window.location.href
+    };
+
+    var result = await db.from('feedback').insert(payload);
+
+    if (result.error) {
+      document.getElementById('errorMsg').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send feedback';
+    } else {
+      document.getElementById('feedbackForm').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    }
+  });
+</script>
+</body>
+</html>
