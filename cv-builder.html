@@ -506,7 +506,7 @@
     <div id="chatDrawer" hidden style="position:absolute;bottom:64px;right:0;width:320px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);display:flex;flex-direction:column;overflow:hidden;border:1.5px solid #E8E0F5;">
       <div style="background:#5B2D8E;color:#fff;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-weight:700;font-size:0.9rem;">✨ AI Assistant</span>
-        <button id="chatClose" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;line-height:1;">✕</button>
+        <button id="chatClose" style="background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:1rem;cursor:pointer;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;flex-shrink:0;">✕</button>
       </div>
       <!-- Locked state for free users -->
       <div id="chatLocked" style="padding:1.5rem;text-align:center;">
@@ -595,10 +595,16 @@
       colorScheme: null
     };
 
-    // ?new=1 → show template picker overlay before starting fresh
-    if (new URLSearchParams(window.location.search).get('new') === '1') {
+    // ?new=1 → clear draft and show template picker
+    // Also show picker if no draft exists at all (first-time visitor)
+    var _isNew = new URLSearchParams(window.location.search).get('new') === '1';
+    if (_isNew) {
       try { localStorage.removeItem('cvcentral_draft'); } catch(e) {}
       window.history.replaceState({}, '', window.location.pathname);
+    }
+    var _hasDraft = false;
+    try { var _d = localStorage.getItem('cvcentral_draft'); _hasDraft = !!(_d && JSON.parse(_d).personal); } catch(e) {}
+    if (_isNew || !_hasDraft) {
       var tpOverlayEl = document.getElementById('tpOverlay');
       if (tpOverlayEl) { tpOverlayEl.style.display = 'block'; document.body.style.overflow = 'hidden'; }
     }
@@ -2391,7 +2397,7 @@
       toggle.addEventListener('click', function() {
         chatOpen = !chatOpen;
         drawer.hidden = !chatOpen;
-        toggle.textContent = chatOpen ? '✕' : '\U0001f4ac';
+        toggle.textContent = chatOpen ? '✕' : '💬';
         if (chatOpen) {
           if (isPro()) {
             locked.style.display = 'none';
@@ -2406,11 +2412,13 @@
         }
       });
 
-      closeBtn.addEventListener('click', function() {
+      function closeChatWidget() {
         chatOpen = false;
         drawer.hidden = true;
-        toggle.textContent = '\U0001f4ac';
-      });
+        toggle.textContent = '💬';
+      }
+      closeBtn.addEventListener('click', closeChatWidget);
+      closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); closeChatWidget(); });
 
       var input = document.getElementById('chatInput');
       var sendBtn = document.getElementById('chatSend');
