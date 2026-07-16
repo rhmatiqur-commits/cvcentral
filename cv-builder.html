@@ -595,6 +595,12 @@
       colorScheme: null
     };
 
+    // ?new=1 → discard any existing draft and start fresh
+    if (new URLSearchParams(window.location.search).get('new') === '1') {
+      try { localStorage.removeItem('cvcentral_draft'); } catch(e) {}
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     // Restore a draft if one exists
     try {
       var draft = JSON.parse(localStorage.getItem('cvcentral_draft') || 'null');
