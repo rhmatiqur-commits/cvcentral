@@ -2463,6 +2463,14 @@
 
     initChatWidget();
 
+    // ── Hydrate form fields from restored draft / loaded CV ─────
+    // Skills/languages/certifications are hydrated by their own tag forEach.
+    // These four need an explicit call after all DOM references are ready.
+    hydratePersonal();
+    renderExperience();
+    renderEducation();
+    hydrateJobTarget();
+
   })();
   </script>
 </body>
