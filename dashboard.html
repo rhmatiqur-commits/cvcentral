@@ -308,67 +308,71 @@
       return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function renderMyCVs(allCvs, plan) {
+    // Global store so event listeners can access CV data without inline JSON
+    window._cvStore = {};
+
+    function renderMyCVs(allCvs) {
       var section = document.getElementById('myCvsSection');
       var list    = document.getElementById('myCvsList');
       if (!allCvs || allCvs.length === 0) { section.style.display = 'none'; return; }
+
+      // Populate store
+      allCvs.forEach(function(cv) { window._cvStore[cv.id] = cv; });
 
       section.style.display = 'block';
       list.innerHTML = '';
 
       allCvs.forEach(function(cv) {
-        var card = document.createElement('div');
-        card.className = 'dash-card';
-        card.style.cssText = 'display:flex;flex-direction:column;gap:0;';
-
-        var updated = cv.updated_at
+        var cvId     = cv.id;
+        var cvName   = cv.cv_name || 'My CV';
+        var template = cv.template || 'professional';
+        var score    = cv.score != null ? cv.score + '/100' : 'Not scored';
+        var updated  = cv.updated_at
           ? new Date(cv.updated_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
           : '';
-        var score    = cv.score != null ? cv.score + '/100' : 'Not scored';
-        var template = (cv.template || 'professional');
-        var cvName   = cv.cv_name || 'My CV';
-
-        // Template icon
         var icon = template === 'modern' ? '🎨' : template === 'graduate' ? '🎓' : '📄';
+
+        var card = document.createElement('div');
+        card.className = 'dash-card';
+        card.style.cssText = 'display:flex;flex-direction:column;';
 
         card.innerHTML =
           '<p style="font-size:1.5rem;margin:0 0 0.4rem;">' + icon + '</p>'
         + '<p style="font-weight:700;font-size:0.92rem;color:var(--ink);margin:0 0 0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(cvName) + '">' + escHtml(cvName) + '</p>'
-        + '<p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.75rem;line-height:1.5;">'
-        +   escHtml(template.charAt(0).toUpperCase() + template.slice(1)) + ' &bull; ' + score
+        + '<p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.85rem;line-height:1.5;">'
+        +   escHtml(template.charAt(0).toUpperCase() + template.slice(1)) + ' &bull; Score: ' + escHtml(score)
         +   (updated ? '<br>Updated ' + updated : '')
         + '</p>'
         + '<div style="display:flex;gap:0.5rem;margin-top:auto;">'
-        +   '<button class="btn btn-violet btn-sm" style="flex:1;font-size:0.78rem;" onclick="window._openCv(' + JSON.stringify(JSON.stringify(cv.cv_data)) + ',\'' + escHtml(cvName) + '\')">Open</button>'
-        +   '<button class="btn btn-ghost btn-sm" style="font-size:0.78rem;color:#EF4444;border-color:#FCA5A5;" onclick="window._deleteCv(\'' + escHtml(cv.id) + '\',\'' + escHtml(cvName) + '\',this)">Delete</button>'
+        +   '<button class="btn btn-violet btn-sm cv-open-btn" style="flex:1;font-size:0.78rem;">Open</button>'
+        +   '<button class="btn btn-ghost btn-sm cv-del-btn" style="font-size:0.78rem;color:#EF4444;border-color:#FCA5A5;">Delete</button>'
         + '</div>';
+
+        // Safe event listeners — no inline JSON
+        card.querySelector('.cv-open-btn').addEventListener('click', function() {
+          var entry = window._cvStore[cvId];
+          if (!entry) return;
+          try { localStorage.setItem('cvcentral_draft', JSON.stringify(entry.cv_data)); } catch(e) {}
+          window.location.href = 'cv-builder.html';
+        });
+
+        card.querySelector('.cv-del-btn').addEventListener('click', async function() {
+          var btn = this;
+          if (!confirm('Delete "' + cvName + '"? This cannot be undone.')) return;
+          btn.disabled = true; btn.textContent = '…';
+          try {
+            var r = await supabase.from('saved_cvs').delete().eq('id', cvId).eq('user_id', userId);
+            if (r.error) throw r.error;
+            location.reload();
+          } catch(e) {
+            alert('Could not delete: ' + (e.message || 'Please try again.'));
+            btn.disabled = false; btn.textContent = 'Delete';
+          }
+        });
 
         list.appendChild(card);
       });
     }
-
-    // Open a saved CV — write to localStorage then go to builder
-    window._openCv = function(cvDataStr, cvName) {
-      try {
-        var cvData = JSON.parse(cvDataStr);
-        localStorage.setItem('cvcentral_draft', JSON.stringify(cvData));
-      } catch(e) { console.error('_openCv parse error', e); }
-      window.location.href = 'cv-builder.html';
-    };
-
-    // Delete a saved CV
-    window._deleteCv = async function(cvId, cvName, btn) {
-      if (!confirm('Delete "' + cvName + '"? This cannot be undone.')) return;
-      btn.disabled = true; btn.textContent = '…';
-      try {
-        var r = await supabase.from('saved_cvs').delete().eq('id', cvId).eq('user_id', userId);
-        if (r.error) throw r.error;
-        location.reload();
-      } catch(e) {
-        alert('Could not delete: ' + (e.message || 'Please try again.'));
-        btn.disabled = false; btn.textContent = 'Delete';
-      }
-    };
 
     /* ---------- Render: authenticated but no saved CV ---------- */
     function renderEmpty(profile) {
@@ -433,7 +437,7 @@
       if (window._paymentInit) window._paymentInit(userId, user.email, fullName);
 
       latestCv ? renderDashboard(profile, latestCv) : renderEmpty(profile);
-      renderMyCVs(allCvs, (profile.plan || 'free').toLowerCase());
+      renderMyCVs(allCvs);
 
     } catch (err) {
       console.error('Dashboard load error:', err);
