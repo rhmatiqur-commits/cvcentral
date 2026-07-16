@@ -595,10 +595,12 @@
       colorScheme: null
     };
 
-    // ?new=1 → discard any existing draft and start fresh
+    // ?new=1 → show template picker overlay before starting fresh
     if (new URLSearchParams(window.location.search).get('new') === '1') {
       try { localStorage.removeItem('cvcentral_draft'); } catch(e) {}
       window.history.replaceState({}, '', window.location.pathname);
+      var tpOverlayEl = document.getElementById('tpOverlay');
+      if (tpOverlayEl) { tpOverlayEl.style.display = 'block'; document.body.style.overflow = 'hidden'; }
     }
 
     // Restore a draft if one exists
@@ -1868,6 +1870,87 @@
       });
     });
 
+    /* ── Template Picker Overlay logic ───────────────────────────── */
+    (function () {
+      var overlay = document.getElementById('tpOverlay');
+      if (!overlay) return;
+
+      var TP = [
+        { id:'professional', name:'Professional', desc:'Single column · Finance, legal, corporate', popular:true,
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="32" fill="#5B2D8E"/><rect x="8" y="9" width="55" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="19" width="35" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="40" width="45" height="3.5" rx="1.5" fill="#5B2D8E" opacity=".7"/><rect x="8" y="48" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="54" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="60" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="70" width="40" height="3.5" rx="1.5" fill="#5B2D8E" opacity=".7"/><rect x="8" y="78" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="84" width="70" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="90" width="85" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="100" width="42" height="3.5" rx="1.5" fill="#5B2D8E" opacity=".7"/><rect x="8" y="108" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="114" width="60" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'modern', name:'Modern', desc:'Two-column sidebar · Tech, marketing, creative',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="38" height="160" fill="#5B2D8E"/><circle cx="19" cy="22" r="12" fill="#fff" opacity=".12"/><rect x="7" y="40" width="24" height="3" rx="1.5" fill="#fff" opacity=".7"/><rect x="7" y="47" width="18" height="2" rx="1" fill="#fff" opacity=".4"/><rect x="7" y="58" width="24" height="2.5" rx="1" fill="#fff" opacity=".5"/><rect x="7" y="64" width="20" height="2" rx="1" fill="#fff" opacity=".35"/><rect x="7" y="70" width="22" height="2" rx="1" fill="#fff" opacity=".35"/><rect x="7" y="80" width="24" height="2.5" rx="1" fill="#fff" opacity=".5"/><rect x="7" y="86" width="18" height="2" rx="1" fill="#fff" opacity=".35"/><rect x="7" y="92" width="20" height="2" rx="1" fill="#fff" opacity=".35"/><rect x="46" y="12" width="65" height="5" rx="2" fill="#1E293B"/><rect x="46" y="21" width="45" height="3" rx="1.5" fill="#94A3B8"/><rect x="46" y="34" width="38" height="3.5" rx="1.5" fill="#5B2D8E" opacity=".7"/><rect x="46" y="42" width="66" height="2.5" rx="1" fill="#CBD5E1"/><rect x="46" y="48" width="50" height="2.5" rx="1" fill="#CBD5E1"/><rect x="46" y="54" width="60" height="2.5" rx="1" fill="#CBD5E1"/><rect x="46" y="64" width="36" height="3.5" rx="1.5" fill="#5B2D8E" opacity=".7"/><rect x="46" y="72" width="66" height="2.5" rx="1" fill="#CBD5E1"/><rect x="46" y="78" width="45" height="2.5" rx="1" fill="#CBD5E1"/><rect x="46" y="84" width="55" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'graduate', name:'Graduate', desc:'Education first · Grad schemes, entry level',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="32" fill="#0EA5E9"/><rect x="8" y="9" width="55" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="19" width="35" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="38" width="42" height="3.5" rx="1.5" fill="#0EA5E9" opacity=".7"/><rect x="8" y="46" width="104" height="26" rx="4" fill="#E0F2FE" opacity=".8"/><rect x="14" y="50" width="60" height="2.5" rx="1" fill="#0369A1" opacity=".6"/><rect x="14" y="56" width="45" height="2.5" rx="1" fill="#94A3B8"/><rect x="14" y="62" width="50" height="2.5" rx="1" fill="#94A3B8"/><rect x="8" y="80" width="40" height="3.5" rx="1.5" fill="#0EA5E9" opacity=".7"/><rect x="8" y="88" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="94" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="100" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="110" width="40" height="3.5" rx="1.5" fill="#0EA5E9" opacity=".7"/><rect x="8" y="118" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="124" width="60" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'corporate', name:'Corporate', desc:'Navy header · Finance, legal, banking',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="32" fill="#1E3A5F"/><rect x="8" y="9" width="55" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="19" width="35" height="3" rx="1" fill="#C8D8E8" opacity=".6"/><rect x="8" y="40" width="45" height="3.5" rx="1.5" fill="#1E3A5F" opacity=".7"/><rect x="8" y="48" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="54" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="60" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="70" width="40" height="3.5" rx="1.5" fill="#1E3A5F" opacity=".7"/><rect x="8" y="78" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="84" width="70" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="90" width="85" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="100" width="42" height="3.5" rx="1.5" fill="#1E3A5F" opacity=".7"/><rect x="8" y="108" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="114" width="60" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'tech', name:'Tech', desc:'Dark sidebar · Technology, engineering',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="160" fill="#1A1A2E"/><circle cx="20" cy="22" r="12" fill="#5B2D8E" opacity=".4"/><rect x="7" y="40" width="26" height="2.5" rx="1.5" fill="#AAFF00" opacity=".7"/><rect x="7" y="47" width="22" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="7" y="53" width="24" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="7" y="63" width="26" height="2.5" rx="1.5" fill="#AAFF00" opacity=".7"/><rect x="7" y="70" width="22" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="7" y="76" width="20" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="7" y="86" width="26" height="2.5" rx="1.5" fill="#AAFF00" opacity=".7"/><rect x="7" y="93" width="20" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="7" y="99" width="22" height="2" rx="1" fill="#94A3B8" opacity=".5"/><rect x="48" y="12" width="60" height="5" rx="2" fill="#1E293B"/><rect x="48" y="21" width="40" height="3" rx="1.5" fill="#94A3B8"/><rect x="48" y="34" width="38" height="3.5" rx="1.5" fill="#1A1A2E" opacity=".5"/><rect x="48" y="42" width="62" height="2.5" rx="1" fill="#CBD5E1"/><rect x="48" y="48" width="50" height="2.5" rx="1" fill="#CBD5E1"/><rect x="48" y="54" width="55" height="2.5" rx="1" fill="#CBD5E1"/><rect x="48" y="64" width="36" height="3.5" rx="1.5" fill="#1A1A2E" opacity=".5"/><rect x="48" y="72" width="62" height="2.5" rx="1" fill="#CBD5E1"/><rect x="48" y="78" width="40" height="2.5" rx="1" fill="#CBD5E1"/><rect x="48" y="84" width="52" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'creative', name:'Creative', desc:'Bold accent · Marketing, design, media',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="8" height="160" fill="#14B8A6"/><rect x="8" width="112" height="45" fill="#F0FDFA"/><rect x="16" y="10" width="70" height="7" rx="2" fill="#0F766E"/><rect x="16" y="22" width="50" height="3.5" rx="1.5" fill="#14B8A6" opacity=".6"/><rect x="16" y="30" width="80" height="3" rx="1.5" fill="#94A3B8"/><rect x="16" y="53" width="42" height="3.5" rx="1.5" fill="#0F766E" opacity=".8"/><rect x="16" y="61" width="96" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="67" width="75" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="73" width="85" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="83" width="42" height="3.5" rx="1.5" fill="#0F766E" opacity=".8"/><rect x="16" y="91" width="96" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="97" width="60" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="103" width="75" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'graduate2', name:'Graduate+', desc:'Teal header · Grad schemes, entry level',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="32" fill="#0891B2"/><rect x="8" y="9" width="55" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="19" width="35" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="38" width="45" height="3.5" rx="1.5" fill="#0891B2" opacity=".7"/><rect x="8" y="46" width="104" height="22" rx="4" fill="#CFFAFE" opacity=".8"/><rect x="14" y="50" width="55" height="2.5" rx="1" fill="#0E7490" opacity=".7"/><rect x="14" y="56" width="40" height="2.5" rx="1" fill="#94A3B8"/><rect x="8" y="75" width="40" height="3.5" rx="1.5" fill="#0891B2" opacity=".7"/><rect x="8" y="83" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="89" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="95" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="105" width="40" height="3.5" rx="1.5" fill="#0891B2" opacity=".7"/><rect x="8" y="113" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="119" width="60" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'executive', name:'Executive', desc:'Elegant serif · Senior, director, C-suite',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="45" fill="#1F2937"/><rect x="20" y="10" width="80" height="6" rx="2" fill="#fff" opacity=".9"/><rect x="30" y="21" width="60" height="3" rx="1.5" fill="#9CA3AF"/><rect x="35" y="28" width="50" height="2.5" rx="1" fill="#D4AF37" opacity=".7"/><rect x="8" y="53" width="45" height="3.5" rx="1.5" fill="#1F2937" opacity=".5"/><rect x="8" y="61" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="67" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="73" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="83" width="45" height="3.5" rx="1.5" fill="#1F2937" opacity=".5"/><rect x="8" y="91" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="97" width="70" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="103" width="85" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="113" width="45" height="3.5" rx="1.5" fill="#1F2937" opacity=".5"/><rect x="8" y="121" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="127" width="60" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'timeline', name:'Timeline', desc:'Timeline layout · General professional roles',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="104" height="20" rx="3" fill="#5B2D8E" opacity=".1"/><rect x="12" y="13" width="55" height="5" rx="2" fill="#5B2D8E" opacity=".6"/><line x1="60" y1="36" x2="60" y2="155" stroke="#CBD5E1" stroke-width="2"/><circle cx="60" cy="44" r="4" fill="#5B2D8E"/><rect x="66" y="40" width="46" height="2.5" rx="1" fill="#CBD5E1"/><rect x="66" y="46" width="36" height="2" rx="1" fill="#CBD5E1"/><circle cx="60" cy="62" r="4" fill="#5B2D8E"/><rect x="8" y="58" width="46" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="64" width="36" height="2" rx="1" fill="#CBD5E1"/><circle cx="60" cy="82" r="4" fill="#5B2D8E"/><rect x="66" y="78" width="46" height="2.5" rx="1" fill="#CBD5E1"/><rect x="66" y="84" width="36" height="2" rx="1" fill="#CBD5E1"/><circle cx="60" cy="102" r="4" fill="#5B2D8E"/><rect x="8" y="98" width="46" height="2.5" rx="1" fill="#CBD5E1"/><rect x="16" y="104" width="30" height="2" rx="1" fill="#CBD5E1"/><circle cx="60" cy="120" r="4" fill="#5B2D8E" opacity=".35"/><rect x="66" y="116" width="40" height="2.5" rx="1" fill="#CBD5E1"/><rect x="66" y="122" width="28" height="2" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'healthcare', name:'Healthcare', desc:'Clinical layout · NHS &amp; healthcare roles',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="32" fill="#16A34A"/><rect x="8" y="9" width="55" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="19" width="35" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="40" width="104" height="14" rx="3" fill="#F0FDF4"/><rect x="14" y="44" width="55" height="2.5" rx="1" fill="#15803D" opacity=".6"/><rect x="14" y="50" width="40" height="2" rx="1" fill="#94A3B8"/><rect x="8" y="62" width="45" height="3.5" rx="1.5" fill="#16A34A" opacity=".7"/><rect x="8" y="70" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="76" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="82" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="92" width="40" height="3.5" rx="1.5" fill="#16A34A" opacity=".7"/><rect x="8" y="100" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="106" width="65" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="112" width="80" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'retail', name:'Retail', desc:'Skills-first · Retail, hospitality, service',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="28" fill="#F97316"/><rect x="8" y="8" width="50" height="5" rx="2" fill="#fff" opacity=".9"/><rect x="8" y="18" width="32" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="34" width="25" height="8" rx="4" fill="#FED7AA"/><rect x="37" y="34" width="22" height="8" rx="4" fill="#FED7AA"/><rect x="63" y="34" width="28" height="8" rx="4" fill="#FED7AA"/><rect x="95" y="34" width="17" height="8" rx="4" fill="#FED7AA"/><rect x="8" y="50" width="45" height="3.5" rx="1.5" fill="#F97316" opacity=".7"/><rect x="8" y="58" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="64" width="80" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="70" width="90" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="80" width="42" height="3.5" rx="1.5" fill="#F97316" opacity=".7"/><rect x="8" y="88" width="104" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="94" width="70" height="2.5" rx="1" fill="#CBD5E1"/><rect x="8" y="100" width="85" height="2.5" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'academic', name:'Academic', desc:'Formal serif · Education &amp; research roles',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect width="120" height="38" fill="#1E293B"/><rect x="15" y="8" width="90" height="6" rx="2" fill="#fff" opacity=".9"/><rect x="20" y="19" width="80" height="3" rx="1.5" fill="#94A3B8"/><rect x="30" y="26" width="60" height="2.5" rx="1" fill="#64748B"/><rect x="8" y="46" width="45" height="3.5" rx="1.5" fill="#1E293B" opacity=".6"/><rect x="8" y="54" width="104" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="60" width="90" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="66" width="95" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="72" width="80" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="82" width="45" height="3.5" rx="1.5" fill="#1E293B" opacity=".6"/><rect x="8" y="90" width="104" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="96" width="85" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="102" width="95" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="112" width="45" height="3.5" rx="1.5" fill="#1E293B" opacity=".6"/><rect x="8" y="120" width="104" height="2" rx="1" fill="#CBD5E1"/><rect x="8" y="126" width="70" height="2" rx="1" fill="#CBD5E1"/></svg>' },
+        { id:'minimal', name:'Minimal', desc:'Ultra clean · Any industry',
+          svg:'<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="12" width="80" height="7" rx="2" fill="#1E293B" opacity=".8"/><rect x="8" y="24" width="50" height="2.5" rx="1" fill="#94A3B8"/><rect x="8" y="34" width="104" height="1" rx=".5" fill="#E2E8F0"/><rect x="8" y="42" width="35" height="3" rx="1.5" fill="#64748B" opacity=".5"/><rect x="8" y="50" width="104" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="56" width="85" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="62" width="95" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="72" width="35" height="3" rx="1.5" fill="#64748B" opacity=".5"/><rect x="8" y="80" width="104" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="86" width="70" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="92" width="80" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="102" width="35" height="3" rx="1.5" fill="#64748B" opacity=".5"/><rect x="8" y="110" width="104" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="116" width="60" height="2" rx="1" fill="#E2E8F0"/><rect x="8" y="126" width="104" height="1" rx=".5" fill="#E2E8F0"/><rect x="8" y="132" width="80" height="2" rx="1" fill="#E2E8F0"/></svg>' },
+      ];
+
+      var pickedId = 'professional';
+      var grid = document.getElementById('tpGrid');
+      if (!grid) return;
+
+      // Build cards
+      TP.forEach(function (t) {
+        var card = document.createElement('div');
+        card.className = 'tp-card' + (t.id === pickedId ? ' tpsel' : '');
+        card.innerHTML =
+          (t.popular ? '<span class="tp-pop">Most popular</span>' : '')
+          + '<div class="tp-thumb">' + t.svg + '</div>'
+          + '<strong class="tp-name">' + t.name + '</strong>'
+          + '<span class="tp-desc">' + t.desc + '</span>';
+        card.addEventListener('click', function () {
+          pickedId = t.id;
+          grid.querySelectorAll('.tp-card').forEach(function (c) { c.classList.remove('tpsel'); });
+          card.classList.add('tpsel');
+        });
+        card.addEventListener('touchend', function (e) { e.preventDefault(); card.click(); });
+        grid.appendChild(card);
+      });
+
+      function dismissOverlay() {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+
+      // Start button
+      var startBtn = document.getElementById('tpStartBtn');
+      if (startBtn) {
+        startBtn.addEventListener('click', function () {
+          selectTemplate(pickedId, false);
+          renderPreview();
+          saveDraft();
+          dismissOverlay();
+        });
+        startBtn.addEventListener('touchend', function (e) { e.preventDefault(); startBtn.click(); });
+      }
+
+      // Skip link
+      var skipLink = document.getElementById('tpSkipLink');
+      if (skipLink) {
+        skipLink.addEventListener('click', function (e) { e.preventDefault(); dismissOverlay(); });
+        skipLink.addEventListener('touchend', function (e) { e.preventDefault(); dismissOverlay(); });
+      }
+    })();
+
     /* ---------- Colour schemes ---------- */
     var COLOR_SCHEMES = {
       violet: { accent: '#5B2D8E', light: '#F1EAF9' },
@@ -2477,5 +2560,44 @@
 
   })();
   </script>
+  <!-- ── Template Picker Overlay (shown for ?new=1) ──────────────────── -->
+  <style>
+    .tp-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:.75rem;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .1s;display:flex;flex-direction:column;position:relative;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;}
+    .tp-card:hover{border-color:#5B2D8E;box-shadow:0 4px 16px rgba(91,45,142,.12);transform:translateY(-2px);}
+    .tp-card.tpsel{border-color:#5B2D8E;background:#FAF8FF;box-shadow:0 0 0 3px rgba(91,45,142,.15);}
+    .tp-card.tpsel::after{content:'✓';position:absolute;top:8px;right:8px;width:22px;height:22px;background:#5B2D8E;color:#fff;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;}
+    .tp-thumb{border-radius:8px;overflow:hidden;margin-bottom:.6rem;background:#F8F7FF;border:1px solid #E2E8F0;aspect-ratio:3/4;}
+    .tp-thumb svg{width:100%;height:100%;display:block;}
+    .tp-name{font-size:.88rem;font-weight:700;color:var(--ink);display:block;margin-bottom:.2rem;}
+    .tp-desc{font-size:.72rem;color:var(--muted);line-height:1.4;display:block;}
+    .tp-pop{position:absolute;top:0;left:50%;transform:translateX(-50%);background:#5B2D8E;color:#AAFF00;font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .5rem;border-radius:0 0 7px 7px;white-space:nowrap;}
+    @media(max-width:500px){#tpGrid{grid-template-columns:repeat(2,1fr)!important;}}
+  </style>
+
+  <div id="tpOverlay" style="display:none;position:fixed;inset:0;z-index:500;background:#F8F7FF;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div style="max-width:860px;margin:0 auto;padding:1.75rem 1rem 6rem;">
+
+      <!-- Header -->
+      <div style="text-align:center;padding:.5rem 0 2rem;">
+        <a href="index.html" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;margin-bottom:1.5rem;">
+          <span class="logo-mark" style="width:34px;height:34px;font-size:.8rem;">CV</span>
+          <span style="font-weight:800;font-size:1.1rem;letter-spacing:-.02em;color:var(--ink);">CV<span style="color:var(--violet);">Central</span></span>
+        </a>
+        <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:var(--ink);letter-spacing:-.03em;margin:0 0 .6rem;">Choose your CV template</h1>
+        <p style="font-size:.95rem;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.6;">Pick a style that suits your field. You can switch any time inside the builder.</p>
+      </div>
+
+      <!-- Grid (JS-rendered) -->
+      <div id="tpGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
+
+      <!-- Sticky CTA -->
+      <div style="position:sticky;bottom:0;padding:1.25rem 0 .25rem;text-align:center;background:linear-gradient(to bottom,transparent,#F8F7FF 40%);">
+        <button id="tpStartBtn" class="btn btn-primary" style="padding:.85rem 2.5rem;font-size:1rem;font-weight:800;letter-spacing:-.01em;border-radius:12px;touch-action:manipulation;">Start building →</button>
+        <p style="margin:.6rem 0 0;font-size:.83rem;color:var(--muted);">or <a href="#" id="tpSkipLink" style="color:var(--violet);font-weight:600;touch-action:manipulation;">skip and choose later</a></p>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 </html>
