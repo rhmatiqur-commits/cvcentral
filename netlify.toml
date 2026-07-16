@@ -19,6 +19,7 @@
   to = "/.netlify/functions/ai"
   status = 200
 
+
 [[headers]]
   for = "/*"
   [headers.values]

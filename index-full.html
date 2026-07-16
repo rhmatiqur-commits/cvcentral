@@ -16,8 +16,7 @@
   <header class="site-header">
     <div class="container">
       <a href="index.html" class="logo" aria-label="CV Central home">
-        <span class="logo-mark">CV</span>
-        <span>CV<span class="logo-central">Central</span></span>
+        <img src="assets/logo.svg" alt="CV Central" height="36" style="display:block;">
       </a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -245,6 +244,21 @@
             <a href="signup.html" class="btn btn-primary">Go Premium</a>
           </article>
         </div>
+        <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:32px;padding:20px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;max-width:600px;margin-left:auto;margin-right:auto;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.2rem;">🔒</span>
+            <div><div style="font-size:0.82rem;font-weight:700;color:#fff;">Stripe-secured</div><div style="font-size:0.73rem;color:#9999AA;">Bank-grade encryption</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.2rem;">✅</span>
+            <div><div style="font-size:0.82rem;font-weight:700;color:#fff;">Cancel anytime</div><div style="font-size:0.73rem;color:#9999AA;">One click — no phone calls</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.2rem;">💸</span>
+            <div><div style="font-size:0.82rem;font-weight:700;color:#fff;">No hidden fees</div><div style="font-size:0.73rem;color:#9999AA;">Price shown is price charged</div></div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:0.75rem;color:#55556A;margin-top:14px;">VAT may apply</p>
       </div>
     </section>
 
@@ -341,40 +355,4 @@
           if (entry.isIntersecting) {
             entry.target.classList.add('in');
             io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-      els.forEach(function (el) { io.observe(el); });
-    })();
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/auth.js"></script>
-  <script>
-  (function () {
-    'use strict';
-    cvAuth.getSession().then(function (session) {
-      if (session) {
-        document.getElementById('navSignIn').hidden  = true;
-        document.getElementById('navSignUp').hidden  = true;
-        document.getElementById('navDash').hidden    = false;
-        document.getElementById('navSignOut').hidden = false;
-      }
-    });
-    document.getElementById('navSignOut').addEventListener('click', function () {
-      cvAuth.signOut();
-    });
-
-    // Mobile hamburger toggle
-    (function () {
-      var toggle = document.getElementById('navToggle');
-      var nav = document.getElementById('mainNav');
-      if (!toggle || !nav) return;
-      toggle.addEventListener('click', function () {
-        var open = nav.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        toggle.innerHTML = open
-          ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
-          : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
-      });
-      // Close menu when a nav
+       
