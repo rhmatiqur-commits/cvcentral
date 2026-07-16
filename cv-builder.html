@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en-GB">
 <head>
   <meta charset="UTF-8">
@@ -330,7 +330,7 @@
               </div>
 
               <div class="result-card full">
-                <h4>Your cover letter <span style="text-transform:none;letter-spacing:0;">(first one's free ✦)</span></h4>
+                <h4>Your cover letter</h4>
                 <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem;flex-wrap:wrap;">
                   <label for="coverLetterLang" style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Language:</label>
                   <select id="coverLetterLang" style="font-family:var(--font-body);font-size:0.85rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.4rem 0.7rem;cursor:pointer;transition:border-color 0.15s;">
@@ -353,6 +353,34 @@
 
             <div class="result-actions">
               <button class="btn btn-ghost" id="copyCoverLetter">Copy cover letter</button>
+            </div>
+
+            <!-- Interview prep card (Pro+) -->
+            <div class="result-card full" id="interviewPrepCard" style="margin-top:1rem;">
+              <h4>Interview prep</h4>
+              <!-- Free user locked state -->
+              <div id="interviewPrepLocked" style="display:none;text-align:center;padding:1.5rem 1rem;">
+                <p style="font-size:1.5rem;margin:0 0 0.5rem;">🔒</p>
+                <p style="font-weight:700;margin:0 0 0.35rem;">Interview prep is a Pro feature</p>
+                <p style="font-size:0.85rem;color:var(--muted);margin:0 0 1rem;">Upgrade to get 8 tailored interview questions with tips based on your CV and the job description.</p>
+                <a href="dashboard.html" class="btn btn-violet btn-sm">Upgrade to Pro →</a>
+              </div>
+              <!-- Pro user: generate button + results -->
+              <div id="interviewPrepPro" style="display:none;">
+                <div id="interviewPrepGenerate">
+                  <p style="font-size:0.88rem;color:var(--muted);margin:0 0 0.85rem;">8 questions likely to come up, with a tailored tip for how you should answer each one.</p>
+                  <button class="btn btn-violet btn-sm" id="generateInterviewBtn">Generate interview questions</button>
+                </div>
+                <div id="interviewPrepLoading" style="display:none;padding:1rem 0;text-align:center;">
+                  <div class="loader-orb" role="status" aria-label="Generating"></div>
+                  <p style="font-size:0.85rem;color:var(--muted);margin-top:0.5rem;">Generating questions…</p>
+                </div>
+                <div id="interviewPrepQuestions" style="display:none;"></div>
+                <div style="margin-top:0.75rem;" id="interviewPrepActions" style="display:none;">
+                  <button class="btn btn-ghost btn-sm" id="copyInterviewBtn" style="display:none;">Copy all questions</button>
+                  <button class="btn btn-ghost btn-sm" id="regenerateInterviewBtn" style="display:none;margin-left:0.5rem;">Regenerate</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -451,6 +479,32 @@
     </div>
   </main>
 
+  <!-- AI Chat Widget -->
+  <div id="chatWidget" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9000;">
+    <button id="chatToggle" title="Ask the AI assistant" style="width:52px;height:52px;border-radius:50%;background:#5B2D8E;color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 18px rgba(91,45,142,0.35);display:flex;align-items:center;justify-content:center;transition:transform 0.15s;">💬</button>
+    <div id="chatDrawer" hidden style="position:absolute;bottom:64px;right:0;width:320px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);display:flex;flex-direction:column;overflow:hidden;border:1.5px solid #E8E0F5;">
+      <div style="background:#5B2D8E;color:#fff;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-weight:700;font-size:0.9rem;">✨ AI Assistant</span>
+        <button id="chatClose" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <!-- Locked state for free users -->
+      <div id="chatLocked" style="padding:1.5rem;text-align:center;">
+        <p style="font-size:1.5rem;margin:0 0 0.5rem;">🔒</p>
+        <p style="font-weight:700;font-size:0.9rem;margin:0 0 0.35rem;">AI chat is a Pro feature</p>
+        <p style="font-size:0.8rem;color:#6B7280;margin:0 0 1rem;">Ask questions about your CV, get writing tips, and more.</p>
+        <a href="dashboard.html" class="btn btn-violet btn-sm" style="font-size:0.8rem;">Upgrade to Pro →</a>
+      </div>
+      <!-- Chat for Pro users -->
+      <div id="chatPro" style="display:none;flex-direction:column;flex:1;">
+        <div id="chatMessages" style="flex:1;overflow-y:auto;padding:0.75rem;max-height:300px;display:flex;flex-direction:column;gap:0.5rem;"></div>
+        <div style="border-top:1px solid #F0EBF9;padding:0.5rem;display:flex;gap:0.4rem;">
+          <input id="chatInput" type="text" placeholder="Ask about your CV…" style="flex:1;border:1.5px solid #E8E0F5;border-radius:8px;padding:0.45rem 0.65rem;font-size:0.85rem;font-family:inherit;outline:none;" />
+          <button id="chatSend" style="background:#5B2D8E;color:#fff;border:none;border-radius:8px;padding:0.45rem 0.75rem;font-size:0.85rem;font-weight:700;cursor:pointer;">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -464,6 +518,24 @@
     var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
     var SUPABASE_KEY = 'sb_publishable_wvx5-gitH3SZw9qv92vL-g_5lzNIInv';
     var AI_ENDPOINT = '/api/ai';
+    var CHAT_ENDPOINT = '/api/chat';
+
+    // User plan — loaded async; defaults to 'free' until confirmed
+    var userPlan = 'free';
+    var userPlanLoaded = false;
+
+    (async function loadUserPlan() {
+      try {
+        var session = await cvAuth.getSession();
+        if (session && session.user) {
+          var profile = await cvAuth.getProfile(session.user.id);
+          if (profile && profile.plan) userPlan = profile.plan;
+        }
+      } catch(e) {}
+      userPlanLoaded = true;
+    })();
+
+    function isPro() { return userPlan === 'pro' || userPlan === 'premium'; }
 
     var state = {
       step: 1,
@@ -475,6 +547,7 @@
       certifications: [],
       jobTarget: {},
       ai: null,               // full AI result once analysed
+      interviewPrep: null,    // interview questions once generated
       template: 'professional',
       colorScheme: null
     };
@@ -1359,23 +1432,38 @@
       showAnalysisState('aiLoading');
       startLoadingMessages();
 
-      setTimeout(function () {
-        try {
-          clearInterval(loadingTimer);
-          var data = scoreCV();
-          state.ai = data;
-          if (data.recommendedTemplate) selectTemplate(data.recommendedTemplate, true);
-          renderResults(data);
-          renderPreview();
-          saveDraft();
-          showAnalysisState('aiResults');
-          toast('CV analysed — see your score below 🎉', 'success');
-        } catch (err) {
-          clearInterval(loadingTimer);
-          document.getElementById('aiErrorMsg').textContent = 'Could not analyse — please try again.';
-          showAnalysisState('aiError');
-        }
-      }, 1800);
+      fetch(AI_ENDPOINT + '?action=enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personal: state.personal,
+          experience: state.experience,
+          education: state.education,
+          skills: state.skills,
+          languages: state.languages,
+          certifications: state.certifications,
+          jobTarget: state.jobTarget,
+          coverLetterLanguage: 'English'
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        clearInterval(loadingTimer);
+        if (data.error) throw new Error(data.error);
+        state.ai = data;
+        if (data.recommendedTemplate) selectTemplate(data.recommendedTemplate, true);
+        renderResults(data);
+        renderPreview();
+        saveDraft();
+        showAnalysisState('aiResults');
+        initInterviewPrep();
+        toast('CV analysed by AI — see your score below 🎉', 'success');
+      })
+      .catch(function(err) {
+        clearInterval(loadingTimer);
+        document.getElementById('aiErrorMsg').textContent = err.message || 'Could not analyse — please try again.';
+        showAnalysisState('aiError');
+      });
     }
 
     function renderResults(data) {
@@ -1432,6 +1520,105 @@
       document.getElementById('regenerateCoverLetter').style.display = data.coverLetter ? 'inline-flex' : 'none';
     }
 
+    /* ---------- Interview prep ---------- */
+    function initInterviewPrep() {
+      var card = document.getElementById('interviewPrepCard');
+      var locked = document.getElementById('interviewPrepLocked');
+      var pro = document.getElementById('interviewPrepPro');
+      card.style.display = 'block';
+      if (isPro()) {
+        locked.style.display = 'none';
+        pro.style.display = 'block';
+      } else {
+        locked.style.display = 'block';
+        pro.style.display = 'none';
+      }
+    }
+
+    function runInterviewPrep() {
+      var gen = document.getElementById('interviewPrepGenerate');
+      var loading = document.getElementById('interviewPrepLoading');
+      var qDiv = document.getElementById('interviewPrepQuestions');
+      var actions = document.getElementById('interviewPrepActions');
+      gen.style.display = 'none';
+      loading.style.display = 'block';
+      qDiv.style.display = 'none';
+
+      collectStep(state.step);
+      fetch(AI_ENDPOINT + '?action=interview-prep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          personal: state.personal,
+          experience: state.experience,
+          education: state.education,
+          skills: state.skills,
+          languages: state.languages,
+          certifications: state.certifications,
+          jobTarget: state.jobTarget
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        loading.style.display = 'none';
+        if (data.error) throw new Error(data.error);
+        var questions = data.questions || [];
+        state.interviewPrep = questions;
+        renderInterviewQuestions(questions);
+        qDiv.style.display = 'block';
+        document.getElementById('copyInterviewBtn').style.display = 'inline-flex';
+        document.getElementById('regenerateInterviewBtn').style.display = 'inline-flex';
+        toast('Interview questions ready ✓', 'success');
+      })
+      .catch(function(err) {
+        loading.style.display = 'none';
+        gen.style.display = 'block';
+        toast(err.message || 'Could not generate questions — try again', 'error');
+      });
+    }
+
+    function renderInterviewQuestions(questions) {
+      var qDiv = document.getElementById('interviewPrepQuestions');
+      qDiv.innerHTML = '';
+      questions.forEach(function(q, i) {
+        var typeColors = { competency: '#5B2D8E', technical: '#0D9488', 'cv-probing': '#B45309' };
+        var typeLabels = { competency: 'Competency', technical: 'Technical', 'cv-probing': 'CV check' };
+        var color = typeColors[q.type] || '#475569';
+        var label = typeLabels[q.type] || q.type;
+        var item = document.createElement('div');
+        item.style.cssText = 'border:1.5px solid #F0EBF9;border-radius:10px;margin-bottom:0.65rem;overflow:hidden;';
+        item.innerHTML =
+          '<div style="padding:0.7rem 0.85rem;cursor:pointer;display:flex;align-items:flex-start;gap:0.6rem;" onclick="this.parentElement.querySelector(\'.q-tip\').style.display=this.parentElement.querySelector(\'.q-tip\').style.display===\'none\'?\'block\':\'none\'">' +
+            '<span style="font-size:0.7rem;font-weight:700;background:' + color + ';color:#fff;border-radius:4px;padding:0.15rem 0.4rem;white-space:nowrap;margin-top:0.1rem;">' + label + '</span>' +
+            '<span style="font-size:0.85rem;font-weight:600;flex:1;">' + escHtml(q.question) + '</span>' +
+            '<span style="color:#9CA3AF;font-size:0.75rem;white-space:nowrap;">▼</span>' +
+          '</div>' +
+          '<div class="q-tip" style="display:none;padding:0 0.85rem 0.7rem;font-size:0.82rem;color:#5B2D8E;background:#FAF8FF;border-top:1px solid #F0EBF9;">💡 ' + escHtml(q.tip) + '</div>';
+        qDiv.appendChild(item);
+      });
+    }
+
+    function escHtml(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.getElementById('generateInterviewBtn').addEventListener('click', runInterviewPrep);
+    document.getElementById('regenerateInterviewBtn').addEventListener('click', function() {
+      document.getElementById('interviewPrepQuestions').style.display = 'none';
+      document.getElementById('copyInterviewBtn').style.display = 'none';
+      document.getElementById('regenerateInterviewBtn').style.display = 'none';
+      runInterviewPrep();
+    });
+    document.getElementById('copyInterviewBtn').addEventListener('click', function() {
+      var questions = state.interviewPrep || [];
+      var text = questions.map(function(q, i) {
+        return (i+1) + '. ' + q.question + '\n   Tip: ' + q.tip;
+      }).join('\n\n');
+      navigator.clipboard.writeText(text).then(function() {
+        toast('Questions copied ✓', 'success');
+      });
+    });
+
     // Regenerate cover letter in selected language
     document.getElementById('coverLetterLang').addEventListener('change', function () {
       var box = document.getElementById('coverLetterBox');
@@ -1447,11 +1634,27 @@
       btn.textContent = 'Generating…';
       document.getElementById('coverLetterBox').textContent = '';
       try {
-        var letter = generateCoverLetter(lang);
-        document.getElementById('coverLetterBox').textContent = letter;
-        toast('Cover letter generated ✓', 'success');
+        var res = await fetch(AI_ENDPOINT + '?action=cover-letter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            personal: state.personal,
+            experience: state.experience,
+            education: state.education,
+            skills: state.skills,
+            languages: state.languages,
+            certifications: state.certifications,
+            jobTarget: state.jobTarget,
+            coverLetterLanguage: lang
+          })
+        });
+        var data = await res.json();
+        if (data.error) throw new Error(data.error);
+        document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
+        if (state.ai) state.ai.coverLetter = data.coverLetter;
+        toast('Cover letter regenerated ✓', 'success');
       } catch (e) {
-        toast('Could not regenerate — please try again', 'error');
+        toast(e.message || 'Could not regenerate — please try again', 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Regenerate in this language';
@@ -1999,6 +2202,96 @@
 
       el.innerHTML = html;
     }
+
+
+    /* ---------- AI Chat Widget ---------- */
+    var chatMessages = [];
+    var chatOpen = false;
+
+    function initChatWidget() {
+      var toggle = document.getElementById('chatToggle');
+      var drawer = document.getElementById('chatDrawer');
+      var closeBtn = document.getElementById('chatClose');
+      var locked = document.getElementById('chatLocked');
+      var pro = document.getElementById('chatPro');
+
+      toggle.addEventListener('click', function() {
+        chatOpen = !chatOpen;
+        drawer.hidden = !chatOpen;
+        toggle.textContent = chatOpen ? '✕' : '\U0001f4ac';
+        if (chatOpen) {
+          if (isPro()) {
+            locked.style.display = 'none';
+            pro.style.display = 'flex';
+            if (chatMessages.length === 0) {
+              appendChatMessage('assistant', 'Hi! I\'m your CV Central AI assistant. Ask me anything about your CV, cover letter, or interview prep \U0001f60a');
+            }
+          } else {
+            locked.style.display = 'block';
+            pro.style.display = 'none';
+          }
+        }
+      });
+
+      closeBtn.addEventListener('click', function() {
+        chatOpen = false;
+        drawer.hidden = true;
+        toggle.textContent = '\U0001f4ac';
+      });
+
+      var input = document.getElementById('chatInput');
+      var sendBtn = document.getElementById('chatSend');
+
+      function sendMessage() {
+        var text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        appendChatMessage('user', text);
+        chatMessages.push({ role: 'user', content: text });
+        sendBtn.disabled = true;
+        input.disabled = true;
+
+        fetch(CHAT_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatMessages })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var reply = data.reply || 'Sorry, something went wrong.';
+          appendChatMessage('assistant', reply);
+          chatMessages.push({ role: 'assistant', content: reply });
+        })
+        .catch(function() {
+          appendChatMessage('assistant', 'Sorry, I couldn\'t connect. Please try again.');
+        })
+        .finally(function() {
+          sendBtn.disabled = false;
+          input.disabled = false;
+          input.focus();
+        });
+      }
+
+      sendBtn.addEventListener('click', sendMessage);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+      });
+    }
+
+    function appendChatMessage(role, text) {
+      var msgs = document.getElementById('chatMessages');
+      var el = document.createElement('div');
+      var isUser = role === 'user';
+      el.style.cssText = 'max-width:85%;padding:0.5rem 0.7rem;border-radius:' +
+        (isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px') +
+        ';font-size:0.82rem;line-height:1.45;word-wrap:break-word;' +
+        (isUser ? 'background:#5B2D8E;color:#fff;align-self:flex-end;margin-left:auto;' : 'background:#F5F3FF;color:#1F2937;align-self:flex-start;');
+      el.textContent = text;
+      msgs.appendChild(el);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    initChatWidget();
 
   })();
   </script>
