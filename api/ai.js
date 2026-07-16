@@ -271,7 +271,12 @@ function buildParseCvPrompt(p) {
         }],
         skills: ['string'],
         languages: ['string (language name only, e.g. "French")'],
-        certification
+        certifications: ['string']
+      }))
+    ].join('\n')
+  };
+}
+
 
 function buildCompareCvPrompt(p) {
   return {
@@ -280,7 +285,7 @@ function buildCompareCvPrompt(p) {
     user: [
       'OLD CV (raw text extracted from uploaded file):',
       '---',
-      (p.oldCvText || '(no old CV provided)'),
+      (p.oldCvText || '(no old CV provided)').slice(0, 8000),
       '---',
       '',
       'NEW CV (structured data):',
