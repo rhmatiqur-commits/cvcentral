@@ -125,11 +125,25 @@ async function getUserByStripeCustomerId(customerId) {
 }
 
 async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscriptionId) {
-  const patch = {};
-  if (plan !== undefined)                patch.plan = plan;
-  if (stripeCustomerId !== undefined)    patch.stripe_customer_id = stripeCustomerId;
-  if (stripeSubscriptionId !== undefined) patch.stripe_subscription_id = stripeSubscriptionId;
-  return supabaseQuery('profiles?id=eq.' + userId, 'PATCH', patch);
+  // Use upsert so this works even if no profile row exists yet
+  const body = { id: userId };
+  if (plan !== undefined)                body.plan = plan;
+  if (stripeCustomerId !== undefined)    body.stripe_customer_id = stripeCustomerId;
+  if (stripeSubscriptionId !== undefined) body.stripe_subscription_id = stripeSubscriptionId;
+
+  const response = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+    method: 'POST',
+    headers: {
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+      Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_KEY,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  console.log('[updateUserPlan]', response.status, text.slice(0, 200));
+  try { return JSON.parse(text); } catch { return text; }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -378,16 +392,14 @@ async function confirmPayment(req, res) {
   const { userId, sessionId } = req.body || {};
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
-  const profile = await getUserProfile(userId);
-  if (!profile) return res.status(200).json({ plan: 'free', updated: false });
-
   // Use the Stripe checkout session to confirm payment
   if (sessionId) {
     try {
       const stripe = getStripe();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
+      console.log('[confirm-payment] session status:', session.status, 'payment_status:', session.payment_status);
 
-      if (session.status === 'complete' || session.payment_status === 'paid') {
+      if (session.status === 'complete' || session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
         const planKey = session.metadata && session.metadata.planKey;
         const tier = PLAN_TO_TIER[planKey] || 'pro';
         await updateUserPlan(userId, tier, session.customer, session.subscription);
@@ -398,8 +410,9 @@ async function confirmPayment(req, res) {
     }
   }
 
-  // Fallback: return current plan from DB
-  return res.status(200).json({ plan: profile.plan || 'free', updated: false });
+  // Fallback: return current plan from DB (profile may not exist yet)
+  const profile = await getUserProfile(userId);
+  return res.status(200).json({ plan: (profile && profile.plan) || 'free', updated: false });
 }
 
 // ─────────────────────────────────────────────────────────────
