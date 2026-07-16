@@ -1507,7 +1507,8 @@
           languages: state.languages,
           certifications: state.certifications,
           jobTarget: state.jobTarget,
-          coverLetterLanguage: 'English'
+          coverLetterLanguage: 'English',
+          plan: userPlan
         })
       })
       .then(function(res) { return res.json(); })
@@ -1619,7 +1620,8 @@
           skills: state.skills,
           languages: state.languages,
           certifications: state.certifications,
-          jobTarget: state.jobTarget
+          jobTarget: state.jobTarget,
+          plan: userPlan
         })
       })
       .then(function(res) { return res.json(); })
@@ -1709,7 +1711,8 @@
             languages: state.languages,
             certifications: state.certifications,
             jobTarget: state.jobTarget,
-            coverLetterLanguage: lang
+            coverLetterLanguage: lang,
+            plan: userPlan
           })
         });
         var data = await res.json();
@@ -2420,7 +2423,8 @@
               skills: state.skills,
               languages: state.languages,
               certifications: state.certifications,
-              jobTarget: state.jobTarget
+              jobTarget: state.jobTarget,
+              plan: userPlan
             })
           });
           var data = await resp.json();

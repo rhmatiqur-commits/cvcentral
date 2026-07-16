@@ -46,7 +46,16 @@ module.exports = async (req, res) => {
 
   try {
     const prompt = builder(payload);
-    const model = prompt.model || MODEL_HEAVY;
+
+    // Model selection: always-light actions use Haiku regardless of plan.
+    // Quality actions use Sonnet for paid users, Haiku for free.
+    const plan = (payload.plan || 'free').toLowerCase();
+    const isPaid = plan === 'pro' || plan === 'premium' || plan === 'day_pass';
+    const alwaysLight = ['score', 'template-recommend', 'parse-cv'];
+    const model = alwaysLight.includes(action) ? MODEL_LIGHT
+      : isPaid ? MODEL_HEAVY
+      : MODEL_LIGHT;
+
     const result = await callClaude(prompt.system, prompt.user, prompt.maxTokens || 4000, model);
     const parsed = extractJson(result);
     if (!parsed) return res.status(502).json({ error: 'The AI returned an unexpected format. Please try again.' });
@@ -167,7 +176,6 @@ function buildEnhancePrompt(p) {
 
 function buildScorePrompt(p) {
   return {
-    model: MODEL_LIGHT,
     maxTokens: 1500,
     system: UK_STYLE,
     user: [
@@ -211,7 +219,6 @@ function buildInterviewPrompt(p) {
 
 function buildTemplatePrompt(p) {
   return {
-    model: MODEL_LIGHT,
     maxTokens: 600,
     system: UK_STYLE,
     user: [
@@ -225,7 +232,6 @@ function buildTemplatePrompt(p) {
 
 function buildAtsPrompt(p) {
   return {
-    model: MODEL_LIGHT,
     maxTokens: 2000,
     system: UK_STYLE,
     user: [
@@ -239,7 +245,6 @@ function buildAtsPrompt(p) {
 
 function buildParseCvPrompt(p) {
   return {
-    model: MODEL_LIGHT,
     maxTokens: 3000,
     system: 'You are an expert CV parser. Extract structured data from raw CV text accurately. Use British English. Never invent information not present in the text. If a field is not found, return an empty string or empty array.',
     user: [
