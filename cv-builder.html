@@ -533,6 +533,20 @@
         }
       } catch(e) {}
       userPlanLoaded = true;
+      // Deep-link: ?open=chat|analyse|cover-letter
+      var openParam = new URLSearchParams(window.location.search).get('open');
+      if (openParam === 'chat') {
+        var toggle = document.getElementById('chatToggle');
+        if (toggle) setTimeout(function() { toggle.click(); }, 400);
+      } else if (openParam === 'analyse' || openParam === 'cover-letter') {
+        goToStep(5);
+        if (openParam === 'cover-letter') {
+          setTimeout(function() {
+            var cl = document.getElementById('coverLetterBox');
+            if (cl) cl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 300);
+        }
+      }
     })();
 
     function isPro() { return userPlan === 'pro' || userPlan === 'premium'; }
