@@ -544,6 +544,7 @@
     // User plan — loaded async; defaults to 'free' until confirmed
     var userPlan = 'free';
     var userPlanLoaded = false;
+    var planExpiresAt = null; // ISO string; set for day_pass users
 
     (async function loadUserPlan() {
       try {
@@ -551,6 +552,7 @@
         if (session && session.user) {
           var profile = await cvAuth.getProfile(session.user.id);
           if (profile && profile.plan) userPlan = profile.plan;
+          if (profile && profile.plan_expires_at) planExpiresAt = profile.plan_expires_at;
         }
       } catch(e) {}
       userPlanLoaded = true;
@@ -570,7 +572,13 @@
       }
     })();
 
-    function isPro() { return userPlan === 'pro' || userPlan === 'premium'; }
+    function isPro() {
+      if (userPlan === 'pro' || userPlan === 'premium') return true;
+      if (userPlan === 'day_pass' && planExpiresAt) {
+        return new Date(planExpiresAt) > new Date();
+      }
+      return false;
+    }
 
     var state = {
       step: 1,
@@ -1763,6 +1771,8 @@
     });
 
     /* ---------- Save to CV Central ---------- */
+    var CV_LIMITS = { free: 1, pro: 10, premium: Infinity };
+
     document.getElementById('saveBtn').addEventListener('click', async function () {
       var btn = this;
       btn.disabled = true;
@@ -1781,6 +1791,27 @@
         var cvName = (state.personal && state.personal.fullName)
           ? state.personal.fullName + '\'s CV'
           : 'My CV';
+
+        // Check CV count against plan limit
+        var plan = userPlan || 'free';
+        var limit = CV_LIMITS[plan] !== undefined ? CV_LIMITS[plan] : CV_LIMITS.free;
+        if (limit !== Infinity) {
+          var countRes = await cvAuth.client
+            .from('saved_cvs')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', session.user.id)
+            .neq('cv_name', cvName); // don't count the one we're about to overwrite
+          var existing = (countRes.count || 0);
+          if (existing >= limit) {
+            var limitMsg = plan === 'free'
+              ? 'Free accounts can save 1 CV. Upgrade to Pro to save up to 10.'
+              : 'Pro accounts can save up to 10 CVs. Premium (coming soon) gives unlimited storage.';
+            toast(limitMsg, 'error');
+            btn.disabled = false;
+            btn.textContent = 'Save to CV Central';
+            return;
+          }
+        }
 
         var res = await cvAuth.saveCV(
           session.user.id,

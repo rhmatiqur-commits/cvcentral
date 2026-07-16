@@ -32,6 +32,9 @@
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://exzkmavkzqknoghopwhq.supabase.co';
 
+// Hardcoded Quick CV Pass price (£1.19 one-time, created 2026-07-16)
+const DAY_PASS_PRICE_ID = 'price_1TtoeJRwetsWzvA0zINPt3Ht';
+
 // Maps Stripe plan keys → Supabase plan tier
 const PLAN_TO_TIER = {
   pro_monthly:          'pro',
@@ -42,6 +45,7 @@ const PLAN_TO_TIER = {
   pro_annual_trial:     'pro',
   premium_monthly_trial:'premium',
   premium_annual_trial: 'premium',
+  day_pass:             'day_pass',
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -114,7 +118,7 @@ async function supabaseQuery(path, method = 'GET', body) {
 
 async function getUserProfile(userId) {
   const rows = await supabaseQuery(
-    'profiles?id=eq.' + userId + '&select=plan,stripe_customer_id,stripe_subscription_id,email'
+    'profiles?id=eq.' + userId + '&select=plan,stripe_customer_id,stripe_subscription_id,email,plan_expires_at'
   );
   return Array.isArray(rows) ? rows[0] : null;
 }
@@ -124,12 +128,13 @@ async function getUserByStripeCustomerId(customerId) {
   return Array.isArray(rows) ? rows[0] : null;
 }
 
-async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscriptionId) {
+async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscriptionId, planExpiresAt) {
   // Use upsert so this works even if no profile row exists yet
   const body = { id: userId };
   if (plan !== undefined)                body.plan = plan;
   if (stripeCustomerId !== undefined)    body.stripe_customer_id = stripeCustomerId;
   if (stripeSubscriptionId !== undefined) body.stripe_subscription_id = stripeSubscriptionId;
+  if (planExpiresAt !== undefined)       body.plan_expires_at = planExpiresAt;
 
   const response = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
     method: 'POST',
@@ -157,17 +162,6 @@ async function createCheckout(req, res) {
     return res.status(400).json({ error: 'userId, email, and planKey required' });
   }
 
-  const isTrial = planKey.endsWith('_trial');
-  const basePlanKey = planKey.replace('_trial', '');
-  const priceIds = getPriceIds();
-  const priceId = priceIds[basePlanKey];
-
-  if (!priceId) {
-    return res.status(400).json({
-      error: `No Stripe price for "${basePlanKey}". Add it to STRIPE_PRICE_IDS env var.`,
-    });
-  }
-
   const stripe = getStripe();
 
   // Get or create Stripe customer
@@ -181,12 +175,42 @@ async function createCheckout(req, res) {
       metadata: { userId },
     });
     customerId = customer.id;
-    // Save customer ID before checkout so webhook can find the user
     await updateUserPlan(userId, undefined, customerId, undefined);
   }
 
   const successBase = successUrl || 'https://cvcentral.io/dashboard.html';
   const cancelBase  = cancelUrl  || 'https://cvcentral.io/dashboard.html';
+
+  // ── Quick CV Pass (one-time payment, 72h Pro access) ──────────
+  if (planKey === 'day_pass') {
+    const priceId = getPriceIds()['day_pass'] || DAY_PASS_PRICE_ID;
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: 'payment',
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: successBase + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
+      cancel_url:  cancelBase  + '?payment=cancelled',
+      metadata: { userId, planKey: 'day_pass' },
+      custom_text: {
+        submit: {
+          message: 'One-time charge — no subscription, no auto-renewal. 72 hours of full Pro access starts immediately.',
+        },
+      },
+    });
+    return res.status(200).json({ checkout_url: session.url, session_id: session.id });
+  }
+
+  // ── Subscription / Trial flow ─────────────────────────────────
+  const isTrial = planKey.endsWith('_trial');
+  const basePlanKey = planKey.replace('_trial', '');
+  const priceIds = getPriceIds();
+  const priceId = priceIds[basePlanKey];
+
+  if (!priceId) {
+    return res.status(400).json({
+      error: `No Stripe price for "${basePlanKey}". Add it to STRIPE_PRICE_IDS env var.`,
+    });
+  }
 
   // Base session params
   const sessionParams = {
@@ -279,7 +303,14 @@ async function handleWebhook(req, res) {
         const session = event.data.object;
         const userId  = session.metadata && session.metadata.userId;
         const planKey = session.metadata && session.metadata.planKey;
-        if (userId && session.subscription) {
+        if (!userId) break;
+
+        if (planKey === 'day_pass' && session.payment_status === 'paid') {
+          // One-time payment: grant 72 hours of Pro access
+          const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+          await updateUserPlan(userId, 'day_pass', session.customer, null, expiresAt);
+          console.log('[webhook] day_pass activated:', userId, 'expires:', expiresAt);
+        } else if (session.subscription) {
           const tier = PLAN_TO_TIER[planKey] || 'pro';
           await updateUserPlan(userId, tier, session.customer, session.subscription);
           console.log('[webhook] activated:', userId, '->', tier);
@@ -401,6 +432,17 @@ async function confirmPayment(req, res) {
 
       if (session.status === 'complete' || session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
         const planKey = session.metadata && session.metadata.planKey;
+        if (planKey === 'day_pass') {
+          // Check if already activated by webhook (plan_expires_at already set)
+          const existingProfile = await getUserProfile(userId);
+          if (existingProfile && existingProfile.plan === 'day_pass' && existingProfile.plan_expires_at) {
+            return res.status(200).json({ plan: 'day_pass', updated: true, planExpiresAt: existingProfile.plan_expires_at });
+          }
+          // Webhook may not have fired yet — activate now
+          const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
+          await updateUserPlan(userId, 'day_pass', session.customer, null, expiresAt);
+          return res.status(200).json({ plan: 'day_pass', updated: true, planExpiresAt: expiresAt });
+        }
         const tier = PLAN_TO_TIER[planKey] || 'pro';
         await updateUserPlan(userId, tier, session.customer, session.subscription);
         return res.status(200).json({ plan: tier, updated: true });
