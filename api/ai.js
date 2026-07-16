@@ -36,7 +36,8 @@ module.exports = async (req, res) => {
     'interview-prep':     buildInterviewPrompt,
     'template-recommend': buildTemplatePrompt,
     'ats-check':          buildAtsPrompt,
-    'parse-cv':           buildParseCvPrompt
+    'parse-cv':           buildParseCvPrompt,
+    'compare-cv':         buildCompareCvPrompt
   };
 
   const builder = builders[action];
@@ -270,8 +271,23 @@ function buildParseCvPrompt(p) {
         }],
         skills: ['string'],
         languages: ['string (language name only, e.g. "French")'],
-        certifications: ['string']
-      }))
+        certification
+
+function buildCompareCvPrompt(p) {
+  return {
+    maxTokens: 3000,
+    system: UK_STYLE,
+    user: [
+      'OLD CV (raw text extracted from uploaded file):',
+      '---',
+      (p.oldCvText || '(no old CV provided)'),
+      '---',
+      '',
+      'NEW CV (structured data):',
+      cvSummaryBlock(p),
+      '',
+      'Compare the old CV against the new one. Identify what has improved, what is new, what was removed, and flag anything that looks worse or missing. Be specific — reference actual content from both CVs.',
+      jsonOnly('{ "improvements": [{ "category": "string", "old": "string", "new": "string", "verdict": "better | worse | new | removed" }], "summary": "string (2-3 sentence overall verdict)", "score": { "old": 0, "new": 0 } }')
     ].join('\n')
   };
 }

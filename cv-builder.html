@@ -286,11 +286,32 @@
           </div>
 
           <!-- Pre-analysis state -->
-          <div id="analyseIntro" class="analyse-hero">
-            <div class="rocket">🚀</div>
-            <h3>Ready when you are</h3>
-            <p>We'll enhance your summary and bullet points, score your CV out of 100, recommend a template, and write your first cover letter — free.</p>
-            <button class="btn btn-primary btn-lg" id="analyseBtn">Analyse my CV</button>
+          <div id="analyseIntro">
+            <!-- Job description input (synced with step 4) -->
+            <div style="margin-bottom:1.25rem;">
+              <label for="aiJobDesc" style="display:block;font-size:0.85rem;font-weight:600;color:var(--ink);margin-bottom:0.4rem;">Job description <span style="font-weight:400;color:var(--muted);">(paste to tailor your cover letter &amp; interview prep)</span></label>
+              <textarea id="aiJobDesc" rows="5" style="width:100%;font-family:var(--font-body);font-size:0.85rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:0.65rem 0.85rem;resize:vertical;transition:border-color 0.15s;box-sizing:border-box;" placeholder="Paste the full job advert here — the AI will tailor your cover letter and interview questions to match it exactly."></textarea>
+            </div>
+            <!-- Old CV comparison upload (Pro) -->
+            <div id="cvCompareSection" style="margin-bottom:1.25rem;padding:1rem;border:1.5px dashed var(--border);border-radius:var(--radius);background:#FAFAFA;">
+              <p style="font-size:0.85rem;font-weight:600;color:var(--ink);margin:0 0 0.3rem;">Compare with your old CV <span style="font-size:0.75rem;font-weight:700;background:#EDE9F8;color:#5B2D8E;padding:0.15rem 0.45rem;border-radius:6px;vertical-align:middle;">PRO</span></p>
+              <p style="font-size:0.78rem;color:var(--muted);margin:0 0 0.65rem;">Upload your previous CV — we'll show you exactly what improved.</p>
+              <div id="cvCompareLocked" style="display:none;text-align:center;padding:0.5rem;">
+                <a href="dashboard.html" class="btn btn-violet btn-sm">Upgrade to Pro to compare CVs &#8594;</a>
+              </div>
+              <div id="cvComparePro" style="display:none;">
+                <input type="file" id="oldCvUpload" accept=".pdf,.txt" style="display:none;">
+                <button class="btn btn-ghost btn-sm" id="oldCvPickBtn" onclick="document.getElementById('oldCvUpload').click()">&#128206; Upload old CV (PDF or TXT)</button>
+                <span id="oldCvFilename" style="font-size:0.8rem;color:var(--muted);margin-left:0.6rem;"></span>
+                <div id="cvCompareResult" style="display:none;margin-top:1rem;"></div>
+              </div>
+            </div>
+            <div class="analyse-hero" style="margin:0;">
+              <div class="rocket">&#128640;</div>
+              <h3>Ready when you are</h3>
+              <p>We'll enhance your summary and bullet points, score your CV out of 100, recommend a template, and write your first cover letter.</p>
+              <button class="btn btn-primary btn-lg" id="analyseBtn">Analyse my CV</button>
+            </div>
           </div>
 
           <!-- Loading state -->
@@ -610,7 +631,17 @@
       });
       document.getElementById('progressFill').style.width = (n / TOTAL_STEPS * 100) + '%';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (n === 5) renderPreview();
+      if (n === 5) {
+        renderPreview();
+        var aiJD = document.getElementById('aiJobDesc');
+        if (aiJD && state.jobTarget && state.jobTarget.description) aiJD.value = state.jobTarget.description;
+        var locked = document.getElementById('cvCompareLocked');
+        var pro = document.getElementById('cvComparePro');
+        if (locked && pro) {
+          if (isPro()) { locked.style.display = 'none'; pro.style.display = 'block'; }
+          else { locked.style.display = 'block'; pro.style.display = 'none'; }
+        }
+      }
     }
 
     function validateStep(n) {
@@ -1443,6 +1474,11 @@
 
     function runAnalysis() {
       collectStep(state.step);
+      var aiJD = document.getElementById('aiJobDesc');
+      if (aiJD && aiJD.value.trim()) {
+        if (!state.jobTarget) state.jobTarget = {};
+        state.jobTarget.description = aiJD.value.trim();
+      }
       showAnalysisState('aiLoading');
       startLoadingMessages();
 
@@ -2304,6 +2340,89 @@
       msgs.appendChild(el);
       msgs.scrollTop = msgs.scrollHeight;
     }
+
+    /* ---------- Old CV upload & comparison ---------- */
+    (function() {
+      var uploadInput = document.getElementById('oldCvUpload');
+      if (!uploadInput) return;
+      var pickBtn = document.getElementById('oldCvPickBtn');
+      var filenameEl = document.getElementById('oldCvFilename');
+      var resultEl = document.getElementById('cvCompareResult');
+
+      uploadInput.addEventListener('change', async function() {
+        var file = uploadInput.files[0];
+        if (!file) return;
+        filenameEl.textContent = file.name;
+        pickBtn.disabled = true;
+        pickBtn.textContent = '⏳ Reading…';
+        resultEl.style.display = 'none';
+        try {
+          var text = '';
+          if (file.name.toLowerCase().endsWith('.pdf')) {
+            var arrayBuffer = await file.arrayBuffer();
+            var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            var pages = [];
+            for (var i = 1; i <= pdf.numPages; i++) {
+              var page = await pdf.getPage(i);
+              var tc = await page.getTextContent();
+              pages.push(tc.items.map(function(it) { return it.str; }).join(' '));
+            }
+            text = pages.join('\n');
+          } else {
+            text = await file.text();
+          }
+          pickBtn.textContent = '⏳ Comparing…';
+          var resp = await fetch(AI_ENDPOINT + '?action=compare-cv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              oldCvText: text,
+              personal: state.personal,
+              experience: state.experience,
+              education: state.education,
+              skills: state.skills,
+              languages: state.languages,
+              certifications: state.certifications,
+              jobTarget: state.jobTarget
+            })
+          });
+          var data = await resp.json();
+          if (data.error) throw new Error(data.error);
+          renderCvComparison(data);
+        } catch(e) {
+          resultEl.innerHTML = '<p style="color:#B91C1C;font-size:0.85rem;">⚠️ ' + escHtml(e.message || 'Could not compare CVs') + '</p>';
+          resultEl.style.display = 'block';
+        }
+        pickBtn.disabled = false;
+        pickBtn.textContent = '📎 Upload different CV';
+      });
+
+      function renderCvComparison(data) {
+        var verdictColors = { better: '#15803D', worse: '#B91C1C', new: '#5B2D8E', removed: '#92400E' };
+        var verdictLabels = { better: '✅ Better', worse: '⚠️ Worse', new: '🆕 New', removed: '🗑️ Removed' };
+        var html = '<div style="border-top:1.5px solid var(--border);padding-top:1rem;margin-top:0.5rem;">';
+        if (data.score) {
+          html += '<div style="display:flex;gap:2rem;margin-bottom:0.75rem;">';
+          html += '<div><p style="font-size:0.72rem;color:var(--muted);margin:0 0 0.1rem;">Old CV</p><p style="font-size:1.5rem;font-weight:800;color:#B91C1C;margin:0;">' + (data.score.old||'?') + '<small style="font-size:0.85rem;">/100</small></p></div>';
+          html += '<div><p style="font-size:0.72rem;color:var(--muted);margin:0 0 0.1rem;">New CV</p><p style="font-size:1.5rem;font-weight:800;color:#15803D;margin:0;">' + (data.score.new||'?') + '<small style="font-size:0.85rem;">/100</small></p></div>';
+          html += '</div>';
+        }
+        if (data.summary) html += '<p style="font-size:0.85rem;color:var(--muted);margin:0 0 0.75rem;line-height:1.5;">' + escHtml(data.summary) + '</p>';
+        (data.improvements||[]).forEach(function(item) {
+          var color = verdictColors[item.verdict]||'#374151';
+          var label = verdictLabels[item.verdict]||item.verdict;
+          html += '<div style="border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.85rem;margin-bottom:0.5rem;">';
+          html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;"><span style="font-size:0.7rem;font-weight:700;color:'+color+';background:'+color+'22;padding:0.15rem 0.45rem;border-radius:4px;">'+label+'</span>';
+          html += '<span style="font-size:0.8rem;font-weight:600;color:var(--ink);">'+escHtml(item.category||'')+'</span></div>';
+          if (item.old) html += '<p style="font-size:0.78rem;color:var(--muted);margin:0 0 0.15rem;text-decoration:line-through;">'+escHtml(item.old)+'</p>';
+          if (item.new) html += '<p style="font-size:0.78rem;color:var(--ink);margin:0;">'+escHtml(item.new)+'</p>';
+          html += '</div>';
+        });
+        html += '</div>';
+        resultEl.innerHTML = html;
+        resultEl.style.display = 'block';
+      }
+    })();
 
     initChatWidget();
 
