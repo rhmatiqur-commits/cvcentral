@@ -3,7 +3,8 @@
   "functions": {
     "api/ai.js": { "maxDuration": 60 },
     "api/chat.js": { "maxDuration": 15 },
-    "api/payment.js": { "maxDuration": 30 }
+    "api/payment.js": { "maxDuration": 30 },
+    "api/webhook.js": { "maxDuration": 30 }
   },
   "headers": [
     {
@@ -12,6 +13,19 @@
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" }
       ]
     }
   ]
