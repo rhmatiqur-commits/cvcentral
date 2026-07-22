@@ -385,11 +385,11 @@
         <a href="signup.html" class="btn-plan btn-plan-lime" id="proBtnLabel">Get Pro</a>
         <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="proTrialNote">then £5.99/month — cancel anytime</p>
       </div>
-      <div class="price-card reveal">
+      <div class="price-card reveal" style="opacity:0.72;position:relative;pointer-events:none;user-select:none;">
+        <div class="popular-badge" style="background:var(--bg-card2);color:var(--text-2);">Coming Soon</div>
         <div class="plan-name">Premium</div>
         <div class="plan-price" id="premiumPrice">£10.99<span>/mo</span></div>
         <div class="plan-period" id="premiumPeriod">per month</div>
-        <div class="plan-trial">✨ Try 14 days for £1.99</div>
         <ul class="plan-feats">
           <li>Everything in Pro</li>
           <li>Priority AI processing</li>
@@ -398,8 +398,7 @@
           <li>Priority support</li>
           <li>Early access to new features</li>
         </ul>
-        <a href="signup.html" class="btn-plan btn-plan-violet" id="premiumBtnLabel">Get Premium</a>
-        <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="premiumTrialNote">then £10.99/month — cancel anytime</p>
+        <span class="btn-plan btn-plan-ghost" id="premiumBtnLabel" style="cursor:not-allowed;">Coming soon</span>
       </div>
     </div>
     <!-- Trust bar -->
@@ -590,9 +589,7 @@ function setPricing(mode, el){
   document.getElementById('premiumPrice').innerHTML = annual ? '£79<span>/yr</span>' : '£10.99<span>/mo</span>';
   document.getElementById('premiumPeriod').textContent = annual ? 'per year (save £52.88)' : 'per month';
   document.getElementById('proBtnLabel').textContent = annual ? 'Get Pro Annual' : 'Get Pro';
-  document.getElementById('premiumBtnLabel').textContent = annual ? 'Get Premium Annual' : 'Get Premium';
   document.getElementById('proTrialNote').textContent = annual ? 'then £44/year — cancel anytime' : 'then £5.99/month — cancel anytime';
-  document.getElementById('premiumTrialNote').textContent = annual ? 'then £79/year — cancel anytime' : 'then £10.99/month — cancel anytime';
 }
 
 // ── Reveal on scroll ──
