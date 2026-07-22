@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feedback — CV Central</title>
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:#0A0A14; --bg-card:#10101C; --lime:#AAFF00; --lime-dim:rgba(170,255,0,0.08);
       --violet:#5B2D8E; --violet-bright:#7B4DB8;
       --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
       --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
-      --font:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
       --radius:12px;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -20,7 +20,7 @@
     .card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:40px;width:100%;max-width:520px;position:relative;overflow:hidden;}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--lime));}
     .logo{display:flex;justify-content:center;margin-bottom:28px;}
-    h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;text-align:center;margin-bottom:6px;}
+    h1{font-family:var(--font-heading);font-size:1.5rem;font-weight:800;letter-spacing:-0.03em;text-align:center;margin-bottom:6px;}
     .sub{font-size:0.88rem;color:var(--text-2);text-align:center;margin-bottom:32px;}
     label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-2);margin-bottom:6px;letter-spacing:0.02em;}
     .field{margin-bottom:18px;}

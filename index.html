@@ -7,7 +7,7 @@
   <meta name="description" content="Build, score and optimise your CV with AI built for the UK job market. Start your 14-day trial for £1.99.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#5B2D8E">
@@ -22,7 +22,7 @@
       --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.15);
       --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
       --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
-      --font:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
       --radius:12px;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -39,7 +39,7 @@
     .nav-actions{display:flex;align-items:center;gap:12px;}
     .btn-ghost{font-size:0.875rem;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;padding:8px 16px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,background 0.2s;}
     .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-    .btn-lime{font-size:0.875rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
+    .btn-lime{font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
     .btn-lime:hover{background:#C4FF33;}
     @media(max-width:768px){.nav-links{display:none;} nav{padding:0 20px;}}
 
@@ -50,11 +50,11 @@
     .hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:24px;}
     .hero-tag-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse-dot 1.6s ease-in-out infinite;}
     @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
-    .hero-h1{font-size:clamp(2.6rem,5vw,4rem);font-weight:900;line-height:1.0;letter-spacing:-0.04em;margin-bottom:20px;}
+    .hero-h1{font-family:var(--font-heading);font-size:clamp(2.6rem,5vw,4rem);font-weight:800;line-height:1.0;letter-spacing:-0.03em;margin-bottom:20px;}
     .hero-h1 em{font-style:normal;color:var(--lime);}
     .hero-sub{font-size:1.05rem;color:var(--text-2);line-height:1.7;margin-bottom:36px;max-width:480px;}
     .hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:40px;}
-    .btn-primary{font-size:1rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:14px 28px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s,transform 0.1s;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{font-family:var(--font-heading);font-size:1rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:14px 28px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s,transform 0.1s;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:6px;}
     .btn-primary:hover{background:#C4FF33;}
     .btn-primary:active{transform:scale(0.97);}
     .btn-outline{font-size:0.95rem;font-weight:600;color:var(--text-2);background:transparent;border:1px solid var(--border-bright);cursor:pointer;padding:13px 22px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,border-color 0.2s,background 0.2s;}
@@ -99,7 +99,7 @@
     /* SECTIONS */
     .section-inner{max-width:1200px;margin:0 auto;padding:96px 40px;}
     .section-tag{display:inline-block;font-family:var(--mono);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lime);background:var(--lime-dim);padding:4px 12px;border-radius:100px;margin-bottom:16px;}
-    .section-h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;letter-spacing:-0.03em;line-height:1.15;margin-bottom:12px;}
+    .section-h2{font-family:var(--font-heading);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-bottom:12px;}
     .section-h2 em{font-style:normal;color:var(--lime);}
     .section-sub{font-size:1rem;color:var(--text-2);max-width:560px;line-height:1.7;}
     @media(max-width:768px){.section-inner{padding:64px 24px;} .stats-inner{padding:0 24px;}}
@@ -138,7 +138,7 @@
     .price-card.popular{border-color:rgba(170,255,0,0.3);}
     .price-card.popular::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--lime));}
     .popular-badge{display:inline-block;font-size:0.65rem;font-weight:700;color:#0A0A00;background:var(--lime);padding:3px 10px;border-radius:100px;margin-bottom:12px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;}
-    .plan-name{font-size:1rem;font-weight:700;margin-bottom:8px;}
+    .plan-name{font-family:var(--font-heading);font-size:1rem;font-weight:700;margin-bottom:8px;}
     .plan-price{font-size:2.4rem;font-weight:900;font-family:var(--mono);letter-spacing:-0.04em;color:var(--text);margin-bottom:2px;}
     .plan-price span{font-size:1rem;font-weight:400;color:var(--text-2);}
     .plan-period{font-size:0.8rem;color:var(--text-2);margin-bottom:6px;}
@@ -146,7 +146,7 @@
     .plan-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
     .plan-feats li{font-size:0.87rem;color:var(--text-2);display:flex;align-items:flex-start;gap:8px;}
     .plan-feats li::before{content:'✓';color:var(--lime);font-weight:700;flex-shrink:0;margin-top:1px;}
-    .btn-plan{display:block;text-align:center;padding:12px;border-radius:var(--radius);font-weight:700;font-size:0.9rem;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;}
+    .btn-plan{display:block;text-align:center;padding:12px;border-radius:var(--radius);font-family:var(--font-heading);font-weight:700;font-size:0.9rem;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;}
     .btn-plan-lime{background:var(--lime);color:#0A0A00;} .btn-plan-lime:hover{background:#C4FF33;}
     .btn-plan-violet{background:var(--violet);color:#fff;} .btn-plan-violet:hover{background:var(--violet-bright);}
     .btn-plan-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border-bright);} .btn-plan-ghost:hover{border-color:rgba(255,255,255,0.25);color:var(--text);}
@@ -167,7 +167,7 @@
     /* CTA */
     #cta{border-top:1px solid var(--border);}
     .cta-inner{text-align:center;max-width:640px;margin:0 auto;}
-    .cta-h2{font-size:clamp(2rem,4vw,3rem);font-weight:900;letter-spacing:-0.04em;margin-bottom:16px;line-height:1.1;}
+    .cta-h2{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:16px;line-height:1.1;}
     .cta-h2 em{font-style:normal;color:var(--lime);}
     .cta-sub{font-size:1rem;color:var(--text-2);margin-bottom:36px;line-height:1.7;}
     .cta-note{font-size:0.8rem;color:var(--text-3);margin-top:16px;}
