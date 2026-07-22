@@ -669,7 +669,6 @@
     }
     var closeBtn = document.getElementById('closeUpgradeModal');
     closeBtn.addEventListener('click', closeUpgradeModal);
-    closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); closeUpgradeModal(); });
     document.getElementById('upgradeModal').addEventListener('click', function(e) {
       if (e.target === this) closeUpgradeModal();
     });
