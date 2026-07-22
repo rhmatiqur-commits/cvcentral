@@ -499,7 +499,7 @@
       </div>
 
       <!-- Plan cards -->
-      <div style="padding:1.25rem 2rem 1.75rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div style="padding:1.25rem 2rem 1.75rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
 
         <!-- Pro -->
         <div class="upgrade-card" data-plan-monthly="pro_monthly" data-plan-annual="pro_annual" style="border:2px solid #5B2D8E;border-radius:14px;padding:1.25rem;cursor:pointer;background:#FAF8FF;position:relative;overflow:hidden;transition:box-shadow 0.15s;" onclick="window._checkoutCurrent('pro')">
@@ -521,7 +521,7 @@
         </div>
 
         <!-- Premium (Coming Soon) -->
-        <div style="border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;background:#FAFAFA;opacity:0.72;position:relative;overflow:hidden;">
+        <div style="border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;background:#FAFAFA;opacity:0.72;position:relative;overflow:hidden;pointer-events:none;user-select:none;">
           <div style="position:absolute;top:12px;right:12px;background:#E0D4F5;color:#5B2D8E;font-size:0.7rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:6px;">Coming Soon</div>
           <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Premium</p>
           <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£10.99</p>
@@ -724,8 +724,15 @@
       document.getElementById('cancelModal').style.display = 'none';
     });
 
-    // Handle ?payment=success redirect from Stripe Checkout
+    // Handle ?upgrade=1 — auto-open upgrade modal (e.g. from CV builder upgrade links)
     var params = new URLSearchParams(window.location.search);
+    if (params.get('upgrade') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+      // Small delay to let the dashboard render first
+      setTimeout(function() { window._openUpgradeModal && window._openUpgradeModal(); }, 600);
+    }
+
+    // Handle ?payment=success redirect from Stripe Checkout
     if (params.get('payment') === 'success') {
       var stripeSessionId = params.get('session_id') || null;
       window.history.replaceState({}, '', window.location.pathname);
