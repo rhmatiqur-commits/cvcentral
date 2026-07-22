@@ -25,6 +25,36 @@
 </head>
 <body class="builder-page">
 
+  <!-- Template picker overlay — must live before the main <script> below so
+       document.getElementById('tpOverlay') can find it during synchronous
+       script execution (it previously sat after </script>, at the very end
+       of <body>, and was always null as a result). -->
+  <div id="tpOverlay" style="display:none;position:fixed;inset:0;z-index:500;background:#F8F7FF;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+    <div style="max-width:860px;margin:0 auto;padding:1.75rem 1rem 6rem;">
+
+      <!-- Header -->
+      <div style="text-align:center;padding:.5rem 0 2rem;">
+        <a href="index.html" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;margin-bottom:1.5rem;">
+          <span class="logo-mark" style="width:34px;height:34px;font-size:.8rem;">CV</span>
+          <span style="font-weight:800;font-size:1.1rem;letter-spacing:-.02em;color:var(--ink);">CV<span style="color:var(--violet);">Central</span></span>
+        </a>
+        <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:var(--ink);letter-spacing:-.03em;margin:0 0 .6rem;">Choose your CV template</h1>
+        <p style="font-size:.95rem;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.6;">Pick a style that suits your field. You can switch any time inside the builder.</p>
+      </div>
+
+      <!-- Grid (JS-rendered) -->
+      <div id="tpGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
+
+      <!-- Sticky CTA -->
+      <div style="position:sticky;bottom:0;padding:1.25rem 0 .25rem;text-align:center;background:linear-gradient(to bottom,transparent,#F8F7FF 40%);">
+        <button id="tpStartBtn" class="btn btn-primary" style="padding:.85rem 2.5rem;font-size:1rem;font-weight:800;letter-spacing:-.01em;border-radius:12px;touch-action:manipulation;">Start building →</button>
+        <p style="margin:.6rem 0 0;font-size:.83rem;color:var(--muted);">or <a href="#" id="tpSkipLink" style="color:var(--violet);font-weight:600;touch-action:manipulation;">skip and choose later</a></p>
+      </div>
+
+    </div>
+  </div>
+
+
   <header class="site-header">
     <div class="container">
       <a href="index.html" class="logo" aria-label="CV Central home">
@@ -2585,31 +2615,6 @@
     .tp-pop{position:absolute;top:0;left:50%;transform:translateX(-50%);background:#5B2D8E;color:#AAFF00;font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .5rem;border-radius:0 0 7px 7px;white-space:nowrap;}
     @media(max-width:500px){#tpGrid{grid-template-columns:repeat(2,1fr)!important;}}
   </style>
-
-  <div id="tpOverlay" style="display:none;position:fixed;inset:0;z-index:500;background:#F8F7FF;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-    <div style="max-width:860px;margin:0 auto;padding:1.75rem 1rem 6rem;">
-
-      <!-- Header -->
-      <div style="text-align:center;padding:.5rem 0 2rem;">
-        <a href="index.html" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;margin-bottom:1.5rem;">
-          <span class="logo-mark" style="width:34px;height:34px;font-size:.8rem;">CV</span>
-          <span style="font-weight:800;font-size:1.1rem;letter-spacing:-.02em;color:var(--ink);">CV<span style="color:var(--violet);">Central</span></span>
-        </a>
-        <h1 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:900;color:var(--ink);letter-spacing:-.03em;margin:0 0 .6rem;">Choose your CV template</h1>
-        <p style="font-size:.95rem;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.6;">Pick a style that suits your field. You can switch any time inside the builder.</p>
-      </div>
-
-      <!-- Grid (JS-rendered) -->
-      <div id="tpGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:1rem;margin-bottom:1.5rem;"></div>
-
-      <!-- Sticky CTA -->
-      <div style="position:sticky;bottom:0;padding:1.25rem 0 .25rem;text-align:center;background:linear-gradient(to bottom,transparent,#F8F7FF 40%);">
-        <button id="tpStartBtn" class="btn btn-primary" style="padding:.85rem 2.5rem;font-size:1rem;font-weight:800;letter-spacing:-.01em;border-radius:12px;touch-action:manipulation;">Start building →</button>
-        <p style="margin:.6rem 0 0;font-size:.83rem;color:var(--muted);">or <a href="#" id="tpSkipLink" style="color:var(--violet);font-weight:600;touch-action:manipulation;">skip and choose later</a></p>
-      </div>
-
-    </div>
-  </div>
 
 </body>
 </html>
