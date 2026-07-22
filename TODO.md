@@ -22,6 +22,18 @@
 
 ---
 
+## 📧 Email Infrastructure
+
+### Set up transactional email via Resend (Priority: HIGH — do before scaling)
+- Sign up at resend.com (free up to 3,000 emails/month)
+- Add cvcentral.io domain and verify DNS records
+- Configure Supabase SMTP: host `smtp.resend.com`, port 465, user `resend`, password = Resend API key
+- Enable email confirmation back on in Supabase Auth settings
+- Also covers: password reset emails, any future notification emails
+- Estimated effort: 30 minutes
+
+---
+
 ## 💡 Other Ideas
 <!-- Add more ideas here -->
 

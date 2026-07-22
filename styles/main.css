@@ -965,6 +965,17 @@ a { color: inherit; text-decoration: none; }
   .dash-hero { margin-bottom: -1.25rem; padding-bottom: 2.5rem; }
 }
 
+@media (max-width: 560px) {
+  .dash-hero { padding: 1.5rem 1.25rem 2.5rem; border-radius: 16px; }
+  .dash-hero::before { width: 140px; height: 140px; top: -40px; right: -40px; }
+  .dash-hero-inner { align-items: stretch; }
+  .dash-hero-inner .btn { width: 100%; }
+  .dash-card { padding: 1.25rem; }
+  .dash-card.accent-fill .btn { width: 100%; }
+  .kw-chip { padding: 0.45rem 0.85rem; }
+  .dash-check { padding: 0.85rem; }
+}
+
 .dash-check {
   display: flex;
   align-items: center;
