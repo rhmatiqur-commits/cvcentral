@@ -7,7 +7,7 @@
   <meta name="description" content="Your CV Central dashboard &mdash; CV score, plan and next steps.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
 </head>
@@ -44,38 +44,48 @@
 
       <!-- Dashboard -->
       <div id="dashPanel" hidden>
-        <div class="dash-head">
-          <div>
-            <h1 id="dashGreeting">Hello!</h1>
-            <p id="dashSub">Here&rsquo;s where your job hunt stands.</p>
+        <div class="dash-hero">
+          <div class="dash-hero-inner">
+            <div>
+              <h1 id="dashGreeting">Hello!</h1>
+              <p id="dashSub">Here&rsquo;s where your job hunt stands.</p>
+            </div>
+            <a href="cv-builder.html" class="btn btn-primary">Edit my CV →</a>
           </div>
-          <a href="cv-builder.html" class="btn btn-primary">Edit my CV</a>
         </div>
 
         <div class="dash-grid">
           <div class="dash-card">
             <p class="card-label">CV Score</p>
-            <p class="dash-stat"><span id="dashScore">&mdash;</span><small>/100</small></p>
-            <p style="font-size:0.85rem;color:var(--muted);margin-top:0.5rem;" id="dashScoreNote"></p>
+            <div style="display:flex;align-items:center;gap:0.85rem;">
+              <div class="score-ring-sm">
+                <svg width="56" height="56" viewBox="0 0 56 56">
+                  <circle class="ring-bg" cx="28" cy="28" r="24" fill="none" stroke-width="6"/>
+                  <circle class="ring-val" id="dashScoreRing" cx="28" cy="28" r="24" fill="none" stroke-width="6" stroke-dasharray="150.8" stroke-dashoffset="150.8"/>
+                </svg>
+                <div class="ring-num"><span id="dashScore">&mdash;</span></div>
+              </div>
+              <p style="font-size:0.8rem;color:var(--muted);line-height:1.4;margin:0;" id="dashScoreNote"></p>
+            </div>
           </div>
-          <div class="dash-card">
+          <div class="dash-card accent-fill">
             <p class="card-label">Your plan</p>
-            <p><span class="plan-chip" id="dashPlan">FREE</span></p>
-            <p style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 1rem;" id="planDesc">Unlock unlimited cover letters, ATS checks and interview prep.</p>
-            <button id="upgradePlanBtn" class="btn btn-violet btn-sm" style="display:none">Upgrade to Pro</button>
-            <button id="managePlanBtn" class="btn btn-ghost btn-sm" style="display:none">Manage subscription</button>
-            <p style="font-size:0.75rem;color:var(--muted);margin:0.4rem 0 0;display:none;" id="cancelHint">Cancel anytime — one click, no phone calls needed.</p>
+            <p style="font-family:var(--font-heading);font-weight:800;font-size:1.15rem;margin:0 0 0.5rem;" id="dashPlan">Free</p>
+            <p style="font-size:0.82rem;color:rgba(255,255,255,0.75);margin:0 0 1rem;" id="planDesc">Unlock unlimited cover letters, ATS checks and interview prep.</p>
+            <button id="upgradePlanBtn" class="btn btn-sm" style="display:none;background:var(--lime);color:var(--ink);border:none;">Upgrade to Pro</button>
+            <button id="managePlanBtn" class="btn btn-sm" style="display:none;background:rgba(255,255,255,0.12);color:#fff;border:1.5px solid rgba(255,255,255,0.3);">Manage subscription</button>
+            <p style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin:0.5rem 0 0;display:none;" id="cancelHint">Cancel anytime — one click, no phone calls needed.</p>
           </div>
-          <div class="dash-card">
+          <div class="dash-card accent-lime">
             <p class="card-label">Target role</p>
-            <p style="font-weight:800;font-size:1.15rem;letter-spacing:-0.01em;" id="dashRole">&mdash;</p>
+            <p style="font-family:var(--font-heading);font-weight:800;font-size:1.15rem;letter-spacing:-0.01em;" id="dashRole">&mdash;</p>
             <p style="font-size:0.85rem;color:var(--muted);margin-top:0.35rem;" id="dashIndustry"></p>
             <p style="font-size:0.8rem;color:var(--muted);margin-top:0.75rem;" id="dashMeta"></p>
           </div>
 
           <div class="dash-card span-2">
             <p class="card-label">Recommended next steps</p>
-            <ul class="dash-list" id="dashImprovements"></ul>
+            <div class="dash-list" id="dashImprovements" style="display:grid;gap:0.6rem;"></div>
           </div>
           <div class="dash-card">
             <p class="card-label">Top ATS keywords</p>
@@ -87,7 +97,7 @@
 
         <!-- Pro Features Panel (hidden for free users) -->
         <div id="proFeaturesPanel" style="display:none;margin-top:2rem;">
-          <h2 style="font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin:0 0 1rem;">Your Pro features</h2>
+          <h2 style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin:0 0 1rem;">Your Pro features</h2>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
             <a href="cv-builder.html?open=analyse" class="dash-card" style="text-decoration:none;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;border:1.5px solid var(--border);" onmouseover="this.style.borderColor='#5B2D8E';this.style.boxShadow='0 4px 16px rgba(91,45,142,0.12)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow=''">
               <p style="font-size:1.5rem;margin:0 0 0.5rem;">🤖</p>
@@ -115,7 +125,7 @@
       <!-- My CVs Section -->
       <div id="myCvsSection" style="display:none;margin-top:2.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-          <h2 style="font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin:0;">My CVs</h2>
+          <h2 style="font-family:var(--font-heading);font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-0.01em;margin:0;">My CVs</h2>
           <a href="cv-builder.html?new=1" class="btn btn-ghost btn-sm" style="font-size:0.82rem;">+ New CV</a>
         </div>
         <div id="myCvsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;"></div>
@@ -186,11 +196,15 @@
     });
 
     /* ---------- Score animation ---------- */
-    function animateScore(el, target) {
+    var RING_CIRC = 150.8;
+    function animateScore(el, target, ringEl) {
       var start = performance.now();
       (function frame(now) {
         var t = Math.min((now - start) / 1000, 1);
-        el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+        var eased = 1 - Math.pow(1 - t, 3);
+        var val = Math.round(target * eased);
+        el.textContent = val;
+        if (ringEl) ringEl.style.strokeDashoffset = RING_CIRC * (1 - (target * eased) / 100);
         if (t < 1) requestAnimationFrame(frame);
       })(start);
     }
@@ -248,20 +262,20 @@
       var cvScore  = savedCV ? savedCV.score : null;
 
       var scoreEl = document.getElementById('dashScore');
+      var ringEl  = document.getElementById('dashScoreRing');
       var note    = document.getElementById('dashScoreNote');
       if (cvScore != null) {
-        animateScore(scoreEl, cvScore);
+        animateScore(scoreEl, cvScore, ringEl);
         note.textContent = cvScore >= 85 ? 'Interview-ready. Nice work.' :
                            cvScore >= 70 ? 'Solid — a few tweaks from great.' :
                            'Run the AI enhancement to boost this.';
       } else {
         scoreEl.textContent = '—';
+        if (ringEl) ringEl.style.strokeDashoffset = RING_CIRC;
         note.textContent = 'Run "Analyse my CV" in the builder to get scored.';
       }
 
-      var chip = document.getElementById('dashPlan');
-      chip.textContent = plan.toUpperCase();
-      chip.className = 'plan-chip ' + plan;
+      document.getElementById('dashPlan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1).replace('_', ' ');
 
       document.getElementById('dashRole').textContent     = personal.targetRole || 'Not set yet';
       document.getElementById('dashIndustry').textContent = personal.targetIndustry || '';
@@ -277,10 +291,21 @@
         'Add measurable achievements to each role (numbers win interviews)',
         'Paste a job description in step 4 to unlock your ATS check'
       ];
+      var doneKey = 'cvcentral_steps_done';
+      var doneSet = {};
+      try { doneSet = JSON.parse(localStorage.getItem(doneKey) || '{}'); } catch(e) {}
       improvements.slice(0, 3).forEach(function(imp) {
-        var li = document.createElement('li');
-        li.textContent = imp;
-        impList.appendChild(li);
+        var row = document.createElement('div');
+        row.className = 'dash-check' + (doneSet[imp] ? ' done' : '');
+        row.innerHTML = '<span class="box">' + (doneSet[imp] ? '&#10003;' : '') + '</span><span class="txt"></span>';
+        row.querySelector('.txt').textContent = imp;
+        row.addEventListener('click', function() {
+          var isDone = row.classList.toggle('done');
+          row.querySelector('.box').innerHTML = isDone ? '&#10003;' : '';
+          doneSet[imp] = isDone;
+          try { localStorage.setItem(doneKey, JSON.stringify(doneSet)); } catch(e) {}
+        });
+        impList.appendChild(row);
       });
 
       var kwWrap = document.getElementById('dashKeywords');
@@ -289,7 +314,11 @@
       if (keywords.length) {
         keywords.slice(0, 5).forEach(function(kw) {
           var c = document.createElement('span');
-          c.style.cssText = 'font-family:var(--font-mono);font-size:0.8rem;font-weight:600;background:#F2FFD6;color:#3F6212;border:1px solid #DBF7A8;padding:0.3rem 0.75rem;border-radius:999px;';
+          c.className = 'kw-chip';
+          c.title = 'Click to copy';
+          c.addEventListener('click', function() {
+            if (navigator.clipboard) navigator.clipboard.writeText(kw).then(function() { toast('Copied "' + kw + '"'); });
+          });
           c.textContent = kw;
           kwWrap.appendChild(c);
         });
@@ -338,7 +367,7 @@
 
         card.innerHTML =
           '<p style="font-size:1.5rem;margin:0 0 0.4rem;">' + icon + '</p>'
-        + '<p style="font-weight:700;font-size:0.92rem;color:var(--ink);margin:0 0 0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(cvName) + '">' + escHtml(cvName) + '</p>'
+        + '<p style="font-family:var(--font-heading);font-weight:700;font-size:0.92rem;color:var(--ink);margin:0 0 0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + escHtml(cvName) + '">' + escHtml(cvName) + '</p>'
         + '<p style="font-size:0.75rem;color:var(--muted);margin:0 0 0.85rem;line-height:1.5;">'
         +   escHtml(template.charAt(0).toUpperCase() + template.slice(1)) + ' &bull; Score: ' + escHtml(score)
         +   (updated ? '<br>Updated ' + updated : '')
