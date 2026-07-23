@@ -6,26 +6,33 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Admin &mdash; CV Central</title>
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     [hidden] { display: none !important; }
 
     :root {
       --violet: #5B2D8E;
-      --violet-light: #7B3FB5;
+      --violet-light: #7B4DB8;
+      --violet-soft: #F1EAF9;
       --lime: #AAFF00;
-      --ink: #0F0720;
-      --surface: #1a0a2e;
-      --card: #241340;
-      --border: rgba(255,255,255,0.1);
-      --muted: #9B8BB5;
-      --text: #E2D9F3;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --ink: #1A1A2E;
+      --bg: #F8F8FF;
+      --card: #FFFFFF;
+      --border: #E7E5F0;
+      --muted: #6B7280;
+      --text: #1A1A2E;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-heading: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --radius: 14px;
     }
 
     body {
       font-family: var(--font);
-      background: var(--surface);
+      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       line-height: 1.5;
@@ -43,17 +50,20 @@
     .pw-card {
       background: var(--card);
       border: 1px solid var(--border);
+      border-top: 3px solid var(--violet);
       border-radius: 16px;
       padding: 2.5rem 2rem;
       width: 100%;
       max-width: 380px;
       text-align: center;
+      box-shadow: 0 8px 24px -14px rgba(91,45,142,0.25);
     }
 
     .pw-logo {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      font-family: var(--font-heading);
       font-size: 1.2rem;
       font-weight: 800;
       color: var(--text);
@@ -77,6 +87,7 @@
     }
 
     .pw-card h1 {
+      font-family: var(--font-heading);
       font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: -0.02em;
@@ -96,7 +107,7 @@
     .pw-field input {
       width: 100%;
       padding: 0.75rem 1rem;
-      background: var(--surface);
+      background: var(--bg);
       border: 1.5px solid var(--border);
       border-radius: 8px;
       color: var(--text);
@@ -108,7 +119,7 @@
     .pw-field input:focus { border-color: var(--violet-light); }
 
     .pw-error {
-      color: #F87171;
+      color: #DC2626;
       font-size: 0.82rem;
       margin-bottom: 0.75rem;
       min-height: 1.2em;
@@ -135,8 +146,8 @@
 
     /* Header */
     .admin-header {
-      background: var(--ink);
-      border-bottom: 1px solid var(--border);
+      background: var(--violet);
+      border-bottom: 1px solid var(--violet);
       padding: 0.85rem 1.5rem;
       display: flex;
       align-items: center;
@@ -151,22 +162,24 @@
       display: flex;
       align-items: center;
       gap: 0.65rem;
+      color: #fff;
     }
 
     .admin-brand-text {
+      font-family: var(--font-heading);
       font-size: 0.95rem;
       font-weight: 700;
     }
 
     .admin-badge {
-      background: rgba(170,255,0,0.12);
+      background: rgba(255,255,255,0.15);
       color: var(--lime);
       font-size: 0.68rem;
       font-weight: 700;
       padding: 0.18rem 0.5rem;
       border-radius: 999px;
       letter-spacing: 0.07em;
-      border: 1px solid rgba(170,255,0,0.28);
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
     .admin-header-actions {
@@ -178,13 +191,13 @@
 
     #lastUpdated {
       font-size: 0.72rem;
-      color: var(--muted);
+      color: rgba(255,255,255,0.7);
     }
 
     .btn-sm-ghost {
       background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.3);
       padding: 0.38rem 0.8rem;
       border-radius: 6px;
       font-size: 0.78rem;
@@ -193,12 +206,12 @@
       transition: all 0.15s;
     }
 
-    .btn-sm-ghost:hover { color: var(--text); border-color: var(--muted); }
+    .btn-sm-ghost:hover { color: #fff; border-color: rgba(255,255,255,0.6); }
 
     .btn-sm-danger {
       background: transparent;
-      color: #F87171;
-      border: 1px solid rgba(248,113,113,0.3);
+      color: #FCA5A5;
+      border: 1px solid rgba(252,165,165,0.4);
       padding: 0.38rem 0.8rem;
       border-radius: 6px;
       font-size: 0.78rem;
@@ -207,7 +220,7 @@
       transition: all 0.15s;
     }
 
-    .btn-sm-danger:hover { background: rgba(248,113,113,0.08); }
+    .btn-sm-danger:hover { background: rgba(255,255,255,0.1); }
 
     /* Main */
     .admin-main {
@@ -218,13 +231,13 @@
 
     /* RLS Warning */
     .rls-banner {
-      background: rgba(251,191,36,0.08);
-      border: 1px solid rgba(251,191,36,0.3);
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
       border-radius: 10px;
       padding: 0.85rem 1.15rem;
       margin-bottom: 1.25rem;
       font-size: 0.82rem;
-      color: #FCD34D;
+      color: #92400E;
       display: none;
     }
 
@@ -242,11 +255,14 @@
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-top: 3px solid var(--violet);
+      border-radius: var(--radius);
       padding: 1.2rem 1.4rem;
+      box-shadow: 0 8px 24px -14px rgba(91,45,142,0.18);
     }
 
     .stat-label {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.07em;
@@ -256,10 +272,11 @@
     }
 
     .stat-value {
+      font-family: var(--font-mono);
       font-size: 2.1rem;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      color: var(--text);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--violet);
       line-height: 1;
       margin-bottom: 0.25rem;
       font-variant-numeric: tabular-nums;
@@ -323,10 +340,11 @@
 
     .btn-export {
       background: var(--lime);
-      color: #000;
+      color: var(--ink);
       border: none;
       padding: 0.58rem 1.1rem;
       border-radius: 8px;
+      font-family: var(--font-heading);
       font-size: 0.875rem;
       font-weight: 700;
       cursor: pointer;
@@ -350,7 +368,7 @@
       overflow-x: auto;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius);
     }
 
     table {
@@ -362,6 +380,7 @@
     thead th {
       padding: 0.7rem 1rem;
       text-align: left;
+      font-family: var(--font-mono);
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.07em;
@@ -373,7 +392,7 @@
 
     tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(255,255,255,0.025); }
+    tbody tr:hover { background: var(--violet-soft); }
 
     tbody td {
       padding: 0.85rem 1rem;
@@ -390,21 +409,22 @@
       display: inline-block;
       padding: 0.18rem 0.55rem;
       border-radius: 999px;
+      font-family: var(--font-heading);
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
-    .plan-chip.free     { background: rgba(155,139,181,0.15); color: #C4B5E3; }
-    .plan-chip.trial    { background: rgba(251,191,36,0.15); color: #FCD34D; }
-    .plan-chip.pro      { background: rgba(91,45,142,0.25); color: #C4A3E8; border: 1px solid rgba(91,45,142,0.45); }
-    .plan-chip.premium  { background: rgba(170,255,0,0.1); color: var(--lime); border: 1px solid rgba(170,255,0,0.28); }
+    .plan-chip.free     { background: #F1F1F5; color: #6B7280; }
+    .plan-chip.trial    { background: #FEF3C7; color: #92400E; }
+    .plan-chip.pro      { background: var(--violet-soft); color: var(--violet); border: 1px solid #D9CCF0; }
+    .plan-chip.premium  { background: #F4FFDE; color: #3F6212; border: 1px solid #DBF7A8; }
 
     .btn-view {
-      background: rgba(91,45,142,0.22);
-      color: #C4A3E8;
-      border: 1px solid rgba(91,45,142,0.38);
+      background: var(--violet-soft);
+      color: var(--violet);
+      border: 1px solid #D9CCF0;
       padding: 0.32rem 0.7rem;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -414,7 +434,7 @@
       white-space: nowrap;
     }
 
-    .btn-view:hover { background: rgba(91,45,142,0.42); }
+    .btn-view:hover { background: #E4D6F5; }
 
     .special-row td {
       text-align: center;
@@ -427,7 +447,8 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(10,5,20,0.82);
+      background: rgba(26,26,46,0.55);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: flex-start;
       justify-content: center;
@@ -443,6 +464,7 @@
       width: 100%;
       max-width: 680px;
       margin: auto;
+      box-shadow: 0 24px 64px -12px rgba(91,45,142,0.22);
     }
 
     .modal-header {
@@ -453,7 +475,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .modal-title { font-size: 1rem; font-weight: 700; }
+    .modal-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; }
 
     .modal-close {
       background: none;
@@ -471,7 +493,7 @@
     .modal-body { padding: 1.15rem 1.4rem; }
 
     .cv-item {
-      background: var(--surface);
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 0.95rem 1.1rem;
@@ -508,15 +530,15 @@
       white-space: nowrap;
     }
 
-    .score-badge.high { background: rgba(74,222,128,0.12); color: #4ADE80; }
-    .score-badge.mid  { background: rgba(251,191,36,0.12); color: #FCD34D; }
-    .score-badge.low  { background: rgba(248,113,113,0.12); color: #F87171; }
-    .score-badge.none { background: rgba(155,139,181,0.1); color: var(--muted); }
+    .score-badge.high { background: #D1FAE5; color: #065F46; }
+    .score-badge.mid  { background: #FEF3C7; color: #92400E; }
+    .score-badge.low  { background: #FEE2E2; color: #991B1B; }
+    .score-badge.none { background: #F1F1F5; color: var(--muted); }
 
     .btn-dl {
-      background: rgba(170,255,0,0.08);
-      color: var(--lime);
-      border: 1px solid rgba(170,255,0,0.25);
+      background: #F4FFDE;
+      color: #3F6212;
+      border: 1px solid #DBF7A8;
       padding: 0.38rem 0.8rem;
       border-radius: 6px;
       font-size: 0.75rem;
@@ -526,7 +548,7 @@
       white-space: nowrap;
     }
 
-    .btn-dl:hover { background: rgba(170,255,0,0.16); }
+    .btn-dl:hover { background: #E9FFC2; }
 
     .modal-empty {
       text-align: center;
