@@ -229,6 +229,94 @@
       padding: 1.5rem;
     }
 
+    /* Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 0.6rem 0.2rem;
+      margin-right: 1.25rem;
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--violet); border-bottom-color: var(--violet); }
+
+    .tab-count {
+      display: inline-block;
+      background: var(--violet-soft);
+      color: var(--violet);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
+      margin-left: 0.3rem;
+    }
+
+    .tab-panel[hidden] { display: none; }
+
+    /* Feedback */
+    .feedback-list { display: grid; gap: 0.75rem; }
+
+    .feedback-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      box-shadow: 0 8px 24px -14px rgba(91,45,142,0.12);
+    }
+
+    .feedback-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .feedback-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .feedback-name { font-weight: 700; color: var(--text); font-size: 0.88rem; }
+    .feedback-email { color: var(--muted); font-size: 0.78rem; }
+    .feedback-date { color: var(--muted); font-size: 0.76rem; font-family: var(--font-mono); }
+    .feedback-stars { color: #F59E0B; font-size: 0.8rem; letter-spacing: 0.05em; }
+    .feedback-msg { font-size: 0.88rem; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+    .feedback-page { font-size: 0.72rem; color: var(--muted); margin-top: 0.4rem; word-break: break-all; }
+
+    .type-chip {
+      display: inline-block;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      font-family: var(--font-heading);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .type-chip.bug     { background: #FEE2E2; color: #991B1B; }
+    .type-chip.feature  { background: var(--violet-soft); color: var(--violet); border: 1px solid #D9CCF0; }
+    .type-chip.general { background: #F1F1F5; color: #6B7280; }
+    .type-chip.other   { background: #FEF3C7; color: #92400E; }
+
     /* RLS Warning */
     .rls-banner {
       background: #FFFBEB;
@@ -612,90 +700,143 @@
 
     <main class="admin-main">
 
-      <!-- RLS notice (shown when 0 rows returned) -->
-      <div class="rls-banner" id="rlsBanner">
-        <strong>No data returned.</strong>
-        This page uses your active Supabase session with Row Level Security enabled.
-        To see candidate data, log into CV Central in this browser first, then return here.
-        Full multi-user admin access requires a service-role Edge Function &mdash; the anon key cannot bypass RLS.
+      <div class="admin-tabs">
+        <button class="tab-btn active" id="tabBtnCandidates" data-tab="candidates">Candidates</button>
+        <button class="tab-btn" id="tabBtnFeedback" data-tab="feedback">Feedback<span class="tab-count" id="feedbackCount" hidden></span></button>
       </div>
 
-      <!-- Stats bar -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <p class="stat-label">Total Candidates</p>
-          <p class="stat-value" id="statCandidates">&mdash;</p>
-          <p class="stat-sub">registered accounts</p>
+      <!-- ====== Candidates tab ====== -->
+      <div class="tab-panel" id="tabCandidates">
+
+        <!-- RLS notice (shown when 0 rows returned) -->
+        <div class="rls-banner" id="rlsBanner">
+          <strong>No data returned.</strong>
+          This page uses your active Supabase session with Row Level Security enabled.
+          To see candidate data, log into CV Central in this browser first, then return here.
+          Full multi-user admin access requires a service-role Edge Function &mdash; the anon key cannot bypass RLS.
         </div>
-        <div class="stat-card">
-          <p class="stat-label">Total CVs Saved</p>
-          <p class="stat-value" id="statCVs">&mdash;</p>
-          <p class="stat-sub">across all accounts</p>
+
+        <!-- Stats bar -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Total Candidates</p>
+            <p class="stat-value" id="statCandidates">&mdash;</p>
+            <p class="stat-sub">registered accounts</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Total CVs Saved</p>
+            <p class="stat-value" id="statCVs">&mdash;</p>
+            <p class="stat-sub">across all accounts</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">CVs Saved Today</p>
+            <p class="stat-value" id="statToday">&mdash;</p>
+            <p class="stat-sub" id="statTodayDate"></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Top Template</p>
+            <p class="stat-value" style="font-size:1.35rem;" id="statTemplate">&mdash;</p>
+            <p class="stat-sub">most popular</p>
+          </div>
         </div>
-        <div class="stat-card">
-          <p class="stat-label">CVs Saved Today</p>
-          <p class="stat-value" id="statToday">&mdash;</p>
-          <p class="stat-sub" id="statTodayDate"></p>
+
+        <!-- Controls -->
+        <div class="controls-bar">
+          <div class="search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search name or email&hellip;">
+          </div>
+          <select class="filter-select" id="planFilter">
+            <option value="all">All plans</option>
+            <option value="free">Free</option>
+            <option value="trial">Trial</option>
+            <option value="pro">Pro</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select class="filter-select" id="sortSelect">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="most-cvs">Most CVs</option>
+            <option value="a-z">A &mdash; Z</option>
+          </select>
+          <button class="btn-export" id="exportBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export CSV
+          </button>
+          <span class="results-count" id="resultsCount"></span>
         </div>
-        <div class="stat-card">
-          <p class="stat-label">Top Template</p>
-          <p class="stat-value" style="font-size:1.35rem;" id="statTemplate">&mdash;</p>
-          <p class="stat-sub">most popular</p>
+
+        <!-- Candidates table -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Registered</th>
+                <th>CVs</th>
+                <th>Last active</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr class="special-row">
+                <td colspan="7"><span class="spinner"></span> Loading candidates&hellip;</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
       </div>
 
-      <!-- Controls -->
-      <div class="controls-bar">
-        <div class="search-wrap">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input type="text" class="search-input" id="searchInput" placeholder="Search name or email&hellip;">
-        </div>
-        <select class="filter-select" id="planFilter">
-          <option value="all">All plans</option>
-          <option value="free">Free</option>
-          <option value="trial">Trial</option>
-          <option value="pro">Pro</option>
-          <option value="premium">Premium</option>
-        </select>
-        <select class="filter-select" id="sortSelect">
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="most-cvs">Most CVs</option>
-          <option value="a-z">A &mdash; Z</option>
-        </select>
-        <button class="btn-export" id="exportBtn">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Export CSV
-        </button>
-        <span class="results-count" id="resultsCount"></span>
-      </div>
+      <!-- ====== Feedback tab ====== -->
+      <div class="tab-panel" id="tabFeedback" hidden>
 
-      <!-- Candidates table -->
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Plan</th>
-              <th>Registered</th>
-              <th>CVs</th>
-              <th>Last active</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <tr class="special-row">
-              <td colspan="7"><span class="spinner"></span> Loading candidates&hellip;</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Total Feedback</p>
+            <p class="stat-value" id="statFeedbackTotal">&mdash;</p>
+            <p class="stat-sub">submissions received</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Bug Reports</p>
+            <p class="stat-value" id="statFeedbackBugs">&mdash;</p>
+            <p class="stat-sub">flagged as bugs</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Avg Rating</p>
+            <p class="stat-value" id="statFeedbackRating">&mdash;</p>
+            <p class="stat-sub">out of 5 stars</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">This Week</p>
+            <p class="stat-value" id="statFeedbackWeek">&mdash;</p>
+            <p class="stat-sub">last 7 days</p>
+          </div>
+        </div>
+
+        <div class="controls-bar">
+          <select class="filter-select" id="feedbackTypeFilter">
+            <option value="all">All types</option>
+            <option value="bug">Bug reports</option>
+            <option value="feature">Feature requests</option>
+            <option value="general">General feedback</option>
+            <option value="other">Other</option>
+          </select>
+          <span class="results-count" id="feedbackResultsCount"></span>
+        </div>
+
+        <div class="feedback-list" id="feedbackList">
+          <div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading feedback&hellip;</div>
+        </div>
+
       </div>
 
     </main>
@@ -759,8 +900,24 @@
     });
 
     document.getElementById('refreshBtn').addEventListener('click', function() {
-      loadData();
+      if (activeTab === 'feedback') loadFeedback();
+      else loadData();
     });
+
+    /* ---- Tabs ---- */
+    var activeTab = 'candidates';
+    var feedbackLoaded = false;
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('tabBtnCandidates').classList.toggle('active', tab === 'candidates');
+      document.getElementById('tabBtnFeedback').classList.toggle('active', tab === 'feedback');
+      document.getElementById('tabCandidates').hidden = tab !== 'candidates';
+      document.getElementById('tabFeedback').hidden = tab !== 'feedback';
+      if (tab === 'feedback' && !feedbackLoaded) loadFeedback();
+    }
+    document.getElementById('tabBtnCandidates').addEventListener('click', function() { switchTab('candidates'); });
+    document.getElementById('tabBtnFeedback').addEventListener('click', function() { switchTab('feedback'); });
 
     if (sessionStorage.getItem(SESSION_KEY) === 'true') {
       showAdminApp();
@@ -812,6 +969,121 @@
         document.getElementById('tableBody').innerHTML =
           '<tr class="special-row"><td colspan="7">Failed to load data: ' + esc(err.message || 'Unknown error') + '</td></tr>';
       }
+    }
+
+    /* ---- Feedback ---- */
+    var allFeedback = [];
+    var feedbackTypeFilterVal = 'all';
+
+    async function loadFeedback() {
+      var list = document.getElementById('feedbackList');
+      list.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading feedback&hellip;</div>';
+
+      try {
+        var res = await fetch('/api/admin-feedback', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load feedback');
+
+        allFeedback = data.feedback || [];
+        feedbackLoaded = true;
+        updateFeedbackStats();
+        renderFeedback();
+
+        var now = new Date();
+        document.getElementById('lastUpdated').textContent =
+          'Updated ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+      } catch (err) {
+        console.error('Feedback load error:', err);
+        list.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);">Failed to load feedback: ' + esc(err.message || 'Unknown error') + '</div>';
+      }
+    }
+
+    function updateFeedbackStats() {
+      document.getElementById('statFeedbackTotal').textContent = allFeedback.length;
+      document.getElementById('statFeedbackBugs').textContent =
+        allFeedback.filter(function(f) { return f.type === 'bug'; }).length;
+
+      var rated = allFeedback.filter(function(f) { return f.rating != null; });
+      var avg = rated.length
+        ? (rated.reduce(function(sum, f) { return sum + f.rating; }, 0) / rated.length).toFixed(1)
+        : '—';
+      document.getElementById('statFeedbackRating').textContent = avg;
+
+      var weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      document.getElementById('statFeedbackWeek').textContent =
+        allFeedback.filter(function(f) { return new Date(f.created_at).getTime() >= weekAgo; }).length;
+
+      var badge = document.getElementById('feedbackCount');
+      if (allFeedback.length) { badge.textContent = allFeedback.length; badge.hidden = false; }
+      else { badge.hidden = true; }
+    }
+
+    document.getElementById('feedbackTypeFilter').addEventListener('change', function() {
+      feedbackTypeFilterVal = this.value;
+      renderFeedback();
+    });
+
+    function renderFeedback() {
+      var filtered = feedbackTypeFilterVal === 'all'
+        ? allFeedback
+        : allFeedback.filter(function(f) { return f.type === feedbackTypeFilterVal; });
+
+      document.getElementById('feedbackResultsCount').textContent =
+        filtered.length + (filtered.length === 1 ? ' submission' : ' submissions');
+
+      var list = document.getElementById('feedbackList');
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);">No feedback yet.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(function(f) {
+        var stars = f.rating ? '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating) : '';
+        var typeLabel = { bug: 'Bug', feature: 'Feature', general: 'General', other: 'Other' }[f.type] || 'General';
+        return (
+          '<div class="feedback-card" data-id="' + esc(f.id) + '">' +
+            '<div class="feedback-top">' +
+              '<div class="feedback-meta">' +
+                '<span class="type-chip ' + esc(f.type || 'general') + '">' + typeLabel + '</span>' +
+                (f.name ? '<span class="feedback-name">' + esc(f.name) + '</span>' : '<span class="feedback-name" style="color:var(--muted);font-weight:600;">Anonymous</span>') +
+                (f.email ? '<span class="feedback-email">' + esc(f.email) + '</span>' : '') +
+                (stars ? '<span class="feedback-stars">' + stars + '</span>' : '') +
+              '</div>' +
+              '<div style="display:flex;align-items:center;gap:0.6rem;">' +
+                '<span class="feedback-date">' + timeAgo(new Date(f.created_at)) + '</span>' +
+                '<button class="btn-sm-danger fb-del-btn" style="padding:0.2rem 0.5rem;font-size:0.72rem;">Delete</button>' +
+              '</div>' +
+            '</div>' +
+            '<p class="feedback-msg">' + esc(f.message || '') + '</p>' +
+            (f.page ? '<p class="feedback-page">' + esc(f.page) + '</p>' : '') +
+          '</div>'
+        );
+      }).join('');
+
+      list.querySelectorAll('.fb-del-btn').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          var card = btn.closest('.feedback-card');
+          var id = card.dataset.id;
+          if (!confirm('Delete this feedback entry? This cannot be undone.')) return;
+          btn.disabled = true; btn.textContent = '…';
+          try {
+            var res = await fetch('/api/admin-feedback?id=' + encodeURIComponent(id), {
+              method: 'DELETE',
+              headers: { 'x-admin-key': ADMIN_PASSWORD }
+            });
+            var data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+            allFeedback = allFeedback.filter(function(f) { return f.id !== id; });
+            updateFeedbackStats();
+            renderFeedback();
+          } catch (err) {
+            alert('Could not delete: ' + (err.message || 'Please try again.'));
+            btn.disabled = false; btn.textContent = 'Delete';
+          }
+        });
+      });
     }
 
     /* ---- Stats ---- */
