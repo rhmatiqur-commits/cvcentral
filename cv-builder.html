@@ -616,6 +616,9 @@
             if (cl) cl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 300);
         }
+      } else if (_isView) {
+        // Opened a saved CV from the dashboard — show the finished CV, not the wizard.
+        goToStep(5);
       }
     })();
 
@@ -648,10 +651,16 @@
       try { localStorage.removeItem('cvcentral_draft'); } catch(e) {}
       window.history.replaceState({}, '', window.location.pathname);
     }
-    // Template picker now shows for everyone on every visit — returning users
+    // ?view=1 → opened from "Open" on a saved CV in the dashboard.
+    // Skip the template overlay and land straight on the finished CV (step 5)
+    // instead of dropping the user back into the edit wizard at step 1.
+    var _isView = new URLSearchParams(window.location.search).get('view') === '1';
+
+    // Template picker shows for everyone on every visit — returning users
     // can just hit "Skip" to keep their current template and carry on.
+    // Not shown when opening a saved CV to view it.
     var tpOverlayEl = document.getElementById('tpOverlay');
-    if (tpOverlayEl) { tpOverlayEl.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+    if (tpOverlayEl && !_isView) { tpOverlayEl.style.display = 'block'; document.body.style.overflow = 'hidden'; }
 
     // Restore a draft if one exists
     try {

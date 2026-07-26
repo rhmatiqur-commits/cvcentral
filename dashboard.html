@@ -390,7 +390,7 @@
           var entry = window._cvStore[cvId];
           if (!entry) return;
           try { localStorage.setItem('cvcentral_draft', JSON.stringify(entry.cv_data)); } catch(e) {}
-          window.location.href = 'cv-builder.html';
+          window.location.href = 'cv-builder.html?view=1';
         });
 
         card.querySelector('.cv-del-btn').addEventListener('click', async function() {
