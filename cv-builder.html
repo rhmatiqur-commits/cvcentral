@@ -146,6 +146,16 @@
             </div>
 
           </div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;padding:0.85rem 1rem;background:var(--surface,#FAFAFA);border:1.5px dashed var(--border);border-radius:var(--radius);">
+            <div id="photoPreview" style="width:64px;height:64px;border-radius:50%;background:#EDEBF5 center/cover no-repeat;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.4rem;">👤</div>
+            <div style="flex:1;min-width:0;">
+              <p style="margin:0 0 0.3rem;font-size:0.85rem;font-weight:600;color:var(--ink);">Photo <span class="optional">(optional)</span></p>
+              <p style="margin:0 0 0.5rem;font-size:0.75rem;color:var(--muted);line-height:1.4;">Only shown on sidebar-style templates (Modern, Tech, Creative, Executive) — other templates ignore it.</p>
+              <input type="file" id="photoUpload" accept="image/*" style="display:none;">
+              <button type="button" class="btn btn-ghost btn-sm" id="photoAddBtn" style="font-size:0.78rem;">Add photo</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="photoRemoveBtn" style="font-size:0.78rem;display:none;color:#EF4444;border-color:#FCA5A5;">Remove</button>
+            </div>
+          </div>
           <div class="form-grid">
             <div class="field">
               <label for="fullName">Full name</label>
@@ -1257,6 +1267,73 @@
       });
     }
 
+    /* ---------- Step 1: optional photo (sidebar templates only) ---------- */
+    (function () {
+      var photoInput = document.getElementById('photoUpload');
+      var photoPreview = document.getElementById('photoPreview');
+      var addBtn = document.getElementById('photoAddBtn');
+      var removeBtn = document.getElementById('photoRemoveBtn');
+      if (!photoInput) return;
+
+      var MAX_DIMENSION = 400; // px — kept small since it's stored as base64 in cv_data
+
+      function showPreview(dataUrl) {
+        if (dataUrl) {
+          photoPreview.style.backgroundImage = 'url(' + dataUrl + ')';
+          photoPreview.textContent = '';
+          removeBtn.style.display = 'inline-flex';
+          addBtn.textContent = 'Change photo';
+        } else {
+          photoPreview.style.backgroundImage = '';
+          photoPreview.textContent = '👤';
+          removeBtn.style.display = 'none';
+          addBtn.textContent = 'Add photo';
+        }
+      }
+
+      addBtn.addEventListener('click', function () { photoInput.click(); });
+
+      photoInput.addEventListener('change', function () {
+        var file = photoInput.files && photoInput.files[0];
+        if (!file) return;
+        if (!file.type || file.type.indexOf('image/') !== 0) {
+          toast('Please choose an image file', 'error');
+          photoInput.value = '';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var img = new Image();
+          img.onload = function () {
+            var scale = Math.min(1, MAX_DIMENSION / Math.max(img.width, img.height));
+            var w = Math.max(1, Math.round(img.width * scale));
+            var h = Math.max(1, Math.round(img.height * scale));
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            state.personal.photo = dataUrl;
+            showPreview(dataUrl);
+            saveDraft();
+            renderPreview();
+          };
+          img.onerror = function () { toast('Could not read that image — please try another', 'error'); };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      removeBtn.addEventListener('click', function () {
+        state.personal.photo = '';
+        photoInput.value = '';
+        showPreview('');
+        saveDraft();
+        renderPreview();
+      });
+
+      window._hydratePhotoPreview = function () { showPreview(state.personal.photo || ''); };
+    })();
+
     /* ---------- Step 2: experience entries ---------- */
     var expList = document.getElementById('experienceList');
 
@@ -2150,6 +2227,7 @@
         html =
           '<div class="cv-page cv-t2">' + watermark() +
           '<div class="cv-side">' +
+            (p.photo ? '<img class="cv-photo" src="' + p.photo + '" alt="">' : '') +
             '<div class="cv-name">' + name + '</div>' +
             '<div class="cv-target">' + esc(p.targetRole || '') + '</div>' +
             '<h3>Contact</h3><p>' + [p.address, p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
@@ -2224,6 +2302,7 @@
         html =
           '<div class="cv-page cv-t5">' + watermark() +
           '<div class="cv-side">' +
+            (p.photo ? '<img class="cv-photo" src="' + p.photo + '" alt="">' : '') +
             '<div class="cv-name">' + name + '</div>' +
             '<div class="cv-label">' + esc(p.targetRole || '') + '</div>' +
             '<h3>Contact</h3><p>' + [p.address, p.email, p.phone, p.location, p.linkedin].filter(Boolean).map(esc).join('<br>') + '</p>' +
@@ -2654,6 +2733,7 @@
     // Skills/languages/certifications are hydrated by their own tag forEach.
     // These four need an explicit call after all DOM references are ready.
     hydratePersonal();
+    if (window._hydratePhotoPreview) window._hydratePhotoPreview();
     renderExperience();
     renderEducation();
     hydrateJobTarget();

@@ -575,6 +575,16 @@
   color: #EFE7FA;
   padding: 1.8rem 1.3rem;
 }
+.cv-photo {
+  width: 5.2rem;
+  height: 5.2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 0.9rem;
+  border: 2px solid rgba(255,255,255,0.35);
+}
+.cv-t5 .cv-photo { border-color: #58A6FF; }
 .cv-t2 .cv-side .cv-name { font-size: 1.25rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 0.3rem; }
 .cv-t2 .cv-side .cv-target { font-size: 0.68rem; color: var(--lime); font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .cv-t2 .cv-side h3 {
