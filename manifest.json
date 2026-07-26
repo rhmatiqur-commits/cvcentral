@@ -1,7 +1,7 @@
 {
   "name": "CV Central — AI CV Builder",
   "short_name": "CV Central",
-  "description": "Build, score and optimise your CV with AI built for the UK job market.",
+  "description": "Build, score and optimise your CV with AI built for Europe's job market.",
   "start_url": "/dashboard.html?source=pwa",
   "scope": "/",
   "display": "standalone",

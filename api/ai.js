@@ -112,7 +112,7 @@ function extractJson(text) {
 
 /* ---------------- Shared context ---------------- */
 
-const UK_STYLE = 'You are a senior UK recruitment consultant and CV writer. Always use British English (CV not resume, organisation not organization, -ise endings). Write in a confident, professional but human tone. Never invent employers, dates, or qualifications that are not in the data — you may only rephrase and strengthen what is given.';
+const UK_STYLE = 'You are a senior European recruitment consultant and CV writer, experienced across UK, EU, and wider European hiring conventions. Use English throughout (British spelling by default — CV not resume, organisation not organization, -ise endings). Write in a confident, professional but human tone. Never invent employers, dates, or qualifications that are not in the data — you may only rephrase and strengthen what is given.';
 
 function cvSummaryBlock(p) {
   return [
@@ -147,7 +147,7 @@ function buildEnhancePrompt(p) {
       cvSummaryBlock(p),
       '',
       'Do ALL of the following in one pass:',
-      '1. Rewrite the professional summary to a polished 3–4 sentence UK CV profile.',
+      '1. Rewrite the professional summary to a polished 3–4 sentence CV profile.',
       '2. For each experience entry, rewrite responsibilities and achievements into 3–5 strong, ATS-friendly bullet points (action verb first, quantify where the data allows).',
       '3. Score the CV out of 100 with a breakdown for: formatting, keywords, achievements, ats, length (each 0–100). Base keywords/ats on the job description if provided, otherwise on the target role.',
       '4. Recommend exactly one template: "professional" (finance/legal/corporate), "modern" (tech/marketing/creative), or "graduate" (first jobs, graduate schemes, limited experience).',
@@ -181,7 +181,7 @@ function buildScorePrompt(p) {
     user: [
       cvSummaryBlock(p),
       '',
-      'Score this CV out of 100 for the UK job market, with a breakdown for formatting, keywords, achievements, ats, and length (each 0–100). Explain the total briefly.',
+      'Score this CV out of 100 for the European job market, with a breakdown for formatting, keywords, achievements, ats, and length (each 0–100). Explain the total briefly.',
       jsonOnly('{ "score": { "total": 0, "breakdown": { "formatting": 0, "keywords": 0, "achievements": 0, "ats": 0, "length": 0 } }, "summary": "one-paragraph explanation" }')
     ].join('\n')
   };
