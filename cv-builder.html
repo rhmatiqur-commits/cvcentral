@@ -1026,6 +1026,27 @@
 
           prefillFields(data);
           setStatus('✓ Fields prefilled from your CV — check and adjust as needed', '#16A34A');
+
+          // If already signed in, save straight to their account — don't make an
+          // imported CV depend on reaching the final step and clicking Save.
+          // Guests still walk through the wizard as before and are asked to sign
+          // in at the end, same as any other CV they start from scratch.
+          try {
+            var session = await cvAuth.getSession();
+            if (session) {
+              var saveResult = await saveCurrentCv();
+              if (saveResult.ok) {
+                setStatus('✓ Prefilled and saved to your account — check and adjust as needed', '#16A34A');
+                toast('Imported CV saved to your account ✓', 'success');
+              } else if (saveResult.reason === 'limit') {
+                toast(limitMessage(saveResult.plan), 'error');
+              }
+              // reason === 'error' fails silently here — fields are still prefilled
+              // on screen and the visible Save button remains available as a retry.
+            }
+          } catch (saveErr) {
+            console.warn('[cv-upload] auto-save after import failed:', saveErr.message);
+          }
         } catch (err) {
           setStatus('⚠ ' + (err.message || 'Could not parse this file — please fill in manually'), '#DC2626');
         } finally {
@@ -1839,57 +1860,62 @@
     /* ---------- Save to CV Central ---------- */
     var CV_LIMITS = { free: 1, pro: 10, premium: Infinity };
 
+    // Shared save logic — used by the manual "Save to CV Central" button and by
+    // the automatic save that fires right after a signed-in user imports an old
+    // CV, so an import isn't lost just because they never reach the final step.
+    async function saveCurrentCv() {
+      var session = await cvAuth.getSession();
+      if (!session) return { ok: false, reason: 'signin' };
+
+      collectStep(state.step);
+      var cvName = (state.personal && state.personal.fullName)
+        ? state.personal.fullName + '\'s CV'
+        : 'My CV';
+
+      var plan = userPlan || 'free';
+      var limit = CV_LIMITS[plan] !== undefined ? CV_LIMITS[plan] : CV_LIMITS.free;
+      if (limit !== Infinity) {
+        var countRes = await cvAuth.client
+          .from('saved_cvs')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', session.user.id)
+          .neq('cv_name', cvName); // don't count the one we're about to overwrite
+        var existing = (countRes.count || 0);
+        if (existing >= limit) return { ok: false, reason: 'limit', plan: plan };
+      }
+
+      var res = await cvAuth.saveCV(
+        session.user.id,
+        { personal: state.personal, experience: state.experience, education: state.education, skills: state.skills, languages: state.languages, certifications: state.certifications, jobTarget: state.jobTarget },
+        state.template,
+        state.colorScheme,
+        cvName,
+        state.ai && state.ai.score ? state.ai.score.total : null
+      );
+      if (res.error) return { ok: false, reason: 'error', error: res.error };
+      return { ok: true };
+    }
+
+    function limitMessage(plan) {
+      return plan === 'free'
+        ? 'Free accounts can save 1 CV. Upgrade to Pro to save up to 10.'
+        : 'Pro accounts can save up to 10 CVs. Premium (coming soon) gives unlimited storage.';
+    }
+
     document.getElementById('saveBtn').addEventListener('click', async function () {
       var btn = this;
       btn.disabled = true;
       btn.textContent = 'Saving…';
 
       try {
-        var session = await cvAuth.getSession();
-        if (!session) {
-          toast('Sign in to save your CV', 'error');
-          btn.disabled = false;
-          btn.textContent = 'Save to CV Central';
-          return;
+        var result = await saveCurrentCv();
+        if (!result.ok) {
+          if (result.reason === 'signin') toast('Sign in to save your CV', 'error');
+          else if (result.reason === 'limit') toast(limitMessage(result.plan), 'error');
+          else toast((result.error && result.error.message) || 'Could not save — please try again', 'error');
+        } else {
+          toast('CV saved to your account ✓', 'success');
         }
-
-        collectStep(state.step);
-        var cvName = (state.personal && state.personal.fullName)
-          ? state.personal.fullName + '\'s CV'
-          : 'My CV';
-
-        // Check CV count against plan limit
-        var plan = userPlan || 'free';
-        var limit = CV_LIMITS[plan] !== undefined ? CV_LIMITS[plan] : CV_LIMITS.free;
-        if (limit !== Infinity) {
-          var countRes = await cvAuth.client
-            .from('saved_cvs')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', session.user.id)
-            .neq('cv_name', cvName); // don't count the one we're about to overwrite
-          var existing = (countRes.count || 0);
-          if (existing >= limit) {
-            var limitMsg = plan === 'free'
-              ? 'Free accounts can save 1 CV. Upgrade to Pro to save up to 10.'
-              : 'Pro accounts can save up to 10 CVs. Premium (coming soon) gives unlimited storage.';
-            toast(limitMsg, 'error');
-            btn.disabled = false;
-            btn.textContent = 'Save to CV Central';
-            return;
-          }
-        }
-
-        var res = await cvAuth.saveCV(
-          session.user.id,
-          { personal: state.personal, experience: state.experience, education: state.education, skills: state.skills, languages: state.languages, certifications: state.certifications, jobTarget: state.jobTarget },
-          state.template,
-          state.colorScheme,
-          cvName,
-          state.ai && state.ai.score ? state.ai.score.total : null
-        );
-
-        if (res.error) throw res.error;
-        toast('CV saved to your account ✓', 'success');
       } catch (err) {
         toast((err && err.message) || 'Could not save — please try again', 'error');
       } finally {
@@ -2532,6 +2558,23 @@
       uploadInput.addEventListener('change', async function() {
         var file = uploadInput.files[0];
         if (!file) return;
+
+        // "Compare with your old CV" is a Pro feature — enforce sign-in + plan
+        // here rather than relying only on the locked/unlocked panel visibility,
+        // since that's just a display toggle and not a real gate on the upload.
+        var session = await cvAuth.getSession();
+        if (!session) {
+          toast('Sign in to use CV comparison', 'error');
+          uploadInput.value = '';
+          return;
+        }
+        if (!isPro()) {
+          toast('CV comparison is a Pro feature — upgrade to unlock it', 'error');
+          uploadInput.value = '';
+          setTimeout(function() { window.location.href = 'dashboard.html?upgrade=1'; }, 1200);
+          return;
+        }
+
         filenameEl.textContent = file.name;
         pickBtn.disabled = true;
         pickBtn.textContent = '⏳ Reading…';
