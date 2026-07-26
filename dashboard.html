@@ -137,14 +137,6 @@
         <div id="myCvsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;"></div>
       </div>
 
-      <!-- No saved CV yet -->
-      <div id="emptyPanel" class="empty-state" hidden>
-        <p class="big">&#128196;</p>
-        <p style="font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:0.35rem;">No CV saved yet</p>
-        <p style="margin-bottom:1.5rem;">Build your CV, then click &ldquo;Save to CV Central&rdquo; to see your dashboard here.</p>
-        <a href="cv-builder.html" class="btn btn-primary">Build my CV free</a>
-      </div>
-
     </div>
   </main>
 
@@ -334,7 +326,6 @@
       }
 
       document.getElementById('dashPanel').hidden = false;
-      document.getElementById('emptyPanel').hidden = true;
       var showPro = (plan === 'pro' || plan === 'premium') || (plan === 'day_pass' && !dayPassExpired);
       document.getElementById('proFeaturesPanel').style.display = showPro ? 'block' : 'none';
     }
@@ -350,7 +341,17 @@
     function renderMyCVs(allCvs) {
       var section = document.getElementById('myCvsSection');
       var list    = document.getElementById('myCvsList');
-      if (!allCvs || allCvs.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+
+      if (!allCvs || allCvs.length === 0) {
+        list.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">'
+          + '<p class="big">&#128196;</p>'
+          + '<p style="font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:0.35rem;">No CV saved yet</p>'
+          + '<p style="margin-bottom:1.5rem;">Build your CV, then click &ldquo;Save to CV Central&rdquo; to see it here.</p>'
+          + '<a href="cv-builder.html" class="btn btn-primary">Build my CV free</a>'
+          + '</div>';
+        return;
+      }
 
       // Populate store
       allCvs.forEach(function(cv) { window._cvStore[cv.id] = cv; });
@@ -412,7 +413,23 @@
 
     /* ---------- Render: authenticated but no saved CV ---------- */
     function renderEmpty(profile) {
+      var firstName = (profile.full_name || '').split(' ')[0];
+      document.getElementById('dashGreeting').textContent =
+        firstName ? 'Hello, ' + firstName + ' \u{1F44B}' : 'Hello! \u{1F44B}';
+      document.getElementById('dashSub').textContent = 'Build your first CV to see your score and next steps here.';
+
+      document.getElementById('dashScore').textContent = '—';
+      document.getElementById('dashScoreNote').textContent = 'Build a CV to get scored.';
+      document.getElementById('dashRole').textContent = 'Not set yet';
+      document.getElementById('dashIndustry').textContent = '';
+      document.getElementById('dashMeta').textContent = '';
+      document.getElementById('dashImprovements').innerHTML =
+        '<span style="color:var(--muted);font-size:0.88rem;">Build your CV to get tailored next steps.</span>';
+      document.getElementById('dashKeywords').innerHTML =
+        '<span style="color:var(--muted);font-size:0.88rem;">Build your CV to see keyword matches.</span>';
+
       var plan = (profile.plan || 'free').toLowerCase();
+      document.getElementById('dashPlan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1).replace('_', ' ');
       var expiresAt = profile.plan_expires_at || null;
       var dayPassExpired = plan === 'day_pass' && expiresAt && new Date(expiresAt) < new Date();
       var effectivePlan = (plan === 'day_pass' && !dayPassExpired) ? 'day_pass' : (dayPassExpired ? 'free' : plan);
@@ -437,9 +454,11 @@
       } else {
         document.getElementById('managePlanBtn').style.display = 'inline-flex';
         document.getElementById('cancelHint').style.display = 'block';
+        document.getElementById('planDesc').textContent =
+          plan === 'premium' ? 'You have full access to all CV Central features.' :
+          'You have access to all Pro features. Upgrade to Premium for priority support.';
       }
-      document.getElementById('dashPanel').hidden = true;
-      document.getElementById('emptyPanel').hidden = false;
+      document.getElementById('dashPanel').hidden = false;
       var showPro = (plan === 'pro' || plan === 'premium') || (plan === 'day_pass' && !dayPassExpired);
       document.getElementById('proFeaturesPanel').style.display = showPro ? 'block' : 'none';
     }
@@ -479,7 +498,6 @@
       console.error('Dashboard load error:', err);
       toast('Could not load your dashboard — please refresh.', 'error');
       document.getElementById('dashPanel').hidden = true;
-      document.getElementById('emptyPanel').hidden = false;
     }
 
   })();

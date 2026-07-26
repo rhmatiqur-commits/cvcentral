@@ -28,6 +28,13 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* The `hidden` attribute must always win over component classes like .btn
+   that set their own `display`. Without this, any element combining
+   `hidden` with a class that declares `display` renders visible anyway —
+   e.g. #upgradeLink (dashboard.html) stayed visible for Pro/Premium users
+   even though JS never unhid it. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
