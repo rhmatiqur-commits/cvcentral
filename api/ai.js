@@ -57,7 +57,18 @@ module.exports = async (req, res) => {
       : MODEL_LIGHT;
 
     const result = await callClaude(prompt.system, prompt.user, prompt.maxTokens || 4000, model);
-    const parsed = extractJson(result);
+    let parsed = extractJson(result);
+
+    // 'enhance' can get cut off mid-JSON for CVs with several experience
+    // entries (rich content + cover letter + score + keywords all in one
+    // response can exceed the token budget). Retry once with a tighter,
+    // more compact instruction rather than failing the whole analysis.
+    if (!parsed && action === 'enhance') {
+      const retryPrompt = buildEnhancePrompt(Object.assign({}, payload, { _compact: true }));
+      const retryResult = await callClaude(retryPrompt.system, retryPrompt.user, retryPrompt.maxTokens, model);
+      parsed = extractJson(retryResult);
+    }
+
     if (!parsed) return res.status(502).json({ error: 'The AI returned an unexpected format. Please try again.' });
     return res.status(200).json(parsed);
   } catch (err) {
@@ -140,18 +151,21 @@ function buildEnhancePrompt(p) {
   var langInstruction = lang === 'English'
     ? 'Write the cover letter in British English.'
     : 'Write the cover letter entirely in ' + lang + ' — no English text in the cover letter itself.';
+  var compact = !!p._compact;
   return {
-    maxTokens: 6000,
+    maxTokens: 8000,
     system: UK_STYLE,
     user: [
       cvSummaryBlock(p),
       '',
-      'Do ALL of the following in one pass:',
+      compact
+        ? 'Do ALL of the following in one pass. IMPORTANT: your previous attempt at this got cut off before the JSON was complete — this time, be noticeably more concise everywhere (shorter bullets, shorter cover letter) so the full response fits comfortably within the token budget.'
+        : 'Do ALL of the following in one pass. Keep the whole response inside the token budget — for candidates with several experience entries, favour fewer, punchier bullets over hitting the top of every range below.',
       '1. Rewrite the professional summary to a polished 3–4 sentence CV profile.',
-      '2. For each experience entry, rewrite responsibilities and achievements into 3–5 strong, ATS-friendly bullet points (action verb first, quantify where the data allows).',
+      '2. For each experience entry, rewrite responsibilities and achievements into ' + (compact ? '2–3 concise' : '3–4 strong') + ', ATS-friendly bullet points (action verb first, quantify where the data allows).',
       '3. Score the CV out of 100 with a breakdown for: formatting, keywords, achievements, ats, length (each 0–100). Base keywords/ats on the job description if provided, otherwise on the target role.',
       '4. Recommend exactly one template: "professional" (finance/legal/corporate), "modern" (tech/marketing/creative), or "graduate" (first jobs, graduate schemes, limited experience).',
-      '5. Write a tailored cover letter (~250 words) addressed for the job description if given, otherwise for the target role. Use the candidate\'s real name. ' + langInstruction,
+      '5. Write a tailored cover letter (' + (compact ? '~150 words' : '~250 words') + ') addressed for the job description if given, otherwise for the target role. Use the candidate\'s real name. ' + langInstruction,
       '6. List the top 5 ATS keywords the candidate should include, drawn from the job description or typical adverts for the target role.',
       '7. Give 3 specific, actionable improvements to raise the score.',
       '',
