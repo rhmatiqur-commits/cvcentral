@@ -7,7 +7,7 @@
   <meta name="description" content="Your CV Central dashboard &mdash; CV score, plan and next steps.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
@@ -16,30 +16,141 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CV Central">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('cvcentral_dash_theme');
+        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --dv-bg: #0B0A12;
+      --dv-side: #100D19;
+      --dv-card: #161320;
+      --dv-card-2: #1C1828;
+      --dv-border: rgba(255,255,255,0.1);
+      --dv-border-strong: rgba(255,255,255,0.18);
+      --dv-text: #FFFFFF;
+      --dv-muted: #B6B0C8;
+      --dv-faint: #8B85A0;
+      --dv-violet-bright: #8A5CD6;
+      --font-display: 'Fraunces', Georgia, serif;
+    }
+    html[data-theme="light"] {
+      --dv-bg: #F6F4FB;
+      --dv-side: #14111F;
+      --dv-card: #FFFFFF;
+      --dv-card-2: #FBFAFF;
+      --dv-border: #E8E4F2;
+      --dv-border-strong: #D9D2EC;
+      --dv-text: #1A1625;
+      --dv-muted: #55506A;
+      --dv-faint: #7B7590;
+    }
+    body { background: var(--dv-bg); }
+    .app-shell { display: flex; align-items: stretch; min-height: 100vh; }
+    .app-sidebar {
+      width: 230px; flex-shrink: 0; background: var(--dv-side);
+      padding: 1.4rem 1.1rem; display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    }
+    .app-sidebar .logo { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.2rem 1.6rem; text-decoration: none; }
+    .app-sidebar .logo-mark { width: 0; height: 0; background: none; }
+    .app-sidebar .brand-word { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; color: #FFFFFF; letter-spacing: -0.01em; }
+    .app-sidebar .main-nav { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; }
+    .app-sidebar .main-nav a:not(.btn), .app-sidebar .main-nav button:not(.btn) {
+      display: flex; align-items: center; gap: 0.65rem; padding: 0.65rem 0.75rem; border-radius: 10px;
+      font-size: 0.95rem; color: #B6B0C8; text-decoration: none; font-weight: 500; font-family: var(--font-body);
+      background: none; border: none; cursor: pointer; text-align: left; width: 100%;
+    }
+    .app-sidebar .main-nav a:not(.btn):hover { background: rgba(139,92,214,0.14); color: #fff; }
+    .app-sidebar .main-nav .btn { margin-top: 0.5rem; }
+    .app-sidebar #planBadgeWrap { display: block; margin-bottom: 0.6rem; }
+    .app-sidebar .plan-badge { display: inline-block; width: 100%; box-sizing: border-box; text-align: center; }
+    .app-sidebar #user-name { display: block; font-size: 0.78rem !important; color: #8B85A0 !important; padding: 0.5rem 0.75rem 0.2rem; word-break: break-all; }
+    .theme-toggle-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-family: var(--font-body); font-weight: 600; font-size: 0.85rem;
+      background: rgba(139,92,214,0.14); color: #fff; border: 1px solid rgba(139,92,214,0.3);
+      padding: 0.6rem 0.8rem; border-radius: 10px; cursor: pointer; margin-top: 0.75rem;
+    }
+    .theme-toggle-btn:hover { background: rgba(139,92,214,0.24); }
+    .app-main { flex: 1; min-width: 0; background: var(--dv-bg); }
+    .app-main .container { max-width: 1180px; }
+    .dash-wrap { color: var(--dv-text); }
+    .dash-hero { background: var(--dv-card); border: 1px solid var(--dv-border); }
+    .dash-hero::before { display: none; }
+    .dash-hero h1 { font-family: var(--font-display); font-weight: 600; color: var(--dv-text); }
+    .dash-hero p { color: var(--dv-muted) !important; }
+    .dash-card {
+      background: var(--dv-card) !important; border: 1px solid var(--dv-border); border-top: 1px solid var(--dv-border);
+      color: var(--dv-text);
+      transition: transform 0.12s ease-out, box-shadow 0.25s ease-out !important;
+      will-change: transform; box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+    }
+    /* Pro-feature-panel cards keep their own inline border + JS hover
+       highlight untouched — only the base cards above get the themed border. */
+    html[data-theme="light"] .dash-card { box-shadow: 0 6px 18px rgba(20,17,31,0.06); }
+    .dash-card:hover { transform: none; box-shadow: 0 10px 26px rgba(0,0,0,0.22); }
+    .dash-card.accent-fill { background: var(--violet) !important; border-color: var(--violet) !important; }
+    .dash-card .card-label { color: var(--dv-faint) !important; }
+    .dash-card p, .dash-card span { color: inherit; }
+    .dash-card p[id], .dash-card p[style*="var(--ink)"] { color: var(--dv-text) !important; }
+    .dash-card p[style*="var(--muted)"] { color: var(--dv-muted) !important; }
+    #myCvsSection .empty-state { color: var(--dv-muted); }
+    #myCvsSection .empty-state p[style*="var(--ink)"] { color: var(--dv-text) !important; }
+    #dashRole, #dashPlan, #dashScore { font-family: var(--font-display) !important; }
+    .my-cvs-heading, #myCvsSection h2, #proFeaturesPanel h2 { color: var(--dv-text) !important; font-family: var(--font-display) !important; font-weight: 600 !important; }
+    #dashImprovements .dash-check .txt, #dashIndustry, #dashMeta { color: var(--dv-muted) !important; }
+    .kw-chip { background: rgba(139,92,214,0.16) !important; color: #C4A8F0 !important; border: 1px solid rgba(139,92,214,0.3) !important; }
+    .dash-check { background: var(--dv-card-2) !important; }
+    .dash-check:hover { background: rgba(139,92,214,0.16) !important; }
+    .dash-check.done { background: rgba(170,255,0,0.12) !important; }
+    .dash-check .box { border-color: var(--dv-border-strong) !important; }
+    .dash-check span.txt { color: var(--dv-text) !important; }
+    .score-ring-sm .ring-bg { stroke: var(--dv-border-strong) !important; }
+    .score-ring-sm .ring-num { color: var(--dv-text) !important; }
+    @media (max-width: 860px) {
+      .app-shell { flex-direction: column; }
+      .app-sidebar { width: 100%; height: auto; position: relative; flex-direction: row; align-items: center; flex-wrap: wrap; padding: 0.9rem 1rem; }
+      .app-sidebar .logo { padding: 0 1rem 0 0; }
+      .app-sidebar .main-nav { flex-direction: row; flex-wrap: wrap; flex: none; }
+    }
+  </style>
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="container">
-      <a href="index.html" class="logo" aria-label="CV Central home">
-        <span class="logo-mark">CV</span>
-        <span>CV<span class="logo-central">Central</span></span>
-      </a>
-      <nav class="main-nav">
-        <a href="cv-builder.html">CV builder</a>
-        <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
-        <span id="user-name" style="font-size:0.85rem;color:var(--muted);font-weight:500;"></span>
-        <button id="upgradeLink" hidden class="btn btn-primary btn-sm" onclick="window._openUpgradeModal && window._openUpgradeModal()">Upgrade</button>
-        <a href="feedback.html" class="btn btn-ghost btn-sm" title="Tell us what's working and what's not">Feedback</a>
-        <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none">Sign out</button>
-      </nav>
-    </div>
-  </header>
+  <div class="app-shell">
+  <aside class="app-sidebar">
+    <a href="index.html" class="logo" aria-label="CV Central home">
+      <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+        <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+        <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+      </svg>
+      <span class="brand-word">Central</span>
+    </a>
+    <nav class="main-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="cv-builder.html">CV builder</a>
+      <a href="feedback.html" title="Tell us what's working and what's not">Feedback</a>
+    </nav>
+    <div style="flex:1"></div>
+    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
+    <button id="upgradeLink" hidden class="btn btn-primary btn-sm" style="width:100%;margin-bottom:0.5rem;" onclick="window._openUpgradeModal && window._openUpgradeModal()">Upgrade</button>
+    <button id="themeToggleBtn" class="theme-toggle-btn" type="button">Switch to light mode</button>
+    <span id="user-name" style="font-size:0.85rem;color:var(--muted);font-weight:500;"></span>
+    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+  </aside>
+
+  <div class="app-main">
 
   <!-- Loading overlay shown while auth is being checked -->
-  <div id="loading" style="min-height:calc(100vh - 68px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:var(--muted);font-size:0.95rem;">
+  <div id="loading" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:var(--dv-muted);font-size:0.95rem;">
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="animation:spin 0.9s linear infinite;" aria-hidden="true">
-      <circle cx="18" cy="18" r="14" stroke="var(--border)" stroke-width="3.5"/>
+      <circle cx="18" cy="18" r="14" stroke="var(--dv-border)" stroke-width="3.5"/>
       <path d="M18 4 A14 14 0 0 1 32 18" stroke="var(--violet)" stroke-width="3.5" stroke-linecap="round"/>
     </svg>
     Loading your dashboard&hellip;
@@ -140,6 +251,9 @@
 
     </div>
   </main>
+
+  </div>
+  </div>
 
   <footer class="site-footer">
     <div class="container">
@@ -819,6 +933,58 @@
       tryConfirm();
     }
 
+  })();
+  </script>
+
+  <script>
+  (function () {
+    var THEME_KEY = 'cvcentral_dash_theme';
+    var btn = document.getElementById('themeToggleBtn');
+
+    function applyLabel() {
+      var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      btn.textContent = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+    }
+    applyLabel();
+
+    btn.addEventListener('click', function () {
+      var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        try { localStorage.setItem(THEME_KEY, 'dark'); } catch (e) {}
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        try { localStorage.setItem(THEME_KEY, 'light'); } catch (e) {}
+      }
+      applyLabel();
+    });
+
+    // Subtle 3D tilt on dashboard cards, following the cursor.
+    function initTilt() {
+      document.querySelectorAll('.dash-card').forEach(function (card) {
+        if (card.dataset.tiltBound) return;
+        card.dataset.tiltBound = '1';
+        card.addEventListener('mousemove', function (e) {
+          var rect = card.getBoundingClientRect();
+          var px = (e.clientX - rect.left) / rect.width - 0.5;
+          var py = (e.clientY - rect.top) / rect.height - 0.5;
+          var rotateY = px * 14;
+          var rotateX = -py * 14;
+          card.style.transform =
+            'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateZ(10px)';
+          card.style.boxShadow =
+            (-rotateY * 2).toFixed(1) + 'px ' + (rotateX * -2 + 18).toFixed(1) + 'px 32px rgba(91,45,142,0.3)';
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+          card.style.boxShadow = '';
+        });
+      });
+    }
+    initTilt();
+    // My CVs cards render asynchronously after data loads — re-bind once they appear.
+    var cvsList = document.getElementById('myCvsList');
+    if (cvsList) new MutationObserver(initTilt).observe(cvsList, { childList: true });
   })();
   </script>
 
