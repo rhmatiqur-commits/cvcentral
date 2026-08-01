@@ -92,6 +92,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/analytics.js"></script>
   <script src="js/pwa.js"></script>
   <script>
   (function () {
@@ -156,6 +157,10 @@
       try {
         var res = await cvAuth.client.auth.signInWithPassword({ email: email, password: password });
         if (res.error) throw res.error;
+
+        // Await (not fire-and-forget) so the event has a chance to actually
+        // reach Supabase before the redirect below unloads the page.
+        if (typeof cvTrack === 'function') { try { await cvTrack('login_completed', { method: 'email' }); } catch (e) {} }
 
         // Return to wherever the user was, or go to dashboard
         var returnTo = new URLSearchParams(window.location.search).get('returnTo');

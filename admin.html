@@ -703,6 +703,7 @@
       <div class="admin-tabs">
         <button class="tab-btn active" id="tabBtnCandidates" data-tab="candidates">Candidates</button>
         <button class="tab-btn" id="tabBtnFeedback" data-tab="feedback">Feedback<span class="tab-count" id="feedbackCount" hidden></span></button>
+        <button class="tab-btn" id="tabBtnAnalytics" data-tab="analytics">Analytics</button>
       </div>
 
       <!-- ====== Candidates tab ====== -->
@@ -837,6 +838,33 @@
 
       </div>
 
+      <!-- ====== Analytics tab ====== -->
+      <div class="tab-panel" id="tabAnalytics" hidden>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Total Events</p>
+            <p class="stat-value" id="statEventsTotal">&mdash;</p>
+            <p class="stat-sub">last 5,000 logged</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Unique Sessions</p>
+            <p class="stat-value" id="statSessions">&mdash;</p>
+            <p class="stat-sub">visitors, signed in or not</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Unique Signed-in Users</p>
+            <p class="stat-value" id="statUsers">&mdash;</p>
+            <p class="stat-sub">generated at least 1 event</p>
+          </div>
+        </div>
+
+        <div id="analyticsBody">
+          <div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading analytics&hellip;</div>
+        </div>
+
+      </div>
+
     </main>
   </div>
 
@@ -895,23 +923,29 @@
 
     document.getElementById('refreshBtn').addEventListener('click', function() {
       if (activeTab === 'feedback') loadFeedback();
+      else if (activeTab === 'analytics') loadAnalytics();
       else loadData();
     });
 
     /* ---- Tabs ---- */
     var activeTab = 'candidates';
     var feedbackLoaded = false;
+    var analyticsLoaded = false;
 
     function switchTab(tab) {
       activeTab = tab;
       document.getElementById('tabBtnCandidates').classList.toggle('active', tab === 'candidates');
       document.getElementById('tabBtnFeedback').classList.toggle('active', tab === 'feedback');
+      document.getElementById('tabBtnAnalytics').classList.toggle('active', tab === 'analytics');
       document.getElementById('tabCandidates').hidden = tab !== 'candidates';
       document.getElementById('tabFeedback').hidden = tab !== 'feedback';
+      document.getElementById('tabAnalytics').hidden = tab !== 'analytics';
       if (tab === 'feedback' && !feedbackLoaded) loadFeedback();
+      if (tab === 'analytics' && !analyticsLoaded) loadAnalytics();
     }
     document.getElementById('tabBtnCandidates').addEventListener('click', function() { switchTab('candidates'); });
     document.getElementById('tabBtnFeedback').addEventListener('click', function() { switchTab('feedback'); });
+    document.getElementById('tabBtnAnalytics').addEventListener('click', function() { switchTab('analytics'); });
 
     if (sessionStorage.getItem(SESSION_KEY) === 'true') {
       showAdminApp();
@@ -1074,6 +1108,84 @@
           }
         });
       });
+    }
+
+    /* ---- Analytics ---- */
+    async function loadAnalytics() {
+      var body = document.getElementById('analyticsBody');
+      body.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading analytics&hellip;</div>';
+
+      try {
+        var res = await fetch('/api/admin-analytics', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load analytics');
+
+        analyticsLoaded = true;
+        document.getElementById('statEventsTotal').textContent = data.totalEvents;
+        document.getElementById('statSessions').textContent = data.uniqueSessions;
+        document.getElementById('statUsers').textContent = data.uniqueUsers;
+
+        renderAnalytics(data);
+
+        var now = new Date();
+        document.getElementById('lastUpdated').textContent =
+          'Updated ' + now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+      } catch (err) {
+        console.error('Analytics load error:', err);
+        body.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);">Failed to load analytics: ' + esc(err.message || 'Unknown error') + '</div>';
+      }
+    }
+
+    function renderAnalytics(data) {
+      var body = document.getElementById('analyticsBody');
+      var maxSessions = Math.max.apply(null, data.funnel.map(function(f) { return f.sessions; })) || 1;
+      var maxDaily = Math.max.apply(null, data.daily.map(function(d) { return d.count; })) || 1;
+
+      var funnelHtml = data.funnel.map(function(f) {
+        var pct = Math.round((f.sessions / maxSessions) * 100);
+        return (
+          '<div style="margin-bottom:0.85rem;">' +
+            '<div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.3rem;">' +
+              '<span>' + esc(f.label) + '</span>' +
+              '<span style="font-family:var(--font-mono);font-weight:700;">' + f.sessions + '</span>' +
+            '</div>' +
+            '<div style="background:var(--bg);border-radius:6px;height:10px;overflow:hidden;">' +
+              '<div style="background:var(--violet);height:100%;width:' + pct + '%;border-radius:6px;"></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      var dailyHtml = data.daily.map(function(d) {
+        var pct = Math.round((d.count / maxDaily) * 100);
+        var shortDate = new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        return (
+          '<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;">' +
+            '<span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);width:52px;flex-shrink:0;">' + shortDate + '</span>' +
+            '<div style="flex:1;background:var(--bg);border-radius:5px;height:8px;overflow:hidden;">' +
+              '<div style="background:var(--lime);height:100%;width:' + Math.max(pct, d.count ? 4 : 0) + '%;border-radius:5px;"></div>' +
+            '</div>' +
+            '<span style="font-family:var(--font-mono);font-size:0.72rem;font-weight:700;width:24px;text-align:right;flex-shrink:0;">' + d.count + '</span>' +
+          '</div>'
+        );
+      }).join('');
+
+      body.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">' +
+          '<div class="table-wrap" style="padding:1.25rem 1.4rem;">' +
+            '<p class="stat-label" style="margin-bottom:1rem;">Funnel &mdash; distinct sessions per step</p>' +
+            funnelHtml +
+          '</div>' +
+          '<div class="table-wrap" style="padding:1.25rem 1.4rem;">' +
+            '<p class="stat-label" style="margin-bottom:1rem;">Events per day &mdash; last 14 days</p>' +
+            dailyHtml +
+          '</div>' +
+        '</div>' +
+        '<p style="font-size:0.76rem;color:var(--muted);margin-top:1rem;">Funnel counts are distinct sessions, not raw event counts &mdash; a session repeating a step only counts once. "Reached final step" means the wizard\'s review step (step 5), not a completed CV.</p>';
+
+      var grid = body.querySelector('div');
+      if (window.innerWidth < 860 && grid) grid.style.gridTemplateColumns = '1fr';
     }
 
     /* ---- Stats ---- */

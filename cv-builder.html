@@ -21,6 +21,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/analytics.js"></script>
   <script src="js/pwa.js"></script>
 </head>
 <body class="builder-page">
@@ -665,6 +666,7 @@
     // Skip the template overlay and land straight on the finished CV (step 5)
     // instead of dropping the user back into the edit wizard at step 1.
     var _isView = new URLSearchParams(window.location.search).get('view') === '1';
+    if (typeof cvTrack === 'function') cvTrack('builder_opened', { view: _isView });
 
     // Template picker shows for everyone on every visit — returning users
     // can just hit "Skip" to keep their current template and carry on.
@@ -705,6 +707,7 @@
     function goToStep(n) {
       if (n < 1 || n > TOTAL_STEPS) return;
       state.step = n;
+      if (typeof cvTrack === 'function') cvTrack('wizard_step_reached', { step: n });
       document.querySelectorAll('.wizard-step').forEach(function (s) {
         s.classList.toggle('active', +s.dataset.step === n);
       });
@@ -1669,6 +1672,7 @@
       }
       showAnalysisState('aiLoading');
       startLoadingMessages();
+      if (typeof cvTrack === 'function') cvTrack('ai_analysis_started', { plan: userPlan });
 
       fetch(AI_ENDPOINT + '?action=enhance', {
         method: 'POST',
@@ -1697,11 +1701,13 @@
         showAnalysisState('aiResults');
         initInterviewPrep();
         toast('CV analysed by AI — see your score below 🎉', 'success');
+        if (typeof cvTrack === 'function') cvTrack('ai_analysis_completed', { score: data.score && data.score.total });
       })
       .catch(function(err) {
         clearInterval(loadingTimer);
         document.getElementById('aiErrorMsg').textContent = err.message || 'Could not analyse — please try again.';
         showAnalysisState('aiError');
+        if (typeof cvTrack === 'function') cvTrack('ai_analysis_failed', { error: (err.message || '').slice(0, 200) });
       });
     }
 
@@ -1922,6 +1928,7 @@
 
       var name = (state.personal && state.personal.fullName) ? state.personal.fullName.replace(/\s+/g, '_') : 'CV';
       var cvHtml = previewEl.innerHTML;
+      if (typeof cvTrack === 'function') cvTrack('pdf_downloaded', { template: state.template });
 
       // Collect cv-specific styles from the page
       var cvStyles = '';
@@ -1989,6 +1996,7 @@
         state.ai && state.ai.score ? state.ai.score.total : null
       );
       if (res.error) return { ok: false, reason: 'error', error: res.error };
+      if (typeof cvTrack === 'function') cvTrack('cv_saved', { template: state.template, plan: plan });
       return { ok: true };
     }
 
