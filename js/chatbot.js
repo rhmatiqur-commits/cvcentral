@@ -9,6 +9,7 @@
   var PAID_PLANS = ['pro', 'premium'];
   var messages = [];
   var open = false;
+  var accessToken = null;
 
   // ── Inject CSS ──────────────────────────────────────────────
   var style = document.createElement('style');
@@ -213,6 +214,7 @@
   async function init() {
     var session = await cvAuth.getSession();
     if (!session) return; // not logged in — hide bubble entirely
+    accessToken = session.access_token;
 
     // Fetch plan from profiles
     var supabase = cvAuth.client;
@@ -311,7 +313,7 @@
     try {
       var res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
         body: JSON.stringify({ messages: messages })
       });
       var data = await res.json();

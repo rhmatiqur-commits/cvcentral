@@ -592,11 +592,21 @@
     var userPlan = 'free';
     var userPlanLoaded = false;
     var planExpiresAt = null; // ISO string; set for day_pass users
+    var accessToken = null; // Supabase session token — sent to /api/ai and /api/chat so the server can verify who's calling and look up the REAL plan itself, rather than trusting whatever this page sends.
+
+    // Every /api/ai or /api/chat call must include this — the server rejects
+    // requests with no valid Authorization header.
+    function aiHeaders() {
+      var h = { 'Content-Type': 'application/json' };
+      if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
+      return h;
+    }
 
     (async function loadUserPlan() {
       try {
         var session = await cvAuth.getSession();
         if (session && session.user) {
+          accessToken = session.access_token;
           var profile = await cvAuth.getProfile(session.user.id);
           if (profile && profile.plan) userPlan = profile.plan;
           if (profile && profile.plan_expires_at) planExpiresAt = profile.plan_expires_at;
@@ -1030,7 +1040,7 @@
           try {
             var resp = await fetch(AI_ENDPOINT + '?action=parse-cv', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: aiHeaders(),
               body: JSON.stringify({ text: text, plan: userPlan })
             });
             var json = await resp.json();
@@ -1662,7 +1672,7 @@
 
       fetch(AI_ENDPOINT + '?action=enhance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: aiHeaders(),
         body: JSON.stringify({
           personal: state.personal,
           experience: state.experience,
@@ -1776,7 +1786,7 @@
       collectStep(state.step);
       fetch(AI_ENDPOINT + '?action=interview-prep', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: aiHeaders(),
         body: JSON.stringify({
           personal: state.personal,
           experience: state.experience,
@@ -1866,7 +1876,7 @@
       try {
         var res = await fetch(AI_ENDPOINT + '?action=cover-letter', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: aiHeaders(),
           body: JSON.stringify({
             personal: state.personal,
             experience: state.experience,
@@ -2597,7 +2607,7 @@
 
         fetch(CHAT_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: aiHeaders(),
           body: JSON.stringify({ messages: chatMessages })
         })
         .then(function(res) { return res.json(); })
@@ -2685,7 +2695,7 @@
           pickBtn.textContent = '⏳ Comparing…';
           var resp = await fetch(AI_ENDPOINT + '?action=compare-cv', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: aiHeaders(),
             body: JSON.stringify({
               oldCvText: text,
               personal: state.personal,

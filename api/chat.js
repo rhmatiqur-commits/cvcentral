@@ -4,6 +4,8 @@
  * Requires env var: ANTHROPIC_API_KEY
  */
 
+const { authenticate } = require('./_auth');
+
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL = 'claude-haiku-4-5-20251001';
 
@@ -32,11 +34,20 @@ Guidelines:
 
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', 'https://cvcentral.io');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
   if (!process.env.ANTHROPIC_API_KEY) {
     return res.status(500).json({ error: 'Missing API key' });
+  }
+
+  try {
+    await authenticate(req);
+  } catch (e) {
+    return res.status(e.status || 401).json({ error: e.message || 'Authentication failed' });
   }
 
   const { messages } = req.body || {};
