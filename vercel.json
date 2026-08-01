@@ -5,7 +5,8 @@
     "api/chat.js": { "maxDuration": 15 },
     "api/payment.js": { "maxDuration": 30 },
     "api/webhook.js": { "maxDuration": 30 },
-    "api/admin-feedback.js": { "maxDuration": 15 }
+    "api/admin-feedback.js": { "maxDuration": 15 },
+    "api/admin-data.js": { "maxDuration": 15 }
   },
   "headers": [
     {

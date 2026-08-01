@@ -708,12 +708,10 @@
       <!-- ====== Candidates tab ====== -->
       <div class="tab-panel" id="tabCandidates">
 
-        <!-- RLS notice (shown when 0 rows returned) -->
+        <!-- Error notice (shown if the admin data request fails) -->
         <div class="rls-banner" id="rlsBanner">
-          <strong>No data returned.</strong>
-          This page uses your active Supabase session with Row Level Security enabled.
-          To see candidate data, log into CV Central in this browser first, then return here.
-          Full multi-user admin access requires a service-role Edge Function &mdash; the anon key cannot bypass RLS.
+          <strong>Couldn't load candidate data.</strong>
+          <span id="rlsBannerMsg">Check the server logs for /api/admin-data.</span>
         </div>
 
         <!-- Stats bar -->
@@ -853,16 +851,12 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
   (async function() {
 
     var ADMIN_PASSWORD = 'CVCentral2026!';
     var SESSION_KEY = 'cvcentral_admin_unlocked';
-    var SUPABASE_URL = 'https://exzkmavkzqknoghopwhq.supabase.co';
-    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4emttYXZrenFrbm9naG9wd2hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjI5MjMsImV4cCI6MjA5ODMzODkyM30.ZiQSoZ2bTErHX-zHa6QQ-P2TD5eNgoPfB--Bpnk9R5I';
 
-    var sb = null;
     var allProfiles = [];
     var allCVs = [];
     var cvsByUser = {};
@@ -928,7 +922,6 @@
 
     /* ---- Init ---- */
     async function init() {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       await loadData();
     }
 
@@ -939,23 +932,18 @@
       document.getElementById('rlsBanner').style.display = 'none';
 
       try {
-        var profRes = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-        if (profRes.error) throw profRes.error;
-        allProfiles = profRes.data || [];
+        var res = await fetch('/api/admin-data', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load admin data');
 
-        var cvRes = await sb.from('saved_cvs').select('*').order('updated_at', { ascending: false });
-        if (cvRes.error) throw cvRes.error;
-        allCVs = cvRes.data || [];
+        allProfiles = data.profiles || [];
+        allCVs = data.cvs || [];
 
         cvsByUser = {};
         allCVs.forEach(function(cv) {
           if (!cvsByUser[cv.user_id]) cvsByUser[cv.user_id] = [];
           cvsByUser[cv.user_id].push(cv);
         });
-
-        if (allProfiles.length === 0) {
-          document.getElementById('rlsBanner').style.display = 'block';
-        }
 
         updateStats();
         applyFilters();
@@ -966,6 +954,8 @@
 
       } catch (err) {
         console.error('Admin data error:', err);
+        document.getElementById('rlsBannerMsg').textContent = err.message || 'Unknown error';
+        document.getElementById('rlsBanner').style.display = 'block';
         document.getElementById('tableBody').innerHTML =
           '<tr class="special-row"><td colspan="7">Failed to load data: ' + esc(err.message || 'Unknown error') + '</td></tr>';
       }
