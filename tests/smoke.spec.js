@@ -14,6 +14,21 @@ const { test, expect } = require('@playwright/test');
 
 const hasTestUser = !!(process.env.TEST_USER_EMAIL && process.env.TEST_USER_PASSWORD);
 
+// The template picker overlay (#tpOverlay) shows full-screen on every visit
+// to cv-builder.html that isn't a saved-CV view (?view=1) — "for everyone on
+// every visit" per the comment in cv-builder.html. It intercepts all clicks
+// underneath it until dismissed via the "skip and choose later" link. Every
+// fresh visit to the builder in these tests needs to clear it first.
+async function dismissTemplatePicker(page) {
+  const skipLink = page.locator('#tpSkipLink');
+  try {
+    await skipLink.waitFor({ state: 'visible', timeout: 3000 });
+    await skipLink.click();
+  } catch (e) {
+    // Overlay didn't show (e.g. behavior changes in future) — nothing to dismiss.
+  }
+}
+
 test.describe('Public pages', () => {
   test('homepage loads', async ({ page }) => {
     await page.goto('/');
@@ -58,6 +73,7 @@ test.describe('Security regression — /api/ai and /api/chat must reject unauthe
 test.describe('Guest CV builder flow', () => {
   test('a guest can fill in step 1 and click through to the review step', async ({ page }) => {
     await page.goto('/cv-builder.html');
+    await dismissTemplatePicker(page);
 
     await page.locator('#fullName').fill('Smoke Test User');
     await page.locator('#email').fill('smoke-test@example.com');
@@ -87,6 +103,7 @@ test.describe('Authenticated flow', () => {
 
     // ---- Build a minimal CV ----
     await page.goto('/cv-builder.html');
+    await dismissTemplatePicker(page);
     const uniqueName = 'Smoke Test ' + Date.now();
     await page.locator('#fullName').fill(uniqueName);
     await page.locator('#email').fill('smoke-test@example.com');
@@ -143,6 +160,7 @@ test.describe('Authenticated flow', () => {
     await page.waitForURL(/dashboard\.html/, { timeout: 15000 });
 
     await page.goto('/cv-builder.html');
+    await dismissTemplatePicker(page);
     await page.locator('#fullName').fill('Smoke Test AI');
     await page.locator('#email').fill('smoke-test@example.com');
     await page.locator('#targetRole').fill('QA Engineer');
