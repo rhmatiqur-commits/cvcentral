@@ -2257,20 +2257,14 @@
         });
       }
 
-      // Save Interview Session — hook into interview generate flow
+      // Save Interview Session — uses state.interviewPrep set during generation
       var saveIntBtn = document.getElementById('saveInterviewSessionBtn');
       if (saveIntBtn) {
         saveIntBtn.addEventListener('click', async function () {
-          // Collect Q+A from the rendered list
-          var qEls = document.querySelectorAll('#interviewPrepQuestions .interview-q');
-          var questions = [];
-          qEls.forEach(function (el) {
-            var q = el.querySelector('.q-text');
-            var t = el.querySelector('.q-tip');
-            questions.push({ question: q ? q.textContent.trim() : el.textContent.trim(), tip: t ? t.textContent.trim() : '' });
-          });
+          var questions = (state && state.interviewPrep) || [];
           if (!questions.length) { toast('No interview questions to save.', 'error'); return; }
-          var role = (state.formData && state.formData.targetJob) || 'Interview session';
+          var role = (state.jobTarget && (state.jobTarget.title || state.jobTarget.company))
+            || (state.formData && state.formData.targetJob) || 'Interview session';
           try {
             var sess = await cvAuth.getSession();
             var r = await fetch('/api/interview-sessions', {

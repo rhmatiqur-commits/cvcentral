@@ -32,6 +32,14 @@ module.exports = async (req, res) => {
   const userId = auth.userId;
 
   if (req.method === 'GET') {
+    // GET single version (full data) for restore
+    const id = req.query && req.query.id;
+    if (id) {
+      const { ok, data } = await sb('cv_versions?id=eq.' + id + '&user_id=eq.' + userId + '&select=*');
+      if (!ok || !data || !data[0]) return res.status(404).json({ error: 'Not found' });
+      return res.status(200).json({ version: data[0] });
+    }
+    // GET list (metadata only)
     const { ok, data } = await sb('cv_versions?user_id=eq.' + userId + '&order=created_at.desc&select=id,name,created_at');
     if (!ok) return res.status(500).json({ error: 'Could not fetch versions' });
     return res.status(200).json({ versions: Array.isArray(data) ? data : [] });
