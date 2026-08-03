@@ -675,7 +675,7 @@
         <div class="upgrade-card" data-plan-monthly="pro_monthly" data-plan-annual="pro_annual" style="border:2px solid #5B2D8E;border-radius:14px;padding:1.25rem;cursor:pointer;background:#FAF8FF;position:relative;overflow:hidden;transition:box-shadow 0.15s;" onclick="window._checkoutCurrent('pro')">
           <span style="position:absolute;top:0;left:0;right:0;background:#5B2D8E;color:#AAFF00;font-size:0.68rem;font-weight:800;letter-spacing:0.1em;text-align:center;padding:0.3rem;text-transform:uppercase;">Most popular</span>
           <p style="margin:1.5rem 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#5B2D8E;">Pro</p>
-          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="proPrice">£5.99</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="proPrice">£9.99</p>
           <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="proPeriod">per month</p>
           <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
             <li>✅ Save up to 10 CVs</li>
@@ -687,14 +687,14 @@
           </ul>
           <button class="btn btn-violet btn-sm" style="width:100%;" id="proBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('pro')">Get Pro</button>
           <button class="btn btn-sm" style="width:100%;margin-top:0.5rem;background:#F0EBF9;color:#5B2D8E;border:1.5px solid #D9CCF0;font-weight:700;cursor:pointer;border-radius:10px;padding:0.55rem;" id="proTrialBtn" onclick="event.stopPropagation();window._checkoutTrial('pro')">✨ Try 14 days for £1.99</button>
-          <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.35rem;" id="proTrialNote">then £5.99/month — cancel anytime</p>
+          <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.35rem;" id="proTrialNote">then £9.99/month — cancel anytime</p>
         </div>
 
         <!-- Premium (Coming Soon) -->
         <div style="border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;background:#FAFAFA;opacity:0.72;position:relative;overflow:hidden;pointer-events:none;user-select:none;">
           <div style="position:absolute;top:12px;right:12px;background:#E0D4F5;color:#5B2D8E;font-size:0.7rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:6px;">Coming Soon</div>
           <p style="margin:0 0 0.4rem;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);">Premium</p>
-          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£10.99</p>
+          <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£19.99</p>
           <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="premiumPeriod">per month</p>
           <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
             <li>⏳ Everything in Pro</li>
@@ -766,14 +766,14 @@
       monthly.style.color = isAnnual ? 'var(--muted)' : 'var(--ink)';
       annual.style.color = isAnnual ? 'var(--ink)' : 'var(--muted)';
 
-      document.getElementById('proPrice').textContent    = isAnnual ? '£49' : '£5.99';
-      document.getElementById('proPeriod').textContent   = isAnnual ? 'per year (save £22.88)' : 'per month';
-      document.getElementById('premiumPrice').textContent = isAnnual ? '£99' : '£10.99';
-      document.getElementById('premiumPeriod').textContent = isAnnual ? 'per year (save £32.88)' : 'per month';
+      document.getElementById('proPrice').textContent    = isAnnual ? '£99' : '£9.99';
+      document.getElementById('proPeriod').textContent   = isAnnual ? 'per year (save £20.88)' : 'per month';
+      document.getElementById('premiumPrice').textContent = isAnnual ? '£199' : '£19.99';
+      document.getElementById('premiumPeriod').textContent = isAnnual ? 'per year (save £40.88)' : 'per month';
       document.getElementById('proBtnLabel').textContent = isAnnual ? 'Get Pro Annual' : 'Get Pro';
       document.getElementById('premiumBtnLabel').textContent = isAnnual ? 'Get Premium Annual' : 'Get Premium';
-      document.getElementById('proTrialNote').textContent = isAnnual ? 'then £49/year — cancel anytime' : 'then £5.99/month — cancel anytime';
-      document.getElementById('premiumTrialNote').textContent = isAnnual ? 'then £99/year — cancel anytime' : 'then £10.99/month — cancel anytime';
+      document.getElementById('proTrialNote').textContent = isAnnual ? 'then £99/year — cancel anytime' : 'then £9.99/month — cancel anytime';
+      document.getElementById('premiumTrialNote').textContent = isAnnual ? 'then £199/year — cancel anytime' : 'then £19.99/month — cancel anytime';
     };
 
     // Choose the right plan key based on billing toggle

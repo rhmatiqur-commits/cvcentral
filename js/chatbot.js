@@ -266,7 +266,7 @@
     gate.innerHTML = `
       <div class="upg-icon">🔒</div>
       <h3>Pro & Premium feature</h3>
-      <p>The AI assistant is available on Pro (£5.99/mo) and Premium (£10.99/mo) plans. Upgrade to get instant help whenever you're stuck.</p>
+      <p>The AI assistant is available on Pro (£9.99/mo) and Premium (£19.99/mo) plans. Upgrade to get instant help whenever you're stuck.</p>
       <a href="index.html#pricing">See plans →</a>
     `;
     msgBox.appendChild(gate);

@@ -370,7 +370,7 @@
       <div class="price-card popular reveal">
         <div class="popular-badge">Most Popular</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price" id="proPrice">£5.99<span>/mo</span></div>
+        <div class="plan-price" id="proPrice">£9.99<span>/mo</span></div>
         <div class="plan-period" id="proPeriod">per month</div>
         <div class="plan-trial">✨ Try 14 days for £1.99</div>
         <ul class="plan-feats">
@@ -383,12 +383,12 @@
           <li>PDF download</li>
         </ul>
         <a href="signup.html" class="btn-plan btn-plan-lime" id="proBtnLabel">Get Pro</a>
-        <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="proTrialNote">then £5.99/month — cancel anytime</p>
+        <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="proTrialNote">then £9.99/month — cancel anytime</p>
       </div>
       <div class="price-card reveal" style="opacity:0.72;position:relative;pointer-events:none;user-select:none;">
         <div class="popular-badge" style="background:var(--bg-card2);color:var(--text-2);">Coming Soon</div>
         <div class="plan-name">Premium</div>
-        <div class="plan-price" id="premiumPrice">£10.99<span>/mo</span></div>
+        <div class="plan-price" id="premiumPrice">£19.99<span>/mo</span></div>
         <div class="plan-period" id="premiumPeriod">per month</div>
         <ul class="plan-feats">
           <li>Everything in Pro</li>
@@ -584,12 +584,12 @@ function setPricing(mode, el){
   document.querySelectorAll('.toggle-opt').forEach(function(o){o.classList.remove('active');});
   el.classList.add('active');
   var annual = mode==='annual';
-  document.getElementById('proPrice').innerHTML = annual ? '£44<span>/yr</span>' : '£5.99<span>/mo</span>';
-  document.getElementById('proPeriod').textContent = annual ? 'per year (save £27.88)' : 'per month';
-  document.getElementById('premiumPrice').innerHTML = annual ? '£79<span>/yr</span>' : '£10.99<span>/mo</span>';
-  document.getElementById('premiumPeriod').textContent = annual ? 'per year (save £52.88)' : 'per month';
+  document.getElementById('proPrice').innerHTML = annual ? '£99<span>/yr</span>' : '£9.99<span>/mo</span>';
+  document.getElementById('proPeriod').textContent = annual ? 'per year (save £20.88)' : 'per month';
+  document.getElementById('premiumPrice').innerHTML = annual ? '£199<span>/yr</span>' : '£19.99<span>/mo</span>';
+  document.getElementById('premiumPeriod').textContent = annual ? 'per year (save £40.88)' : 'per month';
   document.getElementById('proBtnLabel').textContent = annual ? 'Get Pro Annual' : 'Get Pro';
-  document.getElementById('proTrialNote').textContent = annual ? 'then £44/year — cancel anytime' : 'then £5.99/month — cancel anytime';
+  document.getElementById('proTrialNote').textContent = annual ? 'then £99/year — cancel anytime' : 'then £9.99/month — cancel anytime';
 }
 
 // ── Reveal on scroll ──
