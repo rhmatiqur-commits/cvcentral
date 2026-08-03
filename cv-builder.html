@@ -566,7 +566,8 @@
             </div>
 
             <div class="result-actions">
-              <a href="saved-cover-letters.html" class="btn btn-ghost">✉ Generate a cover letter →</a>
+              <button class="btn btn-ghost" id="saveVersionBtn" title="Save a named snapshot of this CV (Pro+)" style="display:none;">💾 Save CV version</button>
+              <a href="saved-cover-letters.html" class="btn btn-ghost">✉ Cover letters →</a>
             </div>
 
             <!-- Interview prep card (Pro+) -->
@@ -680,7 +681,7 @@
             <button class="btn btn-violet" id="downloadPdf">Download PDF</button>
             <button class="btn btn-ghost" id="downloadDocx" title="Download as Word document (.docx)">⬇ Word (.docx)</button>
             <button class="btn btn-primary" id="saveBtn">Save to CV Central</button>
-            <button class="btn btn-ghost" id="saveVersionBtn" title="Save a named snapshot of this CV (Pro+)" style="display:none;">💾 Save version</button>
+            <button class="btn btn-ghost" id="saveVersionBtnPreview" title="Save a named snapshot of this CV (Pro+)" style="display:none;">💾 Save version</button>
           </div>
           <p class="hint" style="text-align:center;margin-top:0.75rem;color:var(--muted);font-size:0.8rem;">
             Free downloads include a watermark. <a href="index.html#pricing" style="color:var(--violet);font-weight:600;">Go Pro</a> for a clean PDF.
@@ -2313,33 +2314,36 @@
             (plan === 'day_pass' && expires && new Date(expires) > new Date());
           if (isPro) {
             var sv = document.getElementById('saveVersionBtn');
+            var svp = document.getElementById('saveVersionBtnPreview');
             var scl = document.getElementById('saveCoverLetterBtn');
             if (sv) sv.style.display = '';
+            if (svp) svp.style.display = '';
             if (scl) scl.style.display = '';
           }
         } catch (e) {}
       })();
 
       // Save CV Version
-      var saveVersionBtn = document.getElementById('saveVersionBtn');
-      if (saveVersionBtn) {
-        saveVersionBtn.addEventListener('click', async function () {
-          var name = prompt('Name this CV snapshot:', 'My CV ' + new Date().toLocaleDateString('en-GB'));
-          if (!name) return;
-          var cvRaw = localStorage.getItem('cvcentral_draft') || localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
-          if (!cvRaw) { toast('No CV data to save. Please fill in your CV first.', 'error'); return; }
-          try {
-            var sess = await cvAuth.getSession();
-            var r = await fetch('/api/saved-data?resource=cv-versions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
-              body: JSON.stringify({ name: name, cv_data: JSON.parse(cvRaw) })
-            });
-            if (!r.ok) throw new Error('Failed');
-            toast('CV version saved ✓', 'success');
-          } catch (e) { toast('Could not save version.', 'error'); }
-        });
+      async function saveCvVersion() {
+        var name = prompt('Name this CV snapshot:', 'My CV ' + new Date().toLocaleDateString('en-GB'));
+        if (!name) return;
+        var cvRaw = localStorage.getItem('cvcentral_draft') || localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+        if (!cvRaw) { toast('No CV data to save. Please fill in your CV first.', 'error'); return; }
+        try {
+          var sess = await cvAuth.getSession();
+          var r = await fetch('/api/saved-data?resource=cv-versions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+            body: JSON.stringify({ name: name, cv_data: JSON.parse(cvRaw) })
+          });
+          if (!r.ok) throw new Error('Failed');
+          toast('CV version saved ✓', 'success');
+        } catch (e) { toast('Could not save version.', 'error'); }
       }
+      var saveVersionBtn = document.getElementById('saveVersionBtn');
+      if (saveVersionBtn) saveVersionBtn.addEventListener('click', saveCvVersion);
+      var saveVersionBtnPreview = document.getElementById('saveVersionBtnPreview');
+      if (saveVersionBtnPreview) saveVersionBtnPreview.addEventListener('click', saveCvVersion);
 
       // Save Cover Letter
       var saveCLBtn = document.getElementById('saveCoverLetterBtn');
