@@ -177,7 +177,7 @@
     el.innerHTML=letters.map(function(l){
       var d=new Date(l.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       var meta=[l.job_title,l.company,l.language].filter(Boolean).join(' · ');
-      return '<div class="result-section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;cursor:pointer;" onclick="openLetter(''+l.id+'')">'
+      return '<div class="result-section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;cursor:pointer;" onclick="openLetter(\''+l.id+'\')">'
         +'<div><div style="font-weight:600;font-size:0.95rem;">'+esc(l.title)+'</div>'
         +(meta?'<div style="font-size:0.8rem;color:var(--dv-muted);margin-top:0.15rem;">'+esc(meta)+'</div>':'')
         +'<div style="font-size:0.78rem;color:var(--dv-faint);margin-top:0.1rem;">Saved '+d+'</div></div>'

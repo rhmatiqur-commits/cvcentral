@@ -175,7 +175,7 @@
     el.innerHTML=sessions.map(function(s){
       var d=new Date(s.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       var qCount=(s.questions&&s.questions.length)||0;
-      return '<div class="result-section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;cursor:pointer;" onclick="openSession(''+s.id+'')">'
+      return '<div class="result-section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;cursor:pointer;" onclick="openSession(\''+s.id+'\')">'
         +'<div><div style="font-weight:600;font-size:0.95rem;">'+esc(s.role||'Interview Session')+'</div>'
         +'<div style="font-size:0.8rem;color:var(--dv-muted);margin-top:0.15rem;">'+qCount+' question'+(qCount!==1?'s':'')+' · Saved '+d+'</div>'
         +'</div><span style="color:var(--dv-muted);font-size:0.82rem;">View →</span>'

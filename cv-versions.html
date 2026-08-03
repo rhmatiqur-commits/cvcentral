@@ -180,8 +180,8 @@
       return '<div class="result-section" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">'
         +'<div><div style="font-weight:600;font-size:0.95rem;">'+esc(v.name)+'</div><div style="font-size:0.82rem;color:var(--dv-muted);margin-top:0.2rem;">Saved '+d+'</div></div>'
         +'<div style="display:flex;gap:0.5rem;">'
-        +'<button class="btn btn-ghost btn-sm" onclick="restoreVersion(''+v.id+'')">⬆ Restore</button>'
-        +'<button class="btn btn-ghost btn-sm" style="color:#F87171;" onclick="deleteVersion(''+v.id+'')">🗑</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="restoreVersion(\''+v.id+'\')">⬆ Restore</button>'
+        +'<button class="btn btn-ghost btn-sm" style="color:#F87171;" onclick="deleteVersion(\''+v.id+'\')">🗑</button>'
         +'</div></div>';
     }).join('');
   }
