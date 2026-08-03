@@ -567,7 +567,6 @@
 
             <div class="result-actions">
               <button class="btn btn-ghost" id="saveVersionBtn" title="Save a named snapshot of this CV (Pro+)" style="display:none;">💾 Save CV version</button>
-              <a href="saved-cover-letters.html" class="btn btn-ghost">✉ Cover letters →</a>
             </div>
 
             <!-- Interview prep card (Pro+) -->
@@ -1785,35 +1784,12 @@
       else if (jt.match(/retail|shop|store|customer|sales/)) recommended = 'retail';
       else if (jt.match(/academ|research|professor|lecturer|phd/)) recommended = 'academic';
 
-      // Cover letter
-      var coverLetter = generateCoverLetter('English');
-
       return {
         score: { total: total, breakdown: { formatting: fmt, keywords: kwScore, achievements: achScore, ats: ats, length: len } },
         suggestions: suggestions,
         atsKeywords: skills.slice(0, 5),
-        recommendedTemplate: recommended,
-        coverLetter: coverLetter
+        recommendedTemplate: recommended
       };
-    }
-
-    function generateCoverLetter(lang) {
-      var p = state.personal;
-      var exp = state.experience;
-      var jt = state.jobTarget || {};
-      var name = p.fullName || 'the hiring team';
-      var role = jt.role || 'this position';
-      var company = jt.company || 'your company';
-      var topSkills = state.skills.slice(0, 3).join(', ') || 'my key skills';
-      var lastJob = exp.length ? exp[0] : null;
-      var expLine = lastJob ? ('Most recently, I worked as ' + lastJob.title + (lastJob.company ? ' at ' + lastJob.company : '') + ', where I ' + (lastJob.responsibilities ? lastJob.responsibilities.split('.')[0].toLowerCase() : 'gained valuable experience') + '.') : '';
-
-      return 'Dear Hiring Manager,\n\n' +
-        'I am writing to express my strong interest in the ' + role + ' role at ' + company + '. With my background and skills, I am confident I can make a meaningful contribution to your team.\n\n' +
-        expLine + (expLine ? '\n\n' : '') +
-        'My key strengths include ' + topSkills + '. I am passionate about delivering results and thrive in collaborative, fast-paced environments.\n\n' +
-        'I would welcome the opportunity to discuss how my experience aligns with your needs. Thank you for considering my application.\n\n' +
-        'Yours sincerely,\n' + (p.fullName || '[Your Name]') + '\n' + (p.email || '') + (p.phone ? '  ·  ' + p.phone : '');
     }
 
     function runAnalysis() {
@@ -1839,7 +1815,6 @@
           languages: state.languages,
           certifications: state.certifications,
           jobTarget: state.jobTarget,
-          coverLetterLanguage: 'English',
           plan: userPlan
         })
       })
@@ -1915,33 +1890,6 @@
         list.appendChild(li);
       });
 
-      // Cover letter
-      document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
-      document.getElementById('regenerateCoverLetter').style.display = data.coverLetter ? 'inline-flex' : 'none';
-      // Auto-save cover letter for Pro users
-      if (data.coverLetter && isPro()) {
-        (async function() {
-          try {
-            var sess = await cvAuth.getSession();
-            if (!sess) return;
-            var autoTitle = (state.formData && state.formData.targetJob)
-              ? (state.formData.targetJob + ' — ' + new Date().toLocaleDateString('en-GB'))
-              : ('Cover Letter ' + new Date().toLocaleDateString('en-GB'));
-            await fetch('/api/saved-data?resource=cover-letters', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
-              body: JSON.stringify({
-                title: autoTitle,
-                content: data.coverLetter,
-                job_title: (state.formData && state.formData.targetJob) || '',
-                company: (state.formData && state.formData.targetCompany) || '',
-                language: 'English'
-              })
-            });
-            toast('Cover letter auto-saved ✓', 'success');
-          } catch(e) {}
-        })();
-      }
     }
 
     /* ---------- Interview prep ---------- */
@@ -2046,84 +1994,6 @@
       }).join('\n\n');
       navigator.clipboard.writeText(text).then(function() {
         toast('Questions copied ✓', 'success');
-      });
-    });
-
-    // Regenerate cover letter in selected language
-    document.getElementById('coverLetterLang').addEventListener('change', function () {
-      var box = document.getElementById('coverLetterBox');
-      if (box.textContent) {
-        document.getElementById('regenerateCoverLetter').style.display = 'inline-flex';
-      }
-    });
-
-    document.getElementById('regenerateCoverLetter').addEventListener('click', async function () {
-      if (freeUsed('cover_letter')) { showFreeLimit('Cover Letter'); return; }
-      var lang = document.getElementById('coverLetterLang').value;
-      var btn = this;
-      btn.disabled = true;
-      btn.textContent = 'Generating…';
-      document.getElementById('coverLetterBox').textContent = '';
-      try {
-        var res = await fetch(AI_ENDPOINT + '?action=cover-letter', {
-          method: 'POST',
-          headers: aiHeaders(),
-          body: JSON.stringify({
-            personal: state.personal,
-            experience: state.experience,
-            education: state.education,
-            skills: state.skills,
-            languages: state.languages,
-            certifications: state.certifications,
-            jobTarget: state.jobTarget,
-            coverLetterLanguage: lang,
-            plan: userPlan
-          })
-        });
-        var data = await res.json();
-        if (data.error) throw new Error(data.error);
-        document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
-        if (state.ai) state.ai.coverLetter = data.coverLetter;
-        markFreeUsed('cover_letter');
-        toast('Cover letter regenerated ✓', 'success');
-        // Auto-save regenerated cover letter for Pro users
-        if (data.coverLetter && isPro()) {
-          (async function() {
-            try {
-              var sess = await cvAuth.getSession();
-              if (!sess) return;
-              var autoTitle = (state.formData && state.formData.targetJob)
-                ? (state.formData.targetJob + ' (' + lang + ') — ' + new Date().toLocaleDateString('en-GB'))
-                : ('Cover Letter (' + lang + ') ' + new Date().toLocaleDateString('en-GB'));
-              await fetch('/api/saved-data?resource=cover-letters', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
-                body: JSON.stringify({
-                  title: autoTitle,
-                  content: data.coverLetter,
-                  job_title: (state.formData && state.formData.targetJob) || '',
-                  company: (state.formData && state.formData.targetCompany) || '',
-                  language: lang
-                })
-              });
-            } catch(e) {}
-          })();
-        }
-      } catch (e) {
-        toast(e.message || 'Could not regenerate — please try again', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Regenerate in this language';
-      }
-    });
-
-    document.getElementById('copyCoverLetter').addEventListener('click', function () {
-      var text = document.getElementById('coverLetterBox').textContent;
-      if (!text) { toast('Run the analysis first to get your cover letter', 'error'); return; }
-      navigator.clipboard.writeText(text).then(function () {
-        toast('Cover letter copied ✓', 'success');
-      }, function () {
-        toast("Couldn't copy — select and copy manually", 'error');
       });
     });
 
@@ -2344,34 +2214,6 @@
       if (saveVersionBtn) saveVersionBtn.addEventListener('click', saveCvVersion);
       var saveVersionBtnPreview = document.getElementById('saveVersionBtnPreview');
       if (saveVersionBtnPreview) saveVersionBtnPreview.addEventListener('click', saveCvVersion);
-
-      // Save Cover Letter
-      var saveCLBtn = document.getElementById('saveCoverLetterBtn');
-      if (saveCLBtn) {
-        saveCLBtn.addEventListener('click', async function () {
-          var box = document.getElementById('coverLetterBox');
-          var text = box ? box.textContent.trim() : '';
-          if (!text) { toast('No cover letter to save — generate one first.', 'error'); return; }
-          var title = prompt('Name this cover letter:', (state.formData && state.formData.targetJob) || 'Cover Letter');
-          if (!title) return;
-          try {
-            var sess = await cvAuth.getSession();
-            var r = await fetch('/api/saved-data?resource=cover-letters', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
-              body: JSON.stringify({
-                title: title,
-                content: text,
-                job_title: (state.formData && state.formData.targetJob) || '',
-                company: (state.formData && state.formData.targetCompany) || '',
-                language: 'English'
-              })
-            });
-            if (!r.ok) throw new Error('Failed');
-            toast('Cover letter saved ✓', 'success');
-          } catch (e) { toast('Could not save cover letter.', 'error'); }
-        });
-      }
 
       // Save Interview Session — uses state.interviewPrep set during generation
       var saveIntBtn = document.getElementById('saveInterviewSessionBtn');
