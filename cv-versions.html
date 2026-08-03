@@ -262,7 +262,7 @@
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
   document.getElementById('saveCurrentBtn').addEventListener('click',function(){
-    var cvData=localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData');
+    var cvData=localStorage.getItem('cvcentral_draft')||localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData');
     if(!cvData||cvData==='{}'){alert('No CV data found. Build your CV first in the CV Builder.');return;}
     document.getElementById('versionName').value='';
     document.getElementById('saveModal').style.display='flex';
@@ -270,7 +270,7 @@
   document.getElementById('cancelSaveBtn').addEventListener('click',function(){document.getElementById('saveModal').style.display='none';});
   document.getElementById('confirmSaveBtn').addEventListener('click',async function(){
     var name=document.getElementById('versionName').value.trim()||'My CV '+new Date().toLocaleDateString('en-GB');
-    var cvData=JSON.parse(localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData')||'{}');
+    var cvData=JSON.parse(localStorage.getItem('cvcentral_draft')||localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData')||'{}');
     try{
       var r=await fetch('/api/saved-data?resource=cv-versions',{method:'POST',headers:authH(),body:JSON.stringify({name:name,cv_data:cvData})});
       if(!r.ok)throw new Error('Failed');

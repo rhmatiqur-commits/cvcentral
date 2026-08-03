@@ -348,7 +348,7 @@
 
       // Try to load CV data from localStorage
       try {
-        var stored = localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+        var stored = localStorage.getItem('cvcentral_draft') || localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
         if (stored) { cvData = JSON.parse(stored); }
       } catch(e) {}
     } catch(e) { window.location.href = 'login.html'; }

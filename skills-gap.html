@@ -233,7 +233,7 @@
       if(!isPro){document.getElementById('upgradeGate').hidden=false;return;}
       document.getElementById('mainContent').hidden=false;
       try{
-        var raw=localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData');
+        var raw=localStorage.getItem('cvcentral_draft')||localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData');
         if(raw)cvData=JSON.parse(raw);
         if(cvData&&cvData.skills){
           var s=Array.isArray(cvData.skills)?cvData.skills.join(', '):(cvData.skills||'');
