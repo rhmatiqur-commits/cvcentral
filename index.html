@@ -7,7 +7,7 @@
   <meta name="description" content="Build, score and optimise your CV with AI built for Europe's job market. Start your 14-day trial for £1.99.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#5B2D8E">
@@ -15,6 +15,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CV Central">
+  <script>(function(){try{var t=localStorage.getItem('cvcentral_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()</script>
   <style>
     :root {
       --bg:#0A0A14; --bg-card:#10101C; --bg-card2:#13131F;
@@ -22,25 +23,89 @@
       --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.15);
       --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
       --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
-      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
+      --font-display:'Fraunces',Georgia,serif; --mono:'JetBrains Mono',monospace;
       --radius:12px;
+      --canvas-opacity:0.35;
     }
+    html[data-theme="light"] {
+      --bg:#F6F4FB; --bg-card:#FFFFFF; --bg-card2:#FBFAFF;
+      --lime:#5B2D8E; --lime-dim:rgba(91,45,142,0.08);
+      --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.10);
+      --border:rgba(0,0,0,0.07); --border-bright:#D9D2EC;
+      --text:#1A1625; --text-2:#55506A; --text-3:#7B7590;
+      --canvas-opacity:0.12;
+    }
+    html[data-theme="light"] .btn-lime,
+    html[data-theme="light"] .btn-primary { color:#FFFFFF; background:var(--violet); }
+    html[data-theme="light"] .btn-lime:hover,
+    html[data-theme="light"] .btn-primary:hover { background:var(--violet-bright); }
+    html[data-theme="light"] .sc-num,
+    html[data-theme="light"] .sc-fill-lime,
+    html[data-theme="light"] .sc-badge,
+    html[data-theme="light"] .hero-tag,
+    html[data-theme="light"] .hero-tag-dot,
+    html[data-theme="light"] .stat-num,
+    html[data-theme="light"] .section-tag,
+    html[data-theme="light"] .save-badge,
+    html[data-theme="light"] .popular-badge,
+    html[data-theme="light"] .plan-trial,
+    html[data-theme="light"] .feat-icon,
+    html[data-theme="light"] .how-num { filter:none; }
+    html[data-theme="light"] .popular-badge { background:var(--violet); color:#fff; }
+    html[data-theme="light"] .plan-trial { color:var(--violet); border-color:rgba(91,45,142,0.35); }
+    html[data-theme="light"] .plan-feats li::before { color:var(--violet); }
+    html[data-theme="light"] .how-num { color:var(--violet); }
+    html[data-theme="light"] .stat-num { color:var(--violet); }
+    html[data-theme="light"] .section-tag { color:var(--violet); background:var(--lime-dim); }
+    html[data-theme="light"] .sc-badge { color:var(--violet); background:var(--lime-dim); }
+    html[data-theme="light"] .sc-num { color:var(--violet); }
+    html[data-theme="light"] .sc-fill-lime { background:linear-gradient(90deg,#9B6DD6,var(--violet)); }
+    html[data-theme="light"] .sc-bar-val { color:var(--violet); }
+    html[data-theme="light"] .ai-box { background:rgba(91,45,142,0.07); border-color:rgba(91,45,142,0.18); }
+    html[data-theme="light"] .ai-label { color:var(--violet-bright); }
+    html[data-theme="light"] .ai-tip strong { color:var(--violet); }
+    html[data-theme="light"] .hero-h1 em,
+    html[data-theme="light"] .section-h2 em,
+    html[data-theme="light"] .cta-h2 em { color:var(--violet); }
+    html[data-theme="light"] .hero-tag { color:var(--violet); }
+    html[data-theme="light"] .hero-tag-dot { background:var(--violet); }
+    html[data-theme="light"] .btn-plan-lime { background:var(--violet); color:#fff; }
+    html[data-theme="light"] .btn-plan-lime:hover { background:var(--violet-bright); }
+    html[data-theme="light"] .btn-plan-violet { background:rgba(91,45,142,0.12); color:var(--violet); }
+    html[data-theme="light"] .save-badge { color:var(--violet); background:var(--lime-dim); }
+    html[data-theme="light"] .testi-stars { color:var(--violet); }
+    html[data-theme="light"] .feat-icon { background:var(--lime-dim); }
+    html[data-theme="light"] .feat-icon svg { color:var(--violet); }
+    html[data-theme="light"] #neural-canvas { opacity:var(--canvas-opacity); }
+    html[data-theme="light"] .footer-logo-accent { color:var(--violet) !important; }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
     html{scroll-behavior:smooth;}
     body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
     ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--violet);border-radius:3px;}
 
     /* NAV */
-    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(10,10,20,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
-    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(10,10,20,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background 0.3s,border-color 0.3s;}
+    html[data-theme="light"] nav{background:rgba(246,244,251,0.92);}
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+    .nav-logo-word{font-family:var(--font-display);font-weight:600;font-size:1.15rem;color:var(--text);letter-spacing:-0.01em;transition:color 0.3s;}
+    .nav-logo-word .logo-accent{color:#7B4DB8;}
+    html[data-theme="light"] .nav-logo-word .logo-accent{color:var(--violet);}
     .nav-links{display:flex;align-items:center;gap:32px;}
     .nav-links a{font-size:0.875rem;color:var(--text-2);text-decoration:none;transition:color 0.2s;}
     .nav-links a:hover{color:var(--text);}
-    .nav-actions{display:flex;align-items:center;gap:12px;}
+    .nav-actions{display:flex;align-items:center;gap:10px;}
     .btn-ghost{font-size:0.875rem;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;padding:8px 16px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,background 0.2s;}
     .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-    .btn-lime{font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
+    html[data-theme="light"] .btn-ghost:hover{background:rgba(0,0,0,0.05);}
+    .btn-lime{font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:#0A0A00;background:#AAFF00;border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
     .btn-lime:hover{background:#C4FF33;}
+    html[data-theme="light"] .btn-lime{background:var(--violet);color:#fff;}
+    html[data-theme="light"] .btn-lime:hover{background:var(--violet-bright);}
+    /* Theme toggle */
+    .theme-toggle{width:36px;height:36px;border-radius:50%;background:transparent;border:1px solid var(--border-bright);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background 0.2s,color 0.2s,border-color 0.2s;flex-shrink:0;}
+    .theme-toggle:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+    html[data-theme="light"] .theme-toggle:hover{background:rgba(0,0,0,0.06);}
     @media(max-width:768px){.nav-links{display:none;} nav{padding:0 20px;}}
 
     /* HERO */
@@ -50,7 +115,7 @@
     .hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:24px;}
     .hero-tag-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse-dot 1.6s ease-in-out infinite;}
     @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
-    .hero-h1{font-family:var(--font-heading);font-size:clamp(2.6rem,5vw,4rem);font-weight:800;line-height:1.0;letter-spacing:-0.03em;margin-bottom:20px;}
+    .hero-h1{font-family:var(--font-display);font-size:clamp(2.6rem,5vw,4rem);font-weight:700;line-height:1.05;letter-spacing:-0.02em;margin-bottom:20px;}
     .hero-h1 em{font-style:normal;color:var(--lime);}
     .hero-sub{font-size:1.05rem;color:var(--text-2);line-height:1.7;margin-bottom:36px;max-width:480px;}
     .hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:40px;}
@@ -99,7 +164,7 @@
     /* SECTIONS */
     .section-inner{max-width:1200px;margin:0 auto;padding:96px 40px;}
     .section-tag{display:inline-block;font-family:var(--mono);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lime);background:var(--lime-dim);padding:4px 12px;border-radius:100px;margin-bottom:16px;}
-    .section-h2{font-family:var(--font-heading);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-bottom:12px;}
+    .section-h2{font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-0.01em;line-height:1.15;margin-bottom:12px;}
     .section-h2 em{font-style:normal;color:var(--lime);}
     .section-sub{font-size:1rem;color:var(--text-2);max-width:560px;line-height:1.7;}
     @media(max-width:768px){.section-inner{padding:64px 24px;} .stats-inner{padding:0 24px;}}
@@ -132,25 +197,34 @@
     .toggle-opt{font-size:0.82rem;font-weight:600;padding:6px 16px;border-radius:100px;cursor:pointer;transition:all 0.2s;color:var(--text-2);user-select:none;display:flex;align-items:center;gap:6px;}
     .toggle-opt.active{background:var(--violet);color:var(--text);}
     .save-badge{font-size:0.65rem;font-weight:700;color:var(--lime);background:var(--lime-dim);padding:2px 7px;border-radius:100px;}
-    .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
-    .price-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:32px;position:relative;overflow:hidden;transition:transform 0.3s;}
+    .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;}
+    .price-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;transition:transform 0.3s;display:flex;flex-direction:column;}
     .price-card:hover{transform:translateY(-4px);}
     .price-card.popular{border-color:rgba(170,255,0,0.3);}
     .price-card.popular::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--lime));}
-    .popular-badge{display:inline-block;font-size:0.65rem;font-weight:700;color:#0A0A00;background:var(--lime);padding:3px 10px;border-radius:100px;margin-bottom:12px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;}
-    .plan-name{font-family:var(--font-heading);font-size:1rem;font-weight:700;margin-bottom:8px;}
-    .plan-price{font-size:2.4rem;font-weight:900;font-family:var(--mono);letter-spacing:-0.04em;color:var(--text);margin-bottom:2px;}
-    .plan-price span{font-size:1rem;font-weight:400;color:var(--text-2);}
-    .plan-period{font-size:0.8rem;color:var(--text-2);margin-bottom:6px;}
-    .plan-trial{display:inline-block;font-size:0.78rem;font-weight:700;color:var(--lime);border:1px dashed rgba(170,255,0,0.4);padding:4px 10px;border-radius:8px;margin-bottom:20px;}
-    .plan-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
-    .plan-feats li{font-size:0.87rem;color:var(--text-2);display:flex;align-items:flex-start;gap:8px;}
+    .price-card.pass-card{border-color:rgba(170,255,0,0.25);}
+    .popular-badge{display:inline-block;font-size:0.63rem;font-weight:700;color:#0A0A00;background:var(--lime);padding:3px 10px;border-radius:100px;margin-bottom:12px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;}
+    .plan-tagline{font-size:0.73rem;color:var(--text-3);margin-bottom:14px;line-height:1.4;}
+    .plan-name{font-family:var(--font-heading);font-size:0.95rem;font-weight:700;margin-bottom:4px;}
+    .plan-price{font-size:2.1rem;font-weight:900;font-family:var(--mono);letter-spacing:-0.04em;color:var(--text);margin-bottom:2px;}
+    .plan-price span{font-size:0.9rem;font-weight:400;color:var(--text-2);}
+    .plan-period{font-size:0.78rem;color:var(--text-2);margin-bottom:6px;}
+    .plan-trial{display:inline-block;font-size:0.75rem;font-weight:700;color:var(--lime);border:1px dashed rgba(170,255,0,0.4);padding:4px 10px;border-radius:8px;margin-bottom:16px;}
+    .plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;flex:1;}
+    .plan-feats li{font-size:0.82rem;color:var(--text-2);display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
     .plan-feats li::before{content:'✓';color:var(--lime);font-weight:700;flex-shrink:0;margin-top:1px;}
-    .btn-plan{display:block;text-align:center;padding:12px;border-radius:var(--radius);font-family:var(--font-heading);font-weight:700;font-size:0.9rem;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;}
-    .btn-plan-lime{background:var(--lime);color:#0A0A00;} .btn-plan-lime:hover{background:#C4FF33;}
+    .plan-feats li.feat-no{color:var(--text-3);}
+    .plan-feats li.feat-no::before{content:'✕';color:var(--text-3);}
+    .plan-feats .feat-divider{height:1px;background:var(--border);margin:6px 0;pointer-events:none;list-style:none;}
+    .plan-feats .feat-divider::before{display:none;}
+    .btn-plan{display:block;text-align:center;padding:11px;border-radius:var(--radius);font-family:var(--font-heading);font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;margin-top:auto;}
+    .btn-plan-lime{background:#AAFF00;color:#0A0A00;} .btn-plan-lime:hover{background:#C4FF33;}
     .btn-plan-violet{background:var(--violet);color:#fff;} .btn-plan-violet:hover{background:var(--violet-bright);}
     .btn-plan-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border-bright);} .btn-plan-ghost:hover{border-color:rgba(255,255,255,0.25);color:var(--text);}
-    @media(max-width:900px){.pricing-grid{grid-template-columns:1fr;}}
+    html[data-theme="light"] .plan-feats li::before{color:var(--violet);}
+    html[data-theme="light"] .btn-plan-lime{background:var(--violet);color:#fff;} html[data-theme="light"] .btn-plan-lime:hover{background:var(--violet-bright);}
+    @media(max-width:1100px){.pricing-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:600px){.pricing-grid{grid-template-columns:1fr;}}
 
     /* TESTIMONIALS */
     #testimonials{border-top:1px solid var(--border);}
@@ -167,7 +241,7 @@
     /* CTA */
     #cta{border-top:1px solid var(--border);}
     .cta-inner{text-align:center;max-width:640px;margin:0 auto;}
-    .cta-h2{font-family:var(--font-heading);font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:16px;line-height:1.1;}
+    .cta-h2{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-0.01em;margin-bottom:16px;line-height:1.1;}
     .cta-h2 em{font-style:normal;color:var(--lime);}
     .cta-sub{font-size:1rem;color:var(--text-2);margin-bottom:36px;line-height:1.7;}
     .cta-note{font-size:0.8rem;color:var(--text-3);margin-top:16px;}
@@ -193,7 +267,12 @@
 
 <nav>
   <a href="#" class="nav-logo" aria-label="CV Central">
-    <img src="assets/logo.svg" alt="CV Central" height="36" style="display:block;">
+    <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0;">
+      <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+      <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+      <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+    </svg>
+    <span class="nav-logo-word">CV<span class="logo-accent">Central</span></span>
   </a>
   <div class="nav-links">
     <a href="#features">Features</a>
@@ -201,6 +280,10 @@
     <a href="#pricing">Pricing</a>
   </div>
   <div class="nav-actions">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark">
+      <svg id="themeIconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="themeIconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
     <a href="login.html" class="btn-ghost">Sign in</a>
     <a href="signup.html" class="btn-lime">Get started</a>
   </div>
@@ -349,57 +432,107 @@
   <div class="section-inner">
     <div class="section-tag">Pricing</div>
     <h2 class="section-h2">Simple pricing.<br><em>No surprises.</em></h2>
-    <p class="section-sub">Start with a 14-day trial for £1.99. Cancel anytime — no questions asked.</p>
+    <p class="section-sub">Start free, grab a one-time pass, or go Pro. Every plan includes a 14-day trial for £1.99.</p>
     <div class="pricing-toggle" role="group" aria-label="Billing period">
       <span class="toggle-opt active" onclick="setPricing('monthly',this)">Monthly</span>
       <span class="toggle-opt" onclick="setPricing('annual',this)">Annual <span class="save-badge">Save 25%</span></span>
     </div>
     <div class="pricing-grid">
+
+      <!-- FREE -->
       <div class="price-card reveal">
         <div class="plan-name">Free</div>
         <div class="plan-price">£0<span>/mo</span></div>
         <div class="plan-period">Forever free</div>
+        <p class="plan-tagline">Perfect for first-time users &amp; students</p>
         <ul class="plan-feats">
-          <li>1 CV saved</li>
-          <li>AI enhancement (3 sections)</li>
-          <li>PDF download</li>
+          <li>1 CV</li>
+          <li>Unlimited edits</li>
+          <li>1 ATS Score</li>
+          <li>1 AI CV Enhancement</li>
+          <li>1 Cover Letter</li>
+          <li>5 Interview Questions</li>
           <li>Basic templates</li>
+          <li>PDF download</li>
+          <li>Basic resume parser</li>
+          <li class="feat-no">DOCX export</li>
+          <li class="feat-no">Multiple CVs</li>
+          <li class="feat-no">Application Tracker</li>
         </ul>
         <a href="signup.html" class="btn-plan btn-plan-ghost">Get started free</a>
       </div>
+
+      <!-- JOB PASS -->
+      <div class="price-card pass-card reveal">
+        <div class="popular-badge" style="background:rgba(170,255,0,0.15);color:var(--lime);">⚡ One-time</div>
+        <div class="plan-name">Job Pass</div>
+        <div class="plan-price">£1.19<span> / 3 days</span></div>
+        <div class="plan-period">one-off, no subscription</div>
+        <p class="plan-tagline">Perfect for one-off job applications</p>
+        <ul class="plan-feats">
+          <li>Everything in Free, plus:</li>
+          <li class="feat-divider" aria-hidden="true"></li>
+          <li>Unlimited CVs</li>
+          <li>Unlimited ATS Scores</li>
+          <li>Unlimited CV Enhancements</li>
+          <li>Unlimited Cover Letters</li>
+          <li>Unlimited Interview Prep</li>
+          <li>CV Comparison</li>
+          <li>All templates</li>
+          <li>DOCX export</li>
+          <li>Priority AI</li>
+        </ul>
+        <a href="signup.html" class="btn-plan btn-plan-ghost">Get Job Pass</a>
+      </div>
+
+      <!-- PRO -->
       <div class="price-card popular reveal">
         <div class="popular-badge">Most Popular</div>
         <div class="plan-name">Pro</div>
         <div class="plan-price" id="proPrice">£9.99<span>/mo</span></div>
         <div class="plan-period" id="proPeriod">per month</div>
         <div class="plan-trial">✨ Try 14 days for £1.99</div>
+        <p class="plan-tagline">Perfect for active job seekers</p>
         <ul class="plan-feats">
-          <li>Unlimited CVs</li>
-          <li>Full AI enhancement</li>
-          <li>CV scoring & analysis</li>
-          <li>Cover letter generator</li>
-          <li>LinkedIn import</li>
-          <li>All templates & colours</li>
-          <li>PDF download</li>
+          <li>Everything in Job Pass, plus:</li>
+          <li class="feat-divider" aria-hidden="true"></li>
+          <li>LinkedIn Profile Optimiser</li>
+          <li>AI Personal Statement</li>
+          <li>Skills Gap Analysis</li>
+          <li>AI Job Match Analysis</li>
+          <li>Application Tracker</li>
+          <li>CV Version Manager</li>
+          <li>Save Cover Letters</li>
+          <li>Save Interview Sessions</li>
+          <li>Priority Support</li>
         </ul>
         <a href="signup.html" class="btn-plan btn-plan-lime" id="proBtnLabel">Get Pro</a>
         <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="proTrialNote">then £9.99/month — cancel anytime</p>
       </div>
-      <div class="price-card reveal" style="opacity:0.72;position:relative;pointer-events:none;user-select:none;">
+
+      <!-- PREMIUM -->
+      <div class="price-card reveal" style="opacity:0.75;pointer-events:none;user-select:none;">
         <div class="popular-badge" style="background:var(--bg-card2);color:var(--text-2);">Coming Soon</div>
         <div class="plan-name">Premium</div>
         <div class="plan-price" id="premiumPrice">£19.99<span>/mo</span></div>
         <div class="plan-period" id="premiumPeriod">per month</div>
+        <p class="plan-tagline">Perfect for serious professionals &amp; career changers</p>
         <ul class="plan-feats">
-          <li>Everything in Pro</li>
-          <li>Priority AI processing</li>
-          <li>Cover letters in 10 languages</li>
-          <li>ATS keyword optimiser</li>
-          <li>Priority support</li>
-          <li>Early access to new features</li>
+          <li>Everything in Pro, plus:</li>
+          <li class="feat-divider" aria-hidden="true"></li>
+          <li>AI Career Coach</li>
+          <li>Mock Interview Coach</li>
+          <li>STAR Answer Generator</li>
+          <li>Recruiter Feedback Simulation</li>
+          <li>Salary Insights</li>
+          <li>Career Progression Planner</li>
+          <li>Executive CV Templates</li>
+          <li>LinkedIn Personal Branding</li>
+          <li>AI Career Roadmap</li>
         </ul>
-        <span class="btn-plan btn-plan-ghost" id="premiumBtnLabel" style="cursor:not-allowed;">Coming soon</span>
+        <span class="btn-plan btn-plan-ghost" style="cursor:not-allowed;" id="premiumBtnLabel">Coming soon</span>
       </div>
+
     </div>
     <!-- Trust bar -->
     <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:40px;padding:20px 24px;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:16px;max-width:600px;margin-left:auto;margin-right:auto;">
@@ -461,7 +594,14 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
-      <img src="assets/logo.svg" alt="CV Central" height="32">
+      <a href="#" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;">
+        <svg width="24" height="24" viewBox="0 0 40 40" aria-hidden="true">
+          <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+          <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+          <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+        </svg>
+        <span style="font-family:var(--font-display);font-weight:600;font-size:1.1rem;color:var(--text);">CV<span style="color:#AAFF00;" class="footer-logo-accent">Central</span></span>
+      </a>
       <p>AI-powered CV builder built for job seekers across Europe. Score, enhance, and land more interviews.</p>
     </div>
     <div class="footer-col">
@@ -588,8 +728,9 @@ function setPricing(mode, el){
   document.getElementById('proPeriod').textContent = annual ? 'per year (save £20.88)' : 'per month';
   document.getElementById('premiumPrice').innerHTML = annual ? '£199<span>/yr</span>' : '£19.99<span>/mo</span>';
   document.getElementById('premiumPeriod').textContent = annual ? 'per year (save £40.88)' : 'per month';
-  document.getElementById('proBtnLabel').textContent = annual ? 'Get Pro Annual' : 'Get Pro';
+  document.getElementById('proBtnLabel').textContent = annual ? 'Get Pro — Annual' : 'Get Pro';
   document.getElementById('proTrialNote').textContent = annual ? 'then £99/year — cancel anytime' : 'then £9.99/month — cancel anytime';
+  // Job Pass is always one-time — no change needed
 }
 
 // ── Reveal on scroll ──
@@ -604,6 +745,43 @@ function setPricing(mode, el){
 (function(){
   if(window.location.hash && window.location.hash.indexOf('access_token=') > -1){
     window.location.replace('dashboard.html' + window.location.hash);
+  }
+})();
+
+// ── Theme toggle ──
+(function(){
+  var html = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var sunIcon = document.getElementById('themeIconSun');
+  var moonIcon = document.getElementById('themeIconMoon');
+  var canvas = document.getElementById('neural-canvas');
+
+  function applyTheme(theme){
+    if(theme === 'light'){
+      html.setAttribute('data-theme','light');
+      sunIcon.style.display = 'block';
+      moonIcon.style.display = 'none';
+      if(canvas) canvas.style.opacity = '0.12';
+    } else {
+      html.removeAttribute('data-theme');
+      sunIcon.style.display = 'none';
+      moonIcon.style.display = 'block';
+      if(canvas) canvas.style.opacity = '0.35';
+    }
+  }
+
+  // Init from storage
+  var saved = '';
+  try { saved = localStorage.getItem('cvcentral_theme') || ''; } catch(e){}
+  applyTheme(saved === 'light' ? 'light' : 'dark');
+
+  if(btn){
+    btn.addEventListener('click', function(){
+      var isLight = html.getAttribute('data-theme') === 'light';
+      var next = isLight ? 'dark' : 'light';
+      try { localStorage.setItem('cvcentral_theme', next); } catch(e){}
+      applyTheme(next);
+    });
   }
 })();
 </script>

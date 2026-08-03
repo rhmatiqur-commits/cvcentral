@@ -125,6 +125,8 @@
     <nav class="main-nav">
       <a href="dashboard.html">Dashboard</a>
       <a href="cv-builder.html" class="current">CV builder</a>
+      <a href="tracker.html">Application Tracker</a>
+      <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
       <a href="feedback.html" title="Tell us what's working and what's not">Feedback</a>
     </nav>
     <div style="flex:1"></div>
@@ -597,10 +599,12 @@
           </div>
           <div class="result-actions">
             <button class="btn btn-violet" id="downloadPdf">Download PDF</button>
+            <button class="btn btn-ghost" id="downloadDocx" title="Download as Word document (.docx)">⬇ Word (.docx)</button>
             <button class="btn btn-primary" id="saveBtn">Save to CV Central</button>
           </div>
           <p class="hint" style="text-align:center;margin-top:0.75rem;color:var(--muted);font-size:0.8rem;">
             Free downloads include a watermark. <a href="index.html#pricing" style="color:var(--violet);font-weight:600;">Go Pro</a> for a clean PDF.
+            DOCX export requires a <a href="index.html#pricing" style="color:var(--violet);font-weight:600;">Job Pass or Pro</a>.
           </p>
         </div>
 
@@ -1738,6 +1742,7 @@
         if (!state.jobTarget) state.jobTarget = {};
         state.jobTarget.description = aiJD.value.trim();
       }
+      if (freeUsed('enhance')) { showFreeLimit('AI Enhancement'); return; }
       showAnalysisState('aiLoading');
       startLoadingMessages();
       if (typeof cvTrack === 'function') cvTrack('ai_analysis_started', { plan: userPlan });
@@ -1768,6 +1773,7 @@
         saveDraft();
         showAnalysisState('aiResults');
         initInterviewPrep();
+        markFreeUsed('enhance');
         toast('CV analysed by AI — see your score below 🎉', 'success');
         if (typeof cvTrack === 'function') cvTrack('ai_analysis_completed', { score: data.score && data.score.total });
       })
@@ -1849,6 +1855,7 @@
     }
 
     function runInterviewPrep() {
+      if (freeUsed('interview')) { showFreeLimit('Interview Prep'); return; }
       var gen = document.getElementById('interviewPrepGenerate');
       var loading = document.getElementById('interviewPrepLoading');
       var qDiv = document.getElementById('interviewPrepQuestions');
@@ -1878,6 +1885,7 @@
         if (data.error) throw new Error(data.error);
         var questions = data.questions || [];
         state.interviewPrep = questions;
+        markFreeUsed('interview');
         renderInterviewQuestions(questions);
         qDiv.style.display = 'block';
         document.getElementById('copyInterviewBtn').style.display = 'inline-flex';
@@ -1942,6 +1950,7 @@
     });
 
     document.getElementById('regenerateCoverLetter').addEventListener('click', async function () {
+      if (freeUsed('cover_letter')) { showFreeLimit('Cover Letter'); return; }
       var lang = document.getElementById('coverLetterLang').value;
       var btn = this;
       btn.disabled = true;
@@ -1967,6 +1976,7 @@
         if (data.error) throw new Error(data.error);
         document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
         if (state.ai) state.ai.coverLetter = data.coverLetter;
+        markFreeUsed('cover_letter');
         toast('Cover letter regenerated ✓', 'success');
       } catch (e) {
         toast(e.message || 'Could not regenerate — please try again', 'error');
@@ -2028,8 +2038,71 @@
       toast('Print dialog opened — save as PDF ✓', 'success');
     });
 
+    /* ---------- Download DOCX ---------- */
+    document.getElementById('downloadDocx').addEventListener('click', async function () {
+      if (!isPro()) {
+        toast('DOCX export requires a Job Pass or Pro plan. Upgrade to download Word files.', 'error');
+        return;
+      }
+      collectStep(state.step);
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Generating…';
+      try {
+        var session = await cvAuth.getSession();
+        var headers = { 'Content-Type': 'application/json' };
+        if (session && session.access_token) headers['Authorization'] = 'Bearer ' + session.access_token;
+        var res = await fetch('/api/export-docx', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            personal:       state.personal,
+            experience:     state.experience,
+            education:      state.education,
+            skills:         state.skills,
+            languages:      state.languages,
+            certifications: state.certifications
+          })
+        });
+        if (!res.ok) {
+          var err = await res.json().catch(function() { return {}; });
+          throw new Error(err.error || 'Export failed');
+        }
+        var blob = await res.blob();
+        var name = ((state.personal && state.personal.fullName) || 'CV').replace(/[^a-zA-Z0-9 ]/g, '').trim();
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = name + ' - CV.docx'; a.click();
+        URL.revokeObjectURL(url);
+        toast('Word document downloaded ✓', 'success');
+        if (typeof cvTrack === 'function') cvTrack('docx_downloaded', { plan: userPlan });
+      } catch (e) {
+        toast(e.message || 'Could not generate DOCX — please try again', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⬇ Word (.docx)';
+      }
+    });
+
     /* ---------- Save to CV Central ---------- */
-    var CV_LIMITS = { free: 1, pro: 10, premium: Infinity };
+    var CV_LIMITS = { free: 1, pro: Infinity, premium: Infinity, day_pass: Infinity };
+
+    // ── Free-tier feature usage tracking (localStorage, client-side) ──
+    // Keys: { enhance: 0|1, cover_letter: 0|1, interview: 0|1 }
+    var FREE_USAGE_KEY = 'cvcentral_free_usage';
+    function getFreeUsage() {
+      try { return JSON.parse(localStorage.getItem(FREE_USAGE_KEY) || '{}'); } catch(e) { return {}; }
+    }
+    function markFreeUsed(feature) {
+      var u = getFreeUsage(); u[feature] = 1;
+      try { localStorage.setItem(FREE_USAGE_KEY, JSON.stringify(u)); } catch(e) {}
+    }
+    function freeUsed(feature) {
+      return userPlan === 'free' && !!getFreeUsage()[feature];
+    }
+    function showFreeLimit(featureName) {
+      toast('Free limit reached for ' + featureName + '. Upgrade to Pro for unlimited access.', 'error');
+    }
 
     // Shared save logic — used by the manual "Save to CV Central" button and by
     // the automatic save that fires right after a signed-in user imports an old
@@ -2069,9 +2142,7 @@
     }
 
     function limitMessage(plan) {
-      return plan === 'free'
-        ? 'Free accounts can save 1 CV. Upgrade to Pro to save up to 10.'
-        : 'Pro accounts can save up to 10 CVs. Premium (coming soon) gives unlimited storage.';
+      return 'Free accounts can save 1 CV. Upgrade to Pro or grab a Job Pass for unlimited CV storage.';
     }
 
     document.getElementById('saveBtn').addEventListener('click', async function () {

@@ -7,7 +7,10 @@
     "api/webhook.js": { "maxDuration": 30 },
     "api/admin-feedback.js": { "maxDuration": 15 },
     "api/admin-data.js": { "maxDuration": 15 },
-    "api/admin-analytics.js": { "maxDuration": 15 }
+    "api/admin-analytics.js": { "maxDuration": 15 },
+    "api/export-docx.js":     { "maxDuration": 30 },
+    "api/tracker.js":         { "maxDuration": 15 },
+    "api/linkedin-optimiser.js": { "maxDuration": 60 }
   },
   "headers": [
     {

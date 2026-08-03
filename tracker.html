@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Tracker &mdash; CV Central</title>
+  <meta name="description" content="Track your job applications, interview stages and offers in one place.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <script>
+    (function(){try{var t=localStorage.getItem('cvcentral_dash_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}}())
+  </script>
+  <style>
+    :root {
+      --dv-bg:#0B0A12; --dv-side:#100D19; --dv-card:#161320; --dv-card-2:#1C1828;
+      --dv-border:rgba(255,255,255,0.1); --dv-border-strong:rgba(255,255,255,0.18);
+      --dv-text:#FFFFFF; --dv-muted:#B6B0C8; --dv-faint:#8B85A0;
+      --font-display:'Fraunces',Georgia,serif;
+    }
+    html[data-theme="light"]{
+      --dv-bg:#F6F4FB; --dv-side:#14111F; --dv-card:#FFFFFF; --dv-card-2:#FBFAFF;
+      --dv-border:#E8E4F2; --dv-border-strong:#D9D2EC;
+      --dv-text:#1A1625; --dv-muted:#55506A; --dv-faint:#7B7590;
+    }
+    body{background:var(--dv-bg);color:var(--dv-text);}
+    .app-shell{display:flex;align-items:stretch;min-height:100vh;}
+    .app-sidebar{width:230px;flex-shrink:0;background:var(--dv-side);padding:1.4rem 1.1rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .app-sidebar .logo{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0.2rem 1.6rem;text-decoration:none;}
+    .app-sidebar .brand-word{font-family:var(--font-display);font-weight:600;font-size:1.25rem;color:#fff;letter-spacing:-0.01em;}
+    .app-sidebar .main-nav{display:flex;flex-direction:column;gap:0.15rem;flex:1;}
+    .app-sidebar .main-nav a{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.75rem;border-radius:10px;font-size:0.95rem;color:#B6B0C8;text-decoration:none;font-weight:500;}
+    .app-sidebar .main-nav a:hover,.app-sidebar .main-nav a.active{background:rgba(139,92,214,0.14);color:#fff;}
+    .app-sidebar .main-nav a.active{color:#fff;font-weight:600;}
+    .theme-toggle-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;font-weight:600;font-size:0.85rem;background:rgba(139,92,214,0.14);color:#fff;border:1px solid rgba(139,92,214,0.3);padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;margin-top:0.75rem;}
+    .app-main{flex:1;min-width:0;background:var(--dv-bg);padding:2rem 2.5rem;}
+    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;flex-wrap:wrap;padding:0.9rem 1rem;}.app-sidebar .logo{padding:0 1rem 0 0;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;flex:none;}.app-main{padding:1.25rem;}}
+
+    /* Page */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--dv-text);}
+    .page-sub{font-size:0.9rem;color:var(--dv-muted);margin-top:0.25rem;}
+
+    /* Status tabs */
+    .status-tabs{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+    .status-tab{font-size:0.82rem;font-weight:600;padding:0.4rem 0.9rem;border-radius:100px;border:1.5px solid var(--dv-border-strong);background:transparent;color:var(--dv-muted);cursor:pointer;transition:all 0.15s;}
+    .status-tab:hover{border-color:rgba(139,92,214,0.5);color:var(--dv-text);}
+    .status-tab.active{background:#5B2D8E;border-color:#5B2D8E;color:#fff;}
+
+    /* Table */
+    .tracker-table-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--dv-border);}
+    table{width:100%;border-collapse:collapse;font-size:0.88rem;}
+    thead th{text-align:left;padding:0.85rem 1rem;font-size:0.72rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--dv-faint);background:var(--dv-card-2);border-bottom:1px solid var(--dv-border);}
+    tbody tr{border-bottom:1px solid var(--dv-border);transition:background 0.1s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:rgba(139,92,214,0.06);}
+    td{padding:0.9rem 1rem;color:var(--dv-text);vertical-align:middle;}
+    td.muted{color:var(--dv-muted);}
+    .empty-row td{text-align:center;padding:3rem 1rem;color:var(--dv-muted);}
+
+    /* Status badge */
+    .status-badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;}
+    .s-applied   {background:rgba(59,130,246,0.15);color:#60A5FA;}
+    .s-interview {background:rgba(139,92,214,0.15);color:#A78BFA;}
+    .s-offer     {background:rgba(16,185,129,0.15);color:#34D399;}
+    .s-rejected  {background:rgba(239,68,68,0.12); color:#F87171;}
+    .s-withdrawn {background:rgba(107,114,128,0.15);color:#9CA3AF;}
+    html[data-theme="light"] .s-applied   {background:#EFF6FF;color:#1D4ED8;}
+    html[data-theme="light"] .s-interview {background:#F3E8FF;color:#6D28D9;}
+    html[data-theme="light"] .s-offer     {background:#ECFDF5;color:#047857;}
+    html[data-theme="light"] .s-rejected  {background:#FEF2F2;color:#B91C1C;}
+    html[data-theme="light"] .s-withdrawn {background:#F9FAFB;color:#374151;}
+
+    /* Row actions */
+    .row-actions{display:flex;gap:0.4rem;opacity:0;transition:opacity 0.15s;}
+    tr:hover .row-actions{opacity:1;}
+    .act-btn{background:none;border:none;cursor:pointer;padding:0.3rem 0.5rem;border-radius:6px;font-size:0.8rem;color:var(--dv-muted);transition:background 0.1s,color 0.1s;}
+    .act-btn:hover{background:rgba(139,92,214,0.12);color:var(--dv-text);}
+    .act-btn.del:hover{background:rgba(239,68,68,0.1);color:#F87171;}
+
+    /* Modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,8,20,0.7);backdrop-filter:blur(4px);padding:1rem;overflow-y:auto;}
+    .modal-backdrop.open{display:flex;align-items:flex-start;justify-content:center;padding-top:3rem;}
+    .modal{background:var(--dv-card);border:1px solid var(--dv-border-strong);border-radius:16px;width:100%;max-width:520px;padding:2rem;box-shadow:0 24px 60px rgba(0,0,0,0.4);}
+    .modal h2{font-family:var(--font-display);font-size:1.2rem;font-weight:600;color:var(--dv-text);margin:0 0 1.5rem;}
+    .field{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem;}
+    .field label{font-size:0.82rem;font-weight:600;color:var(--dv-muted);}
+    .field input,.field select,.field textarea{background:var(--dv-card-2);border:1.5px solid var(--dv-border-strong);border-radius:8px;padding:0.65rem 0.8rem;font-size:0.9rem;color:var(--dv-text);font-family:inherit;outline:none;transition:border-color 0.15s;}
+    .field input:focus,.field select,.field textarea:focus{border-color:#5B2D8E;}
+    .field select option{background:var(--dv-card);}
+    .field textarea{resize:vertical;min-height:80px;}
+    .modal-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem;}
+    .pro-gate{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:3rem 2rem;text-align:center;max-width:480px;margin:4rem auto;}
+    .pro-gate h2{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:0 0 0.75rem;}
+    .pro-gate p{color:var(--dv-muted);font-size:0.9rem;margin:0 0 1.5rem;}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <a href="index.html" class="logo" aria-label="CV Central home">
+      <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+        <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+        <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+      </svg>
+      <span class="brand-word">CV Central</span>
+    </a>
+    <nav class="main-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="cv-builder.html">CV Builder</a>
+      <a href="tracker.html" class="active">Application Tracker</a>
+      <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
+      <a href="feedback.html">Feedback</a>
+    </nav>
+    <div style="flex:1"></div>
+    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
+    <button class="theme-toggle-btn" id="themeToggleBtn" type="button">Switch to light mode</button>
+    <span id="user-name" style="font-size:0.78rem;color:#8B85A0;padding:0.5rem 0.75rem 0.2rem;display:block;word-break:break-all;"></span>
+    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+  </aside>
+
+  <!-- Main -->
+  <div class="app-main">
+
+    <!-- Loading -->
+    <div id="loading" style="min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--dv-muted);">
+      Loading&hellip;
+    </div>
+
+    <!-- Upgrade gate (shown to free users) -->
+    <div id="upgradeGate" hidden>
+      <div class="pro-gate">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">📋</div>
+        <h2>Application Tracker</h2>
+        <p>Track every job you've applied to, the stage you're at, and your notes — all in one place. Requires a Pro plan.</p>
+        <a href="dashboard.html" class="btn btn-primary">Upgrade to Pro</a>
+      </div>
+    </div>
+
+    <!-- Tracker content -->
+    <div id="trackerContent" hidden>
+      <div class="page-header">
+        <div>
+          <div class="page-title">Application Tracker</div>
+          <div class="page-sub">Track every job you've applied to.</div>
+        </div>
+        <button class="btn btn-primary" id="addBtn">+ Add application</button>
+      </div>
+
+      <!-- Status filter tabs -->
+      <div class="status-tabs">
+        <button class="status-tab active" data-filter="all">All</button>
+        <button class="status-tab" data-filter="applied">Applied</button>
+        <button class="status-tab" data-filter="interview">Interview</button>
+        <button class="status-tab" data-filter="offer">Offer</button>
+        <button class="status-tab" data-filter="rejected">Rejected</button>
+        <button class="status-tab" data-filter="withdrawn">Withdrawn</button>
+      </div>
+
+      <!-- Summary counts -->
+      <div id="summaryRow" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;"></div>
+
+      <!-- Table -->
+      <div class="tracker-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Applied</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="appTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
+
+<!-- Add / Edit Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h2 id="modalTitle">Add application</h2>
+    <div class="field">
+      <label for="fCompany">Company *</label>
+      <input type="text" id="fCompany" placeholder="e.g. Google" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="fRole">Role *</label>
+      <input type="text" id="fRole" placeholder="e.g. Software Engineer" autocomplete="off">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field">
+        <label for="fStatus">Status</label>
+        <select id="fStatus">
+          <option value="applied">Applied</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+          <option value="withdrawn">Withdrawn</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fDate">Applied date</label>
+        <input type="date" id="fDate">
+      </div>
+    </div>
+    <div class="field">
+      <label for="fUrl">Job URL</label>
+      <input type="url" id="fUrl" placeholder="https://…">
+    </div>
+    <div class="field">
+      <label for="fNotes">Notes</label>
+      <textarea id="fNotes" placeholder="Interview prep, contacts, next steps…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="cancelBtn">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="saveAppBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var TRACKER_URL = '/api/tracker';
+  var currentFilter = 'all';
+  var allApps = [];
+  var editingId = null;
+  var session = null;
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  (async function init() {
+    try {
+      session = await cvAuth.getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+
+      var profile = await cvAuth.getProfile(session.user.id);
+      var plan = (profile && profile.plan) || 'free';
+      var expires = profile && profile.plan_expires_at;
+      var isPro = plan === 'pro' || plan === 'premium' ||
+                  (plan === 'day_pass' && expires && new Date(expires) > new Date());
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('user-name').textContent = session.user.email || '';
+
+      var badge = document.getElementById('navPlanBadge');
+      var badgeWrap = document.getElementById('planBadgeWrap');
+      if (badge) { badge.textContent = plan.toUpperCase(); badge.className = 'plan-badge ' + plan; }
+      if (badgeWrap) badgeWrap.hidden = false;
+
+      if (!isPro) {
+        document.getElementById('upgradeGate').hidden = false;
+        return;
+      }
+      document.getElementById('trackerContent').hidden = false;
+      loadApps();
+    } catch (e) {
+      window.location.href = 'login.html';
+    }
+  })();
+
+  // ── API helpers ──────────────────────────────────────────────────────────
+  function authHeaders() {
+    return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.access_token || '') };
+  }
+
+  async function loadApps() {
+    try {
+      var res = await fetch(TRACKER_URL, { headers: authHeaders() });
+      var data = await res.json();
+      allApps = data.applications || [];
+      renderSummary();
+      renderTable();
+    } catch(e) { console.error('loadApps', e); }
+  }
+
+  async function createApp(body) {
+    var res = await fetch(TRACKER_URL, { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
+    if (!res.ok) { var e = await res.json(); throw new Error(e.error || 'Failed to save'); }
+    return (await res.json()).application;
+  }
+
+  async function updateApp(id, body) {
+    var res = await fetch(TRACKER_URL + '?id=' + id, { method: 'PATCH', headers: authHeaders(), body: JSON.stringify(body) });
+    if (!res.ok) { var e = await res.json(); throw new Error(e.error || 'Failed to update'); }
+    return (await res.json()).application;
+  }
+
+  async function deleteApp(id) {
+    var res = await fetch(TRACKER_URL + '?id=' + id, { method: 'DELETE', headers: authHeaders() });
+    if (!res.ok) { var e = await res.json(); throw new Error(e.error || 'Failed to delete'); }
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  var STATUS_LABELS = { applied:'Applied', interview:'Interview', offer:'Offer 🎉', rejected:'Rejected', withdrawn:'Withdrawn' };
+  var STATUS_ICONS  = { applied:'📤', interview:'🗣️', offer:'🎉', rejected:'❌', withdrawn:'↩️' };
+
+  function renderSummary() {
+    var counts = { applied:0, interview:0, offer:0, rejected:0, withdrawn:0 };
+    allApps.forEach(function(a){ if(counts[a.status]!==undefined) counts[a.status]++; });
+    var row = document.getElementById('summaryRow');
+    row.innerHTML = Object.entries(counts).filter(function(e){ return e[1]>0; }).map(function(e){
+      return '<div style="background:var(--dv-card);border:1px solid var(--dv-border);border-radius:10px;padding:0.6rem 1rem;display:flex;align-items:center;gap:0.5rem;">'
+        + '<span style="font-size:1.1rem;">' + STATUS_ICONS[e[0]] + '</span>'
+        + '<span style="font-size:0.82rem;color:var(--dv-muted);">' + STATUS_LABELS[e[0]] + '</span>'
+        + '<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:0.9rem;">' + e[1] + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  function renderTable() {
+    var filtered = currentFilter === 'all' ? allApps : allApps.filter(function(a){ return a.status === currentFilter; });
+    var tbody = document.getElementById('appTable');
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">'
+        + (currentFilter === 'all' ? 'No applications yet. Add your first one!' : 'No ' + currentFilter + ' applications.')
+        + '</td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(function(a) {
+      var dateStr = a.applied_date ? new Date(a.applied_date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—';
+      var notesTrunc = a.notes ? (a.notes.length > 60 ? a.notes.slice(0,60) + '…' : a.notes) : '—';
+      return '<tr>'
+        + '<td><strong>' + esc(a.company) + '</strong>' + (a.url ? ' <a href="' + esc(a.url) + '" target="_blank" rel="noopener" style="color:#8A5CD6;font-size:0.75rem;margin-left:4px;">↗</a>' : '') + '</td>'
+        + '<td>' + esc(a.role) + '</td>'
+        + '<td><span class="status-badge s-' + a.status + '">' + STATUS_LABELS[a.status] + '</span></td>'
+        + '<td class="muted">' + dateStr + '</td>'
+        + '<td class="muted" style="max-width:200px;">' + esc(notesTrunc) + '</td>'
+        + '<td><div class="row-actions">'
+        + '<button class="act-btn" onclick="window._editApp(\'' + a.id + '\')">✏️</button>'
+        + '<button class="act-btn del" onclick="window._deleteApp(\'' + a.id + '\')">🗑</button>'
+        + '</div></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Filter tabs ──────────────────────────────────────────────────────────
+  document.querySelectorAll('.status-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.status-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderTable();
+    });
+  });
+
+  // ── Modal ────────────────────────────────────────────────────────────────
+  function openModal(app) {
+    editingId = app ? app.id : null;
+    document.getElementById('modalTitle').textContent = app ? 'Edit application' : 'Add application';
+    document.getElementById('fCompany').value  = app ? (app.company || '') : '';
+    document.getElementById('fRole').value     = app ? (app.role || '') : '';
+    document.getElementById('fStatus').value   = app ? (app.status || 'applied') : 'applied';
+    document.getElementById('fDate').value     = app ? (app.applied_date || '') : new Date().toISOString().slice(0,10);
+    document.getElementById('fUrl').value      = app ? (app.url || '') : '';
+    document.getElementById('fNotes').value    = app ? (app.notes || '') : '';
+    document.getElementById('modalBackdrop').classList.add('open');
+    document.getElementById('fCompany').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    editingId = null;
+  }
+
+  document.getElementById('addBtn').addEventListener('click', function(){ openModal(null); });
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+  window._editApp = function(id) {
+    var app = allApps.find(function(a){ return a.id === id; });
+    if (app) openModal(app);
+  };
+
+  window._deleteApp = async function(id) {
+    if (!confirm('Delete this application?')) return;
+    try {
+      await deleteApp(id);
+      allApps = allApps.filter(function(a){ return a.id !== id; });
+      renderSummary(); renderTable();
+    } catch(e) { alert(e.message); }
+  };
+
+  document.getElementById('saveAppBtn').addEventListener('click', async function() {
+    var btn = this;
+    var company = document.getElementById('fCompany').value.trim();
+    var role    = document.getElementById('fRole').value.trim();
+    if (!company && !role) { document.getElementById('fCompany').focus(); return; }
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var body = {
+      company:      company,
+      role:         role,
+      status:       document.getElementById('fStatus').value,
+      applied_date: document.getElementById('fDate').value || null,
+      url:          document.getElementById('fUrl').value.trim() || null,
+      notes:        document.getElementById('fNotes').value.trim() || null
+    };
+    try {
+      if (editingId) {
+        var updated = await updateApp(editingId, body);
+        var idx = allApps.findIndex(function(a){ return a.id === editingId; });
+        if (idx > -1 && updated) allApps[idx] = updated;
+      } else {
+        var created = await createApp(body);
+        if (created) allApps.unshift(created);
+      }
+      renderSummary(); renderTable();
+      closeModal();
+    } catch(e) { alert(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Save'; }
+  });
+
+  // ── Theme toggle ─────────────────────────────────────────────────────────
+  (function(){
+    var btn = document.getElementById('themeToggleBtn');
+    var html = document.documentElement;
+    function apply(theme){
+      if(theme==='light'){ html.setAttribute('data-theme','light'); btn.textContent='Switch to dark mode'; }
+      else { html.removeAttribute('data-theme'); btn.textContent='Switch to light mode'; }
+    }
+    var saved=''; try{ saved=localStorage.getItem('cvcentral_dash_theme')||''; }catch(e){}
+    apply(saved==='light'?'light':'dark');
+    btn.addEventListener('click',function(){
+      var next=html.getAttribute('data-theme')==='light'?'dark':'light';
+      try{ localStorage.setItem('cvcentral_dash_theme',next); }catch(e){}
+      apply(next);
+    });
+  })();
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  var logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.style.display = 'block';
+    logoutBtn.addEventListener('click', async function() {
+      await cvAuth.signOut();
+      window.location.href = 'login.html';
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

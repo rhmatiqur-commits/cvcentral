@@ -135,6 +135,8 @@
     <nav class="main-nav">
       <a href="dashboard.html">Dashboard</a>
       <a href="cv-builder.html">CV builder</a>
+      <a href="tracker.html">Application Tracker</a>
+      <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
       <a href="feedback.html" title="Tell us what's working and what's not">Feedback</a>
     </nav>
     <div style="flex:1"></div>
@@ -346,7 +348,7 @@
       var effectivePlan = (plan === 'day_pass' && !dayPassExpired) ? 'day_pass' : (dayPassExpired ? 'free' : plan);
 
       var navBadge = document.getElementById('navPlanBadge');
-      navBadge.textContent = plan === 'day_pass' ? (dayPassExpired ? 'PASS EXPIRED' : '3-DAY PASS') : plan.toUpperCase();
+      navBadge.textContent = plan === 'day_pass' ? (dayPassExpired ? 'PASS EXPIRED' : 'JOB PASS') : plan.toUpperCase();
       navBadge.className = 'plan-badge ' + (plan === 'day_pass' ? (dayPassExpired ? 'free' : 'pro') : plan);
       document.getElementById('planBadgeWrap').hidden = false;
       if (effectivePlan === 'free' || plan === 'free') document.getElementById('upgradeLink').hidden = false;
@@ -355,13 +357,13 @@
       if (effectivePlan === 'free' || plan === 'free') {
         document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
         document.getElementById('planDesc').textContent = dayPassExpired
-          ? 'Your 3-day pass has expired. Upgrade to Pro to keep your access.'
+          ? 'Your Job Pass has expired. Upgrade to Pro to keep your access.'
           : 'Unlock unlimited cover letters, ATS checks and interview prep.';
       } else if (plan === 'day_pass') {
         document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
         var timeLeft = expiresAt ? formatCountdown(expiresAt) : '';
         var pd = document.getElementById('planDesc');
-        pd.innerHTML = '⚡ Quick CV Pass active — <strong>' + timeLeft + '</strong> remaining. '
+        pd.innerHTML = '⚡ Job Pass active — <strong>' + timeLeft + '</strong> remaining. '
           + '<a href="#" onclick="window._openUpgradeModal();return false;" style="color:#5B2D8E;font-weight:600;">Upgrade to Pro →</a>';
       } else {
         document.getElementById('managePlanBtn').style.display = 'inline-flex';
@@ -551,7 +553,7 @@
       var effectivePlan = (plan === 'day_pass' && !dayPassExpired) ? 'day_pass' : (dayPassExpired ? 'free' : plan);
 
       var navBadge = document.getElementById('navPlanBadge');
-      navBadge.textContent = plan === 'day_pass' ? (dayPassExpired ? 'PASS EXPIRED' : '3-DAY PASS') : plan.toUpperCase();
+      navBadge.textContent = plan === 'day_pass' ? (dayPassExpired ? 'PASS EXPIRED' : 'JOB PASS') : plan.toUpperCase();
       navBadge.className = 'plan-badge ' + (plan === 'day_pass' ? (dayPassExpired ? 'free' : 'pro') : plan);
       document.getElementById('planBadgeWrap').hidden = false;
 
@@ -559,13 +561,13 @@
         document.getElementById('upgradeLink').hidden = false;
         document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
         if (dayPassExpired) {
-          document.getElementById('planDesc').textContent = 'Your 3-day pass has expired. Upgrade to Pro to keep your access.';
+          document.getElementById('planDesc').textContent = 'Your Job Pass has expired. Upgrade to Pro to keep your access.';
         }
       } else if (plan === 'day_pass') {
         document.getElementById('upgradePlanBtn').style.display = 'inline-flex';
         var timeLeft = expiresAt ? formatCountdown(expiresAt) : '';
         var pd = document.getElementById('planDesc');
-        pd.innerHTML = '⚡ Quick CV Pass — <strong>' + timeLeft + '</strong> remaining. '
+        pd.innerHTML = '⚡ Job Pass — <strong>' + timeLeft + '</strong> remaining. '
           + '<a href="#" onclick="window._openUpgradeModal();return false;" style="color:#5B2D8E;font-weight:600;">Upgrade to Pro →</a>';
       } else {
         document.getElementById('managePlanBtn').style.display = 'inline-flex';
@@ -656,7 +658,7 @@
         <button id="closeUpgradeModal" aria-label="Close" style="position:absolute;top:0.75rem;right:0.75rem;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:10px;width:44px;height:44px;cursor:pointer;font-size:1.25rem;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">&#215;</button>
         <p style="margin:0 0 0.25rem;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;color:rgba(255,255,255,0.6);text-transform:uppercase;">Upgrade CV Central</p>
         <h2 id="upgradeModalTitle" style="margin:0;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Land more interviews</h2>
-        <p style="margin:0.5rem 0 0;font-size:0.9rem;color:rgba(255,255,255,0.75);">Unlimited AI tools, cover letters in 10 languages, ATS optimisation, and more.</p>
+        <p style="margin:0.5rem 0 0;font-size:0.9rem;color:rgba(255,255,255,0.75);">LinkedIn optimiser, application tracker, job match analysis, and everything you need to land faster.</p>
       </div>
 
       <!-- Billing toggle -->
@@ -678,12 +680,15 @@
           <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="proPrice">£9.99</p>
           <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="proPeriod">per month</p>
           <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
-            <li>✅ Save up to 10 CVs</li>
-            <li>✅ Unlimited AI CV enhancement</li>
-            <li>✅ Cover letters in 10 languages</li>
-            <li>✅ ATS score + keyword check</li>
-            <li>✅ Interview prep</li>
-            <li>✅ AI chat assistant</li>
+            <li>✅ Unlimited CVs, enhancements & scores</li>
+            <li>✅ LinkedIn Profile Optimiser</li>
+            <li>✅ AI Personal Statement Generator</li>
+            <li>✅ Skills Gap Analysis</li>
+            <li>✅ AI Job Match Analysis</li>
+            <li>✅ Application Tracker</li>
+            <li>✅ CV Version Manager</li>
+            <li>✅ DOCX export</li>
+            <li>✅ Priority support</li>
           </ul>
           <button class="btn btn-violet btn-sm" style="width:100%;" id="proBtnLabel" onclick="event.stopPropagation();window._checkoutCurrent('pro')">Get Pro</button>
           <button class="btn btn-sm" style="width:100%;margin-top:0.5rem;background:#F0EBF9;color:#5B2D8E;border:1.5px solid #D9CCF0;font-weight:700;cursor:pointer;border-radius:10px;padding:0.55rem;" id="proTrialBtn" onclick="event.stopPropagation();window._checkoutTrial('pro')">✨ Try 14 days for £1.99</button>
@@ -697,26 +702,30 @@
           <p style="margin:0 0 0.15rem;font-size:1.5rem;font-weight:800;color:var(--ink);" id="premiumPrice">£19.99</p>
           <p style="margin:0 0 0.85rem;font-size:0.78rem;color:var(--muted);" id="premiumPeriod">per month</p>
           <ul style="margin:0 0 1rem;padding:0;list-style:none;font-size:0.82rem;color:var(--muted);line-height:2;">
-            <li>⏳ Everything in Pro</li>
-            <li>⏳ Unlimited CV storage (fair use)</li>
-            <li>⏳ LinkedIn profile optimiser</li>
-            <li>⏳ Priority support</li>
-            <li>⏳ Early access to new features</li>
+            <li>⏳ Everything in Pro, plus:</li>
+            <li>⏳ AI Career Coach</li>
+            <li>⏳ Mock Interview Coach</li>
+            <li>⏳ STAR Answer Generator</li>
+            <li>⏳ Recruiter Feedback Simulation</li>
+            <li>⏳ Salary Insights</li>
+            <li>⏳ Career Progression Planner</li>
+            <li>⏳ LinkedIn Personal Branding</li>
+            <li>⏳ AI Career Roadmap</li>
           </ul>
           <button class="btn btn-ghost btn-sm" style="width:100%;opacity:0.5;cursor:not-allowed;margin-bottom:0.5rem;" disabled id="premiumBtnLabel">Coming soon</button>
           <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin:0;" id="premiumTrialNote"></p>
         </div>
       </div>
 
-      <!-- Quick CV Pass -->
+      <!-- Job Pass -->
       <div style="padding:0 2rem 1.25rem;">
         <div style="border:1.5px solid #AAFF00;background:#F6FFDB;border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
           <div style="flex:1;min-width:200px;">
-            <p style="margin:0 0 0.2rem;font-size:0.72rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#4D7C0F;">⚡ Quick CV Pass — Need it fast?</p>
+            <p style="margin:0 0 0.2rem;font-size:0.72rem;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#4D7C0F;">⚡ Job Pass — Need it fast?</p>
             <p style="margin:0 0 0.3rem;font-size:1.25rem;font-weight:800;color:var(--ink);">£1.19 <span style="font-size:0.78rem;font-weight:500;color:var(--muted);">one-time, 72 hours</span></p>
-            <p style="margin:0;font-size:0.78rem;color:var(--muted);line-height:1.5;">Full Pro access for 3 days. No subscription, no auto-renewal.<br><span style="font-size:0.72rem;">Breakdown: 99p to CV Central + 20p Stripe processing fee</span></p>
+            <p style="margin:0;font-size:0.78rem;color:var(--muted);line-height:1.5;">Full unlimited access for 3 days. No subscription, no auto-renewal.<br><span style="font-size:0.72rem;">Breakdown: 99p to CV Central + 20p Stripe processing fee</span></p>
           </div>
-          <button class="btn btn-sm" style="background:#AAFF00;color:#1A1A2E;border:none;font-weight:800;white-space:nowrap;padding:0.6rem 1.25rem;cursor:pointer;" onclick="window._checkoutDayPass()">Get 3-day pass</button>
+          <button class="btn btn-sm" style="background:#AAFF00;color:#1A1A2E;border:none;font-weight:800;white-space:nowrap;padding:0.6rem 1.25rem;cursor:pointer;" onclick="window._checkoutDayPass()">Get Job Pass</button>
         </div>
       </div>
 
@@ -792,7 +801,7 @@
       window._checkout(planKey);
     };
 
-    // Quick CV Pass — one-time £1.19, 72h Pro access
+    // Job Pass — one-time £1.19, 72h Pro access
     window._checkoutDayPass = function() {
       window._checkout('day_pass');
     };
@@ -919,7 +928,7 @@
           });
           var d = await r.json();
           if (d.updated && d.plan !== 'free') {
-            var planLabel = d.plan === 'day_pass' ? '3-Day Pass (72h Pro access)' : d.plan.charAt(0).toUpperCase() + d.plan.slice(1) + ' plan';
+            var planLabel = d.plan === 'day_pass' ? 'Job Pass (72h access)' : d.plan.charAt(0).toUpperCase() + d.plan.slice(1) + ' plan';
             if (window._showToast) window._showToast('🎉 You\'re all set! ' + planLabel + ' activated.', 'success');
             setTimeout(function() { location.reload(); }, 2000);
           } else if (confirmAttempts < 5) {

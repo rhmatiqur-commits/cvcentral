@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Optimiser &mdash; CV Central</title>
+  <meta name="description" content="Rewrite your LinkedIn headline, About section, and skills with AI — tailored to your target role.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <script>
+    (function(){try{var t=localStorage.getItem('cvcentral_dash_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}}())
+  </script>
+  <style>
+    :root {
+      --dv-bg:#0B0A12; --dv-side:#100D19; --dv-card:#161320; --dv-card-2:#1C1828;
+      --dv-border:rgba(255,255,255,0.1); --dv-border-strong:rgba(255,255,255,0.18);
+      --dv-text:#FFFFFF; --dv-muted:#B6B0C8; --dv-faint:#8B85A0;
+      --font-display:'Fraunces',Georgia,serif;
+      --li-blue:#0A66C2;
+    }
+    html[data-theme="light"]{
+      --dv-bg:#F6F4FB; --dv-side:#14111F; --dv-card:#FFFFFF; --dv-card-2:#FBFAFF;
+      --dv-border:#E8E4F2; --dv-border-strong:#D9D2EC;
+      --dv-text:#1A1625; --dv-muted:#55506A; --dv-faint:#7B7590;
+    }
+    body{background:var(--dv-bg);color:var(--dv-text);}
+    .app-shell{display:flex;min-height:100vh;}
+    .app-sidebar{width:230px;flex-shrink:0;background:var(--dv-side);padding:1.4rem 1.1rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .app-sidebar .logo{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0.2rem 1.6rem;text-decoration:none;}
+    .app-sidebar .brand-word{font-family:var(--font-display);font-weight:600;font-size:1.25rem;color:#fff;letter-spacing:-0.01em;}
+    .app-sidebar .main-nav{display:flex;flex-direction:column;gap:0.15rem;flex:1;}
+    .app-sidebar .main-nav a{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.75rem;border-radius:10px;font-size:0.95rem;color:#B6B0C8;text-decoration:none;font-weight:500;}
+    .app-sidebar .main-nav a:hover,.app-sidebar .main-nav a.active{background:rgba(139,92,214,0.14);color:#fff;}
+    .app-sidebar .main-nav a.active{color:#fff;font-weight:600;}
+    .theme-toggle-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;font-weight:600;font-size:0.85rem;background:rgba(139,92,214,0.14);color:#fff;border:1px solid rgba(139,92,214,0.3);padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;margin-top:0.75rem;}
+    .app-main{flex:1;min-width:0;background:var(--dv-bg);padding:2rem 2.5rem;}
+    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;flex-wrap:wrap;padding:0.9rem 1rem;}.app-sidebar .logo{padding:0 1rem 0 0;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;flex:none;}.app-main{padding:1.25rem;}}
+
+    /* Layout */
+    .page-header{margin-bottom:2rem;}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:600;}
+    .page-sub{font-size:0.9rem;color:var(--dv-muted);margin-top:0.25rem;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+    @media(max-width:960px){.two-col{grid-template-columns:1fr;}}
+
+    /* Input card */
+    .card{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:1.5rem;}
+    .card-title{font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dv-faint);margin-bottom:1rem;}
+    .field{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem;}
+    .field label{font-size:0.82rem;font-weight:600;color:var(--dv-muted);}
+    .field input,.field textarea,.field select{background:var(--dv-card-2);border:1.5px solid var(--dv-border-strong);border-radius:8px;padding:0.65rem 0.8rem;font-size:0.88rem;color:var(--dv-text);font-family:inherit;outline:none;transition:border-color 0.15s;width:100%;box-sizing:border-box;}
+    .field input:focus,.field textarea:focus{border-color:#5B2D8E;}
+    .field textarea{resize:vertical;}
+    .char-hint{font-size:0.72rem;color:var(--dv-faint);text-align:right;}
+    .char-ok{color:#34D399;}
+    .char-warn{color:#F59E0B;}
+    .char-over{color:#F87171;}
+
+    /* Tabs */
+    .input-tabs{display:flex;gap:0.5rem;margin-bottom:1.25rem;}
+    .input-tab{font-size:0.82rem;font-weight:600;padding:0.4rem 0.9rem;border-radius:8px;border:1.5px solid var(--dv-border-strong);background:transparent;color:var(--dv-muted);cursor:pointer;transition:all 0.15s;}
+    .input-tab:hover{color:var(--dv-text);}
+    .input-tab.active{background:rgba(139,92,214,0.15);border-color:rgba(139,92,214,0.5);color:#fff;}
+
+    /* Results */
+    .results-area{display:flex;flex-direction:column;gap:1rem;}
+    .result-section{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;overflow:hidden;}
+    .result-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--dv-border);}
+    .result-label{font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dv-faint);}
+    .result-body{padding:1.25rem;font-size:0.88rem;line-height:1.65;color:var(--dv-text);white-space:pre-wrap;word-break:break-word;}
+    .copy-btn{font-size:0.75rem;font-weight:600;padding:0.3rem 0.65rem;border-radius:6px;border:1.5px solid var(--dv-border-strong);background:transparent;color:var(--dv-muted);cursor:pointer;transition:all 0.15s;}
+    .copy-btn:hover{border-color:rgba(139,92,214,0.5);color:var(--dv-text);}
+    .copy-btn.copied{border-color:#34D399;color:#34D399;}
+
+    /* Skill pills */
+    .pill-list{display:flex;flex-wrap:wrap;gap:0.4rem;padding:1.25rem;}
+    .pill{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;font-weight:600;padding:0.3rem 0.7rem;border-radius:100px;}
+    .pill-add{background:rgba(16,185,129,0.12);color:#34D399;border:1px solid rgba(16,185,129,0.2);}
+    .pill-remove{background:rgba(239,68,68,0.1);color:#F87171;border:1px solid rgba(239,68,68,0.15);}
+    .pill-keyword{background:rgba(139,92,214,0.12);color:#A78BFA;border:1px solid rgba(139,92,214,0.2);}
+
+    /* Tip list */
+    .tip-list{padding:1.25rem;display:flex;flex-direction:column;gap:0.75rem;}
+    .tip-item{font-size:0.87rem;line-height:1.6;color:var(--dv-text);padding-left:1.4rem;position:relative;}
+    .tip-item::before{content:'→';position:absolute;left:0;color:#A78BFA;font-weight:700;}
+
+    /* Progress / empty */
+    .pro-gate{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:3rem 2rem;text-align:center;max-width:480px;margin:4rem auto;}
+    .pro-gate h2{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:0 0 0.75rem;}
+    .pro-gate p{color:var(--dv-muted);font-size:0.9rem;margin:0 0 1.5rem;}
+    .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--dv-muted);}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:1rem;}
+    .spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:0.4rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* LinkedIn brand colour accent */
+    .li-badge{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(10,102,194,0.12);border:1px solid rgba(10,102,194,0.3);color:#60A5FA;border-radius:100px;font-size:0.75rem;font-weight:700;padding:0.25rem 0.7rem;letter-spacing:0.03em;}
+    html[data-theme="light"] .li-badge{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <a href="index.html" class="logo" aria-label="CV Central home">
+      <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+        <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+        <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+      </svg>
+      <span class="brand-word">CV Central</span>
+    </a>
+    <nav class="main-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="cv-builder.html">CV Builder</a>
+      <a href="tracker.html">Application Tracker</a>
+      <a href="linkedin-optimiser.html" class="active">LinkedIn Optimiser</a>
+      <a href="feedback.html">Feedback</a>
+    </nav>
+    <div style="flex:1"></div>
+    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
+    <button class="theme-toggle-btn" id="themeToggleBtn" type="button">Switch to light mode</button>
+    <span id="user-name" style="font-size:0.78rem;color:#8B85A0;padding:0.5rem 0.75rem 0.2rem;display:block;word-break:break-all;"></span>
+    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+  </aside>
+
+  <!-- Main -->
+  <div class="app-main">
+
+    <div id="loading" style="min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--dv-muted);">Loading&hellip;</div>
+
+    <div id="upgradeGate" hidden>
+      <div class="pro-gate">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">🔗</div>
+        <h2>LinkedIn Profile Optimiser</h2>
+        <p>Rewrite your headline, About section, and get keyword recommendations tailored to your target role. Requires a Pro plan.</p>
+        <a href="dashboard.html" class="btn btn-primary">Upgrade to Pro</a>
+      </div>
+    </div>
+
+    <div id="mainContent" hidden>
+      <div class="page-header">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div class="page-title">LinkedIn Optimiser</div>
+            <div class="page-sub">AI-powered headline, About section, and skills rewrite tailored to your target role.</div>
+          </div>
+          <span class="li-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77Z"/></svg>
+            LinkedIn
+          </span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Left: Input -->
+        <div>
+          <div class="card">
+            <div class="card-title">Your profile</div>
+
+            <!-- Input mode tabs -->
+            <div class="input-tabs">
+              <button class="input-tab active" data-mode="manual" id="tabManual">Manual input</button>
+              <button class="input-tab" data-mode="cv" id="tabCv">Use my CV</button>
+            </div>
+
+            <!-- Target role (always visible) -->
+            <div class="field">
+              <label for="targetRole">Target role / industry *</label>
+              <input type="text" id="targetRole" placeholder="e.g. Senior Product Manager, fintech">
+            </div>
+
+            <!-- Manual mode inputs -->
+            <div id="manualInputs">
+              <div class="field">
+                <label for="headline">Current LinkedIn headline</label>
+                <input type="text" id="headline" placeholder="e.g. Software Engineer at Acme Corp" maxlength="220">
+                <div class="char-hint" id="headlineCount">0 / 220</div>
+              </div>
+              <div class="field">
+                <label for="aboutText">Current About / Summary section</label>
+                <textarea id="aboutText" rows="6" placeholder="Paste your current LinkedIn About section here…"></textarea>
+              </div>
+              <div class="field">
+                <label for="skillsInput">Current LinkedIn skills <span style="font-weight:400;color:var(--dv-faint);">(comma-separated)</span></label>
+                <input type="text" id="skillsInput" placeholder="e.g. Product Management, SQL, Agile">
+              </div>
+            </div>
+
+            <!-- CV mode -->
+            <div id="cvInputs" hidden>
+              <div style="background:var(--dv-card-2);border:1px solid var(--dv-border);border-radius:10px;padding:1rem;font-size:0.86rem;color:var(--dv-muted);text-align:center;">
+                <span id="cvLoadStatus">Loading your CV data…</span>
+              </div>
+              <div id="cvPreview" hidden style="margin-top:0.75rem;font-size:0.83rem;color:var(--dv-muted);"></div>
+            </div>
+
+            <button class="btn btn-primary" id="optimiseBtn" style="width:100%;margin-top:0.5rem;">
+              ✨ Optimise my profile
+            </button>
+          </div>
+
+          <!-- Quick tips card -->
+          <div class="card" style="margin-top:1rem;">
+            <div class="card-title">How to use your results</div>
+            <div class="tip-list" style="padding:0;margin-top:0;">
+              <div class="tip-item">Copy the new headline and paste it into your LinkedIn profile settings.</div>
+              <div class="tip-item">Update your About section — personalise it slightly to feel natural.</div>
+              <div class="tip-item">Add the recommended skills via LinkedIn's Skills section (you can have up to 50).</div>
+              <div class="tip-item">Work the highlighted keywords into your experience descriptions.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Results -->
+        <div class="results-area" id="resultsArea">
+          <div class="empty-state" id="emptyState">
+            <div class="icon">🔗</div>
+            <div style="font-weight:600;margin-bottom:0.5rem;">Ready to optimise</div>
+            <div style="font-size:0.85rem;">Fill in your profile details and click Optimise to get AI-powered recommendations.</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /mainContent -->
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
+
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var session = null;
+  var cvData  = null;
+  var inputMode = 'manual';
+
+  // ── Auth & init ──────────────────────────────────────────────────────────
+  (async function init() {
+    try {
+      session = await cvAuth.getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+
+      var profile = await cvAuth.getProfile(session.user.id);
+      var plan = (profile && profile.plan) || 'free';
+      var expires = profile && profile.plan_expires_at;
+      var isPro = plan === 'pro' || plan === 'premium' ||
+                  (plan === 'day_pass' && expires && new Date(expires) > new Date());
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('user-name').textContent = session.user.email || '';
+      var badge = document.getElementById('navPlanBadge');
+      var badgeWrap = document.getElementById('planBadgeWrap');
+      if (badge) { badge.textContent = plan.toUpperCase(); badge.className = 'plan-badge ' + plan; }
+      if (badgeWrap) badgeWrap.hidden = false;
+
+      if (!isPro) { document.getElementById('upgradeGate').hidden = false; return; }
+      document.getElementById('mainContent').hidden = false;
+
+      // Try to load CV data from localStorage
+      try {
+        var stored = localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+        if (stored) { cvData = JSON.parse(stored); }
+      } catch(e) {}
+    } catch(e) { window.location.href = 'login.html'; }
+  })();
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.input-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.input-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      inputMode = btn.dataset.mode;
+      document.getElementById('manualInputs').hidden = inputMode !== 'manual';
+      document.getElementById('cvInputs').hidden = inputMode !== 'cv';
+      if (inputMode === 'cv') loadCvMode();
+    });
+  });
+
+  function loadCvMode() {
+    var statusEl = document.getElementById('cvLoadStatus');
+    var preview  = document.getElementById('cvPreview');
+    if (cvData && cvData.personal) {
+      statusEl.textContent = '✓ CV data loaded — ' + (cvData.personal.fullName || 'your CV');
+      preview.hidden = false;
+      var parts = [];
+      if (cvData.experience && cvData.experience.length) parts.push(cvData.experience.length + ' experience entries');
+      if (cvData.skills && cvData.skills.length) parts.push(cvData.skills.length + ' skills');
+      preview.textContent = parts.join(' · ');
+    } else {
+      statusEl.innerHTML = 'No CV data found. <a href="cv-builder.html" style="color:#A78BFA;">Build your CV first</a> then come back.';
+    }
+  }
+
+  // ── Headline char counter ─────────────────────────────────────────────────
+  var headlineEl = document.getElementById('headline');
+  var countEl    = document.getElementById('headlineCount');
+  headlineEl.addEventListener('input', function() {
+    var n = headlineEl.value.length;
+    countEl.textContent = n + ' / 220';
+    countEl.className = 'char-hint ' + (n > 220 ? 'char-over' : n > 180 ? 'char-warn' : n > 0 ? 'char-ok' : '');
+  });
+
+  // ── Optimise ─────────────────────────────────────────────────────────────
+  document.getElementById('optimiseBtn').addEventListener('click', async function() {
+    var btn = this;
+    var targetRole = document.getElementById('targetRole').value.trim();
+    if (!targetRole) { document.getElementById('targetRole').focus(); return; }
+
+    var body = { targetRole: targetRole };
+    if (inputMode === 'manual') {
+      body.headline   = document.getElementById('headline').value.trim();
+      body.about      = document.getElementById('aboutText').value.trim();
+      body.skills     = document.getElementById('skillsInput').value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    } else {
+      if (!cvData) { alert('No CV data found. Please build your CV first.'); return; }
+      body.cvData = cvData;
+    }
+
+    if (!body.headline && !body.about && !body.cvData) {
+      alert('Please enter your headline or About section (or switch to "Use my CV").');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Optimising…';
+    document.getElementById('emptyState') && (document.getElementById('emptyState').hidden = true);
+
+    try {
+      var res = await fetch('/api/linkedin-optimiser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.access_token || '') },
+        body: JSON.stringify(body)
+      });
+      var data = await res.json();
+      if (!res.ok) { alert(data.error || 'Optimisation failed. Please try again.'); return; }
+      renderResults(data);
+    } catch(e) {
+      alert('Network error. Please try again.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✨ Optimise my profile';
+    }
+  });
+
+  // ── Render results ───────────────────────────────────────────────────────
+  function renderResults(data) {
+    var area = document.getElementById('resultsArea');
+    area.innerHTML = '';
+
+    // Headline
+    if (data.headline) {
+      area.appendChild(resultSection('Optimised Headline', data.headline, true));
+    }
+
+    // Keywords
+    if (data.keywords && data.keywords.length) {
+      var kw = document.createElement('div');
+      kw.className = 'result-section';
+      kw.innerHTML = '<div class="result-header"><span class="result-label">Target Keywords</span></div>';
+      var pillWrap = document.createElement('div');
+      pillWrap.className = 'pill-list';
+      data.keywords.forEach(function(k) {
+        pillWrap.innerHTML += '<span class="pill pill-keyword">' + esc(k) + '</span>';
+      });
+      kw.appendChild(pillWrap);
+      area.appendChild(kw);
+    }
+
+    // About
+    if (data.about) {
+      area.appendChild(resultSection('Optimised About Section', data.about, true));
+    }
+
+    // Skills
+    if (data.skills) {
+      var sk = document.createElement('div');
+      sk.className = 'result-section';
+      sk.innerHTML = '<div class="result-header"><span class="result-label">Skills</span></div>';
+      var pillWrap2 = document.createElement('div');
+      pillWrap2.className = 'pill-list';
+      (data.skills.toAdd || []).forEach(function(s) {
+        pillWrap2.innerHTML += '<span class="pill pill-add">+ ' + esc(s) + '</span>';
+      });
+      (data.skills.toRemove || []).forEach(function(s) {
+        pillWrap2.innerHTML += '<span class="pill pill-remove">− ' + esc(s) + '</span>';
+      });
+      sk.appendChild(pillWrap2);
+      area.appendChild(sk);
+    }
+
+    // Experience tips
+    if (data.experienceTips && data.experienceTips.length) {
+      var exp = document.createElement('div');
+      exp.className = 'result-section';
+      exp.innerHTML = '<div class="result-header"><span class="result-label">Experience Improvements</span></div>';
+      var tl = document.createElement('div');
+      tl.className = 'tip-list';
+      data.experienceTips.forEach(function(t) {
+        var d = document.createElement('div');
+        d.className = 'tip-item';
+        d.innerHTML = (t.company ? '<strong>' + esc(t.company) + ':</strong> ' : '') + esc(t.tip);
+        tl.appendChild(d);
+      });
+      exp.appendChild(tl);
+      area.appendChild(exp);
+    }
+
+    // Profile tips
+    if (data.profileTips && data.profileTips.length) {
+      var pt = document.createElement('div');
+      pt.className = 'result-section';
+      pt.innerHTML = '<div class="result-header"><span class="result-label">Profile Tips</span></div>';
+      var ptl = document.createElement('div');
+      ptl.className = 'tip-list';
+      data.profileTips.forEach(function(tip) {
+        ptl.innerHTML += '<div class="tip-item">' + esc(tip) + '</div>';
+      });
+      pt.appendChild(ptl);
+      area.appendChild(pt);
+    }
+  }
+
+  function resultSection(label, text, copyable) {
+    var sec = document.createElement('div');
+    sec.className = 'result-section';
+    var hdr = '<div class="result-header"><span class="result-label">' + label + '</span>';
+    if (copyable) hdr += '<button class="copy-btn" onclick="copySection(this)">Copy</button>';
+    hdr += '</div>';
+    sec.innerHTML = hdr + '<div class="result-body">' + esc(text) + '</div>';
+    return sec;
+  }
+
+  window.copySection = function(btn) {
+    var body = btn.closest('.result-section').querySelector('.result-body');
+    navigator.clipboard.writeText(body.textContent || '').then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  };
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Theme toggle ─────────────────────────────────────────────────────────
+  (function(){
+    var btn = document.getElementById('themeToggleBtn');
+    var html = document.documentElement;
+    function apply(theme){
+      if(theme==='light'){ html.setAttribute('data-theme','light'); btn.textContent='Switch to dark mode'; }
+      else { html.removeAttribute('data-theme'); btn.textContent='Switch to light mode'; }
+    }
+    var saved=''; try{ saved=localStorage.getItem('cvcentral_dash_theme')||''; }catch(e){}
+    apply(saved==='light'?'light':'dark');
+    btn.addEventListener('click',function(){
+      var next=html.getAttribute('data-theme')==='light'?'dark':'light';
+      try{ localStorage.setItem('cvcentral_dash_theme',next); }catch(e){}
+      apply(next);
+    });
+  })();
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  var logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.style.display = 'block';
+    logoutBtn.addEventListener('click', async function() {
+      await cvAuth.signOut();
+      window.location.href = 'login.html';
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

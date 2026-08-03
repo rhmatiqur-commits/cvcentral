@@ -32,7 +32,7 @@
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://exzkmavkzqknoghopwhq.supabase.co';
 
-// Hardcoded Quick CV Pass price (£1.19 one-time, created 2026-07-16)
+// Hardcoded Job Pass price (£1.19 one-time, created 2026-07-16)
 const DAY_PASS_PRICE_ID = 'price_1TtoeJRwetsWzvA0zINPt3Ht';
 
 // Maps Stripe plan keys → Supabase plan tier
@@ -181,7 +181,7 @@ async function createCheckout(req, res) {
   const successBase = successUrl || 'https://cvcentral.io/dashboard.html';
   const cancelBase  = cancelUrl  || 'https://cvcentral.io/dashboard.html';
 
-  // ── Quick CV Pass (one-time payment, 72h Pro access) ──────────
+  // ── Job Pass (one-time payment, 72h Pro access) ──────────
   if (planKey === 'day_pass') {
     const priceId = getPriceIds()['day_pass'] || DAY_PASS_PRICE_ID;
     const session = await stripe.checkout.sessions.create({
