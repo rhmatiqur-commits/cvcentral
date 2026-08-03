@@ -1938,6 +1938,30 @@
       // Cover letter
       document.getElementById('coverLetterBox').textContent = data.coverLetter || '';
       document.getElementById('regenerateCoverLetter').style.display = data.coverLetter ? 'inline-flex' : 'none';
+      // Auto-save cover letter for Pro users
+      if (data.coverLetter && isPro()) {
+        (async function() {
+          try {
+            var sess = await cvAuth.getSession();
+            if (!sess) return;
+            var autoTitle = (state.formData && state.formData.targetJob)
+              ? (state.formData.targetJob + ' — ' + new Date().toLocaleDateString('en-GB'))
+              : ('Cover Letter ' + new Date().toLocaleDateString('en-GB'));
+            await fetch('/api/saved-data?resource=cover-letters', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+              body: JSON.stringify({
+                title: autoTitle,
+                content: data.coverLetter,
+                job_title: (state.formData && state.formData.targetJob) || '',
+                company: (state.formData && state.formData.targetCompany) || '',
+                language: 'English'
+              })
+            });
+            toast('Cover letter auto-saved ✓', 'success');
+          } catch(e) {}
+        })();
+      }
     }
 
     /* ---------- Interview prep ---------- */
@@ -2082,6 +2106,29 @@
         if (state.ai) state.ai.coverLetter = data.coverLetter;
         markFreeUsed('cover_letter');
         toast('Cover letter regenerated ✓', 'success');
+        // Auto-save regenerated cover letter for Pro users
+        if (data.coverLetter && isPro()) {
+          (async function() {
+            try {
+              var sess = await cvAuth.getSession();
+              if (!sess) return;
+              var autoTitle = (state.formData && state.formData.targetJob)
+                ? (state.formData.targetJob + ' (' + lang + ') — ' + new Date().toLocaleDateString('en-GB'))
+                : ('Cover Letter (' + lang + ') ' + new Date().toLocaleDateString('en-GB'));
+              await fetch('/api/saved-data?resource=cover-letters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+                body: JSON.stringify({
+                  title: autoTitle,
+                  content: data.coverLetter,
+                  job_title: (state.formData && state.formData.targetJob) || '',
+                  company: (state.formData && state.formData.targetCompany) || '',
+                  language: lang
+                })
+              });
+            } catch(e) {}
+          })();
+        }
       } catch (e) {
         toast(e.message || 'Could not regenerate — please try again', 'error');
       } finally {

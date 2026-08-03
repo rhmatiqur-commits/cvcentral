@@ -181,7 +181,7 @@
           <div class="page-title">Saved Cover Letters</div>
           <div class="page-sub">All your saved cover letters in one place. Generate more in the CV Builder.</div>
         </div>
-        <a href="cv-builder.html" class="btn btn-primary">+ Generate new</a>
+        <a href="cv-builder.html?open=cover-letter" class="btn btn-primary">+ Generate new</a>
       </div>
       <div id="lettersList"></div>
       <!-- View modal -->
@@ -244,7 +244,7 @@
   function renderList(){
     var el=document.getElementById('lettersList');
     if(!letters.length){
-      el.innerHTML='<div class="empty-state"><div style="font-size:2rem;margin-bottom:0.75rem;">📝</div><p>No saved cover letters yet. Generate one in the <a href="cv-builder.html" style="color:#A78BFA;">CV Builder</a> and save it.</p></div>';
+      el.innerHTML='<div class="empty-state"><div style="font-size:2rem;margin-bottom:0.75rem;">📝</div><p>No saved cover letters yet. <a href="cv-builder.html?open=cover-letter" style="color:#A78BFA;">Generate your first cover letter</a> — it will be saved here automatically.</p></div>';
       return;
     }
     el.innerHTML=letters.map(function(l){
