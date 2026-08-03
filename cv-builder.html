@@ -495,7 +495,7 @@
           <div class="step-title">
             <span class="step-count">Step 5 of 5</span>
             <h2>AI enhancement &amp; preview</h2>
-            <p>One click. The AI rewrites, scores, checks ATS compatibility and drafts your cover letter.</p>
+            <p>One click. The AI rewrites, scores, checks ATS compatibility and suggests a template.</p>
           </div>
 
           <!-- Pre-analysis state -->
@@ -522,7 +522,7 @@
             <div class="analyse-hero" style="margin:0;">
               <div class="rocket">&#128640;</div>
               <h3>Ready when you are</h3>
-              <p>We'll enhance your summary and bullet points, score your CV out of 100, recommend a template, and write your first cover letter.</p>
+              <p>We'll enhance your summary and bullet points, score your CV out of 100, and recommend a template.</p>
               <button class="btn btn-primary btn-lg" id="analyseBtn">Analyse my CV</button>
             </div>
           </div>
@@ -563,31 +563,10 @@
                 <ol class="improvement-list" id="improvementList"></ol>
               </div>
 
-              <div class="result-card full">
-                <h4>Your cover letter</h4>
-                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem;flex-wrap:wrap;">
-                  <label for="coverLetterLang" style="font-size:0.8rem;font-weight:600;color:var(--muted);white-space:nowrap;">Language:</label>
-                  <select id="coverLetterLang" style="font-family:var(--font-body);font-size:0.85rem;color:var(--ink);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.4rem 0.7rem;cursor:pointer;transition:border-color 0.15s;">
-                    <option value="English">🇬🇧 English</option>
-                    <option value="French">🇫🇷 French</option>
-                    <option value="Spanish">🇪🇸 Spanish</option>
-                    <option value="German">🇩🇪 German</option>
-                    <option value="Polish">🇵🇱 Polish</option>
-                    <option value="Urdu">🇵🇰 Urdu</option>
-                    <option value="Arabic">🇸🇦 Arabic</option>
-                    <option value="Mandarin Chinese">🇨🇳 Mandarin</option>
-                    <option value="Portuguese">🇧🇷 Portuguese</option>
-                    <option value="Italian">🇮🇹 Italian</option>
-                  </select>
-                  <button id="regenerateCoverLetter" class="btn btn-ghost btn-sm" style="display:none;">Regenerate in this language</button>
-                </div>
-                <div class="cover-letter-box" id="coverLetterBox"></div>
-              </div>
             </div>
 
             <div class="result-actions">
-              <button class="btn btn-ghost" id="copyCoverLetter">Copy cover letter</button>
-              <button class="btn btn-ghost" id="saveCoverLetterBtn" title="Save to Saved Cover Letters (Pro+)" style="display:none;">💾 Save cover letter</button>
+              <a href="saved-cover-letters.html" class="btn btn-ghost">✉ Generate a cover letter →</a>
             </div>
 
             <!-- Interview prep card (Pro+) -->

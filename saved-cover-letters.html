@@ -178,11 +178,66 @@
     <div id="mainContent" hidden>
       <div class="page-header">
         <div>
-          <div class="page-title">Saved Cover Letters</div>
-          <div class="page-sub">All your saved cover letters in one place. Generate more in the CV Builder.</div>
+          <div class="page-title">Cover Letters</div>
+          <div class="page-sub">Generate and save tailored cover letters for every application.</div>
         </div>
-        <a href="cv-builder.html?open=cover-letter" class="btn btn-primary">+ Generate new</a>
+        <button class="btn btn-primary" id="showGeneratorBtn">+ Generate new</button>
       </div>
+
+      <!-- Generator panel (hidden by default) -->
+      <div id="generatorPanel" style="display:none;background:var(--dv-card);border:1px solid var(--dv-border);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem;">
+        <h3 style="font-family:var(--font-display);font-size:1.15rem;margin:0 0 1.25rem;">Generate a cover letter</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--dv-muted);margin-bottom:0.4rem;">Target job title</label>
+            <input id="clJobTitle" type="text" placeholder="e.g. Product Manager" style="width:100%;box-sizing:border-box;padding:0.6rem 0.85rem;border:1.5px solid var(--dv-border);border-radius:10px;font-size:0.9rem;background:var(--dv-card-2);color:var(--dv-text);font-family:inherit;">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--dv-muted);margin-bottom:0.4rem;">Company name</label>
+            <input id="clCompany" type="text" placeholder="e.g. Acme Ltd" style="width:100%;box-sizing:border-box;padding:0.6rem 0.85rem;border:1.5px solid var(--dv-border);border-radius:10px;font-size:0.9rem;background:var(--dv-card-2);color:var(--dv-text);font-family:inherit;">
+          </div>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--dv-muted);margin-bottom:0.4rem;">Job description <span style="font-weight:400;">(paste for a tailored letter)</span></label>
+          <textarea id="clJobDesc" rows="5" placeholder="Paste the full job advert here…" style="width:100%;box-sizing:border-box;padding:0.65rem 0.85rem;border:1.5px solid var(--dv-border);border-radius:10px;font-size:0.875rem;background:var(--dv-card-2);color:var(--dv-text);font-family:inherit;resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--dv-muted);margin-bottom:0.4rem;">Language</label>
+            <select id="clLang" style="padding:0.55rem 0.85rem;border:1.5px solid var(--dv-border);border-radius:10px;font-size:0.875rem;background:var(--dv-card-2);color:var(--dv-text);font-family:inherit;cursor:pointer;">
+              <option value="English">🇬🇧 English</option>
+              <option value="French">🇫🇷 French</option>
+              <option value="Spanish">🇪🇸 Spanish</option>
+              <option value="German">🇩🇪 German</option>
+              <option value="Polish">🇵🇱 Polish</option>
+              <option value="Urdu">🇵🇰 Urdu</option>
+              <option value="Arabic">🇸🇦 Arabic</option>
+              <option value="Mandarin Chinese">🇨🇳 Mandarin</option>
+              <option value="Portuguese">🇧🇷 Portuguese</option>
+              <option value="Italian">🇮🇹 Italian</option>
+            </select>
+          </div>
+          <div style="margin-top:auto;">
+            <button id="generateClBtn" class="btn btn-primary">Generate cover letter</button>
+            <button id="cancelGeneratorBtn" class="btn btn-ghost" style="margin-left:0.5rem;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="clResult" style="display:none;margin-top:1.5rem;">
+          <div style="height:1px;background:var(--dv-border);margin-bottom:1.25rem;"></div>
+          <div id="clLoading" style="display:none;text-align:center;padding:1.5rem 0;color:var(--dv-muted);font-size:0.9rem;">Generating your cover letter…</div>
+          <pre id="clOutput" style="white-space:pre-wrap;font-family:inherit;font-size:0.9rem;line-height:1.75;color:var(--dv-text);"></pre>
+          <div style="margin-top:1rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button id="clCopyBtn" class="btn btn-ghost btn-sm">Copy</button>
+            <button id="clSaveBtn" class="btn btn-primary btn-sm">Save to library</button>
+          </div>
+        </div>
+      </div>
+
       <div id="lettersList"></div>
       <!-- View modal -->
       <div id="viewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:1rem;">
@@ -244,7 +299,7 @@
   function renderList(){
     var el=document.getElementById('lettersList');
     if(!letters.length){
-      el.innerHTML='<div class="empty-state"><div style="font-size:2rem;margin-bottom:0.75rem;">📝</div><p>No saved cover letters yet. <a href="cv-builder.html?open=cover-letter" style="color:#A78BFA;">Generate your first cover letter</a> — it will be saved here automatically.</p></div>';
+      el.innerHTML='<div class="empty-state"><div style="font-size:2rem;margin-bottom:0.75rem;">📝</div><p>No saved cover letters yet. Click <strong>+ Generate new</strong> above to create your first one.</p></div>';
       return;
     }
     el.innerHTML=letters.map(function(l){
@@ -285,8 +340,120 @@
   });
 
 
+  // ── Cover Letter Generator ─────────────────────────────────────
+  var generatedCoverLetter = '';
+
+  document.getElementById('showGeneratorBtn').addEventListener('click', function(){
+    var panel = document.getElementById('generatorPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if(panel.style.display === 'block') panel.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  document.getElementById('cancelGeneratorBtn').addEventListener('click', function(){
+    document.getElementById('generatorPanel').style.display = 'none';
+    document.getElementById('clResult').style.display = 'none';
+    document.getElementById('clOutput').textContent = '';
+    generatedCoverLetter = '';
+  });
+
+  document.getElementById('generateClBtn').addEventListener('click', async function(){
+    var jobTitle = document.getElementById('clJobTitle').value.trim();
+    var company  = document.getElementById('clCompany').value.trim();
+    var jobDesc  = document.getElementById('clJobDesc').value.trim();
+    var lang     = document.getElementById('clLang').value;
+
+    // Load CV data from localStorage
+    var cvRaw = localStorage.getItem('cvcentral_draft') || localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+    var cvData = null;
+    try { if(cvRaw) cvData = JSON.parse(cvRaw); } catch(e){}
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    document.getElementById('clResult').style.display = 'block';
+    document.getElementById('clLoading').style.display = 'block';
+    document.getElementById('clOutput').textContent = '';
+    document.getElementById('clSaveBtn').style.display = 'none';
+    document.getElementById('clCopyBtn').style.display = 'none';
+
+    try {
+      var body = {
+        coverLetterLanguage: lang,
+        jobDescription: jobDesc,
+        plan: 'pro'
+      };
+      if(cvData) {
+        body.personal      = cvData.personal || {};
+        body.experience    = cvData.experience || [];
+        body.education     = cvData.education || [];
+        body.skills        = cvData.skills || [];
+        body.languages     = cvData.languages || [];
+        body.certifications= cvData.certifications || [];
+        body.jobTarget     = { targetJob: jobTitle || (cvData.personal && cvData.personal.targetRole) || '', targetCompany: company || '' };
+      } else {
+        body.jobTarget = { targetJob: jobTitle, targetCompany: company };
+      }
+
+      var res = await fetch('/api/ai?action=cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.access_token || '') },
+        body: JSON.stringify(body)
+      });
+      var data = await res.json();
+      if(data.error) throw new Error(data.error);
+
+      generatedCoverLetter = data.coverLetter || '';
+      document.getElementById('clOutput').textContent = generatedCoverLetter;
+      document.getElementById('clSaveBtn').style.display = '';
+      document.getElementById('clCopyBtn').style.display = '';
+
+      // Auto-save
+      var autoTitle = (jobTitle || 'Cover Letter') + (company ? ' — ' + company : '') + ' · ' + new Date().toLocaleDateString('en-GB');
+      var saved = await fetch('/api/saved-data?resource=cover-letters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.access_token || '') },
+        body: JSON.stringify({ title: autoTitle, content: generatedCoverLetter, job_title: jobTitle, company: company, language: lang })
+      });
+      if(saved.ok) {
+        await loadLetters();
+      }
+
+    } catch(e) {
+      document.getElementById('clOutput').textContent = 'Something went wrong — please try again.';
+    } finally {
+      document.getElementById('clLoading').style.display = 'none';
+      btn.disabled = false;
+      btn.textContent = 'Generate cover letter';
+    }
+  });
+
+  document.getElementById('clCopyBtn').addEventListener('click', function(){
+    if(generatedCoverLetter) navigator.clipboard.writeText(generatedCoverLetter).then(function(){
+      document.getElementById('clCopyBtn').textContent = 'Copied!';
+      setTimeout(function(){ document.getElementById('clCopyBtn').textContent = 'Copy'; }, 2000);
+    });
+  });
+
+  document.getElementById('clSaveBtn').addEventListener('click', async function(){
+    if(!generatedCoverLetter) return;
+    var jobTitle = document.getElementById('clJobTitle').value.trim();
+    var company  = document.getElementById('clCompany').value.trim();
+    var lang     = document.getElementById('clLang').value;
+    var customTitle = prompt('Name this cover letter:', (jobTitle || 'Cover Letter') + (company ? ' — ' + company : ''));
+    if(!customTitle) return;
+    try {
+      var r = await fetch('/api/saved-data?resource=cover-letters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session && session.access_token || '') },
+        body: JSON.stringify({ title: customTitle, content: generatedCoverLetter, job_title: jobTitle, company: company, language: lang })
+      });
+      if(r.ok){ await loadLetters(); alert('Saved!'); }
+    } catch(e) { alert('Could not save.'); }
+  });
+
+  // ── Theme & logout ──────────────────────────────────────────────
   var themeBtn = document.getElementById('themeToggleBtn');
-  if(themeBtn){themeBtn.addEventListener('click',function(){var d=document.documentElement;var t=d.getAttribute('data-theme')==='light'?'dark':'light';if(t==='light'){d.setAttribute('data-theme','light');themeBtn.textContent='Switch to dark mode';}else{d.removeAttribute('data-theme');themeBtn.textContent='Switch to light mode';}try{localStorage.setItem('cvcentral_dash_theme',t);}catch(e){}});}
+  if(themeBtn){themeBtn.addEventListener('click',function(){var d=document.documentElement;var t=d.getAttribute('data-theme')==='light'?'dark':'light';if(t==='light'){d.setAttribute('data-theme','light');themeBtn.textContent='Dark';}else{d.removeAttribute('data-theme');themeBtn.textContent='Light';}try{localStorage.setItem('cvcentral_dash_theme',t);}catch(e){}});}
   var logoutBtn=document.getElementById('logout-btn');
   if(logoutBtn){logoutBtn.style.display='block';logoutBtn.addEventListener('click',function(){cvAuth.signOut().then(function(){window.location.href='login.html';});}); }
 
