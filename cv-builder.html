@@ -2300,8 +2300,8 @@
         saveVersionBtn.addEventListener('click', async function () {
           var name = prompt('Name this CV snapshot:', 'My CV ' + new Date().toLocaleDateString('en-GB'));
           if (!name) return;
-          var cvRaw = localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
-          if (!cvRaw) { toast('No CV data to save.', 'error'); return; }
+          var cvRaw = localStorage.getItem('cvcentral_draft') || localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+          if (!cvRaw) { toast('No CV data to save. Please fill in your CV first.', 'error'); return; }
           try {
             var sess = await cvAuth.getSession();
             var r = await fetch('/api/saved-data?resource=cv-versions', {
