@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Tools &mdash; CV Central</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <script>(function(){try{var t=localStorage.getItem('cvcentral_dash_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}}())</script>
+  <style>
+    :root{--dv-bg:#0B0A12;--dv-side:#100D19;--dv-card:#161320;--dv-card-2:#1C1828;--dv-border:rgba(255,255,255,0.1);--dv-border-strong:rgba(255,255,255,0.18);--dv-text:#FFFFFF;--dv-muted:#B6B0C8;--dv-faint:#8B85A0;--font-display:'Fraunces',Georgia,serif;}
+    html[data-theme="light"]{--dv-bg:#F6F4FB;--dv-side:#14111F;--dv-card:#FFFFFF;--dv-card-2:#FBFAFF;--dv-border:#E8E4F2;--dv-border-strong:#D9D2EC;--dv-text:#1A1625;--dv-muted:#55506A;--dv-faint:#7B7590;}
+    body{background:var(--dv-bg);color:var(--dv-text);}
+    .app-shell{display:flex;min-height:100vh;}
+    .app-sidebar{width:230px;flex-shrink:0;background:var(--dv-side);padding:1.4rem 1.1rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .app-sidebar .logo{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0.2rem 1.6rem;text-decoration:none;}
+    .app-sidebar .brand-word{font-family:var(--font-display);font-weight:600;font-size:1.25rem;color:#fff;letter-spacing:-0.01em;}
+    .app-sidebar .main-nav{display:flex;flex-direction:column;gap:0.15rem;flex:1;}
+    .app-sidebar .main-nav a{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.75rem;border-radius:10px;font-size:0.95rem;color:#B6B0C8;text-decoration:none;font-weight:500;}
+    .app-sidebar .main-nav a:hover,.app-sidebar .main-nav a.active{background:rgba(139,92,214,0.14);color:#fff;}
+    .app-sidebar .main-nav a.active{font-weight:600;}
+    .app-sidebar .nav-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;}
+    .app-sidebar .nav-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;}
+    .theme-toggle-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;font-weight:600;font-size:0.85rem;background:rgba(139,92,214,0.14);color:#fff;border:1px solid rgba(139,92,214,0.3);padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;margin-top:0.75rem;}
+    .app-main{flex:1;min-width:0;padding:2rem 2.5rem;}
+    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;padding:0.9rem 1rem;}.app-sidebar .logo{padding:0 1rem 0 0;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;}.app-main{padding:1.25rem;}}
+
+    .page-header{margin-bottom:2rem;}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:600;}
+    .page-sub{font-size:0.9rem;color:var(--dv-muted);margin-top:0.25rem;}
+    .premium-badge{display:inline-flex;align-items:center;gap:0.4rem;background:linear-gradient(135deg,rgba(139,92,214,0.2),rgba(91,45,142,0.3));border:1px solid rgba(139,92,214,0.4);color:#C4A8F5;border-radius:100px;font-size:0.72rem;font-weight:700;padding:0.25rem 0.7rem;letter-spacing:0.06em;text-transform:uppercase;margin-left:0.5rem;}
+
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;}
+    .feature-card{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:1.4rem;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:0.75rem;transition:border-color 0.15s,transform 0.15s;}
+    .feature-card:hover{border-color:rgba(139,92,214,0.5);transform:translateY(-2px);}
+    .feature-icon{font-size:1.8rem;line-height:1;}
+    .feature-name{font-weight:700;font-size:0.95rem;color:var(--dv-text);}
+    .feature-desc{font-size:0.83rem;color:var(--dv-muted);line-height:1.55;}
+    .feature-tag{display:inline-block;font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:0.2rem 0.5rem;border-radius:6px;background:rgba(139,92,214,0.12);color:#A78BFA;margin-top:auto;}
+
+    .section-title{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dv-faint);margin:2rem 0 1rem;}
+
+    .upgrade-gate{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:3rem 2rem;text-align:center;max-width:480px;margin:4rem auto;}
+    .upgrade-gate h2{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:0 0 0.75rem;}
+    .upgrade-gate p{color:var(--dv-muted);font-size:0.9rem;margin:0 0 1.5rem;}
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <a href="index.html" class="logo">
+      <svg width="28" height="28" viewBox="0 0 40 40"><rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/><rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/><rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/></svg>
+      <span class="brand-word">CV Central</span>
+    </a>
+    <nav class="main-nav">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="cv-builder.html">CV Builder</a>
+      <a href="tracker.html">Application Tracker</a>
+      <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
+      <div class="nav-divider"></div>
+      <div class="nav-label">Premium</div>
+      <a href="premium-hub.html" class="active">Premium Hub</a>
+      <a href="career-coach.html">Career Coach</a>
+      <a href="interview-coach.html">Interview Coach</a>
+      <a href="star-generator.html">STAR Generator</a>
+      <a href="recruiter-feedback.html">Recruiter Feedback</a>
+      <a href="salary-insights.html">Salary Insights</a>
+      <a href="career-planner.html">Career Planner</a>
+      <a href="portfolio-review.html">Portfolio Review</a>
+      <a href="career-roadmap.html">Career Roadmap</a>
+      <a href="linkedin-branding.html">LinkedIn Branding</a>
+      <div class="nav-divider"></div>
+      <a href="feedback.html">Feedback</a>
+    </nav>
+    <div style="flex:1"></div>
+    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
+    <button class="theme-toggle-btn" id="themeToggleBtn" type="button">Switch to light mode</button>
+    <span id="user-name" style="font-size:0.78rem;color:#8B85A0;padding:0.5rem 0.75rem 0.2rem;display:block;word-break:break-all;"></span>
+    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+  </aside>
+
+  <div class="app-main">
+    <div id="loading" style="min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--dv-muted);">Loading&hellip;</div>
+
+    <div id="upgradeGate" hidden>
+      <div class="upgrade-gate">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">⭐</div>
+        <h2>Premium Tools</h2>
+        <p>Unlock AI Career Coach, Mock Interview Coach, Salary Insights, Career Roadmap, and much more — exclusive to Premium members.</p>
+        <a href="dashboard.html" class="btn btn-primary">Upgrade to Premium</a>
+      </div>
+    </div>
+
+    <div id="mainContent" hidden>
+      <div class="page-header">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <div class="page-title">Premium Tools</div>
+          <span class="premium-badge">⭐ Premium</span>
+        </div>
+        <div class="page-sub">Your full suite of AI career tools — exclusively for Premium members.</div>
+      </div>
+
+      <div class="section-title">AI Coaching</div>
+      <div class="features-grid">
+        <a class="feature-card" href="career-coach.html">
+          <div class="feature-icon">🧠</div>
+          <div class="feature-name">AI Career Coach</div>
+          <div class="feature-desc">Ask any career question and get personalised, expert-level coaching based on your CV and goals.</div>
+          <span class="feature-tag">Open Q&amp;A</span>
+        </a>
+        <a class="feature-card" href="interview-coach.html">
+          <div class="feature-icon">🗣️</div>
+          <div class="feature-name">Mock Interview Coach</div>
+          <div class="feature-desc">Generate realistic interview questions for your target role, then submit your answers for detailed feedback.</div>
+          <span class="feature-tag">Interactive</span>
+        </a>
+        <a class="feature-card" href="star-generator.html">
+          <div class="feature-icon">⭐</div>
+          <div class="feature-name">STAR Answer Generator</div>
+          <div class="feature-desc">Turn your experience bullet points into polished, structured STAR answers for any interview question.</div>
+          <span class="feature-tag">Competency</span>
+        </a>
+        <a class="feature-card" href="recruiter-feedback.html">
+          <div class="feature-icon">🔍</div>
+          <div class="feature-name">Recruiter Feedback</div>
+          <div class="feature-desc">See your CV through a recruiter's eyes — honest, unfiltered assessment of what makes the YES vs NO pile.</div>
+          <span class="feature-tag">CV Analysis</span>
+        </a>
+      </div>
+
+      <div class="section-title">Career Strategy</div>
+      <div class="features-grid">
+        <a class="feature-card" href="salary-insights.html">
+          <div class="feature-icon">💷</div>
+          <div class="feature-name">Salary Insights</div>
+          <div class="feature-desc">Get market salary ranges for your role and location, personalised negotiation tips, and market context.</div>
+          <span class="feature-tag">Benchmarking</span>
+        </a>
+        <a class="feature-card" href="career-planner.html">
+          <div class="feature-icon">🗺️</div>
+          <div class="feature-name">Career Progression Planner</div>
+          <div class="feature-desc">A step-by-step plan to reach your target role — skills to build, experience to gain, moves to make.</div>
+          <span class="feature-tag">Planning</span>
+        </a>
+        <a class="feature-card" href="career-roadmap.html">
+          <div class="feature-icon">🚀</div>
+          <div class="feature-name">AI Career Roadmap</div>
+          <div class="feature-desc">A visual milestone-based roadmap from where you are now to your ultimate career destination.</div>
+          <span class="feature-tag">Roadmap</span>
+        </a>
+      </div>
+
+      <div class="section-title">Profile &amp; Brand</div>
+      <div class="features-grid">
+        <a class="feature-card" href="portfolio-review.html">
+          <div class="feature-icon">🎨</div>
+          <div class="feature-name">AI Portfolio Review</div>
+          <div class="feature-desc">Expert review of your portfolio or personal website — what's working, what to fix, and what hiring managers notice first.</div>
+          <span class="feature-tag">Portfolio</span>
+        </a>
+        <a class="feature-card" href="linkedin-branding.html">
+          <div class="feature-icon">💡</div>
+          <div class="feature-name">LinkedIn Personal Branding</div>
+          <div class="feature-desc">Build a thought leadership strategy with content pillars, a posting calendar, and positioning that attracts inbound opportunities.</div>
+          <span class="feature-tag">LinkedIn</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  (async function init(){
+    try{
+      var session = await cvAuth.getSession();
+      if(!session){window.location.href='login.html';return;}
+      var profile = await cvAuth.getProfile(session.user.id);
+      var plan = (profile&&profile.plan)||'free';
+      document.getElementById('loading').style.display='none';
+      document.getElementById('user-name').textContent=session.user.email||'';
+      var badge=document.getElementById('navPlanBadge'),wrap=document.getElementById('planBadgeWrap');
+      if(badge){badge.textContent=plan.toUpperCase();badge.className='plan-badge '+plan;}
+      if(wrap)wrap.hidden=false;
+      if(plan!=='premium'){document.getElementById('upgradeGate').hidden=false;return;}
+      document.getElementById('mainContent').hidden=false;
+    }catch(e){window.location.href='login.html';}
+  })();
+  (function(){
+    var btn=document.getElementById('themeToggleBtn'),html=document.documentElement;
+    function apply(t){if(t==='light'){html.setAttribute('data-theme','light');btn.textContent='Switch to dark mode';}else{html.removeAttribute('data-theme');btn.textContent='Switch to light mode';}}
+    var s='';try{s=localStorage.getItem('cvcentral_dash_theme')||'';}catch(e){}
+    apply(s==='light'?'light':'dark');
+    btn.addEventListener('click',function(){var n=html.getAttribute('data-theme')==='light'?'dark':'light';try{localStorage.setItem('cvcentral_dash_theme',n);}catch(e){}apply(n);});
+  })();
+  var lb=document.getElementById('logout-btn');
+  if(lb){lb.style.display='block';lb.addEventListener('click',async function(){await cvAuth.signOut();window.location.href='login.html';});}
+})();
+</script>
+</body>
+</html>

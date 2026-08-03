@@ -11,6 +11,18 @@
  *   ats-check          — ATS compatibility check
  *   parse-cv           — parse raw CV text into structured JSON for prefill
  *
+ * Premium-only actions:
+ *   career-coach         — AI career coaching (question → advice)
+ *   mock-interview       — generate questions + evaluate a submitted answer
+ *   star-answer          — STAR-format answer from experience bullet points
+ *   recruiter-feedback   — CV through a recruiter's eyes
+ *   salary-insights      — salary benchmarking for role/location/experience
+ *   career-progression   — step-by-step plan from current role to target
+ *   portfolio-review     — review portfolio/website description
+ *   career-roadmap       — career roadmap with milestones
+ *   linkedin-branding    — LinkedIn thought-leadership & personal brand strategy
+ *   executive-cover-letter — premium executive-level cover letter
+ *
  * Requires env var: ANTHROPIC_API_KEY
  */
 
@@ -47,16 +59,37 @@ module.exports = async (req, res) => {
   const payload = req.body || {};
   payload.plan = auth.plan; // overwrite anything the client sent
 
+  const PREMIUM_ONLY = new Set([
+    'career-coach', 'mock-interview', 'star-answer', 'recruiter-feedback',
+    'salary-insights', 'career-progression', 'portfolio-review',
+    'career-roadmap', 'linkedin-branding', 'executive-cover-letter'
+  ]);
+
   const builders = {
-    'enhance':            buildEnhancePrompt,
-    'score':              buildScorePrompt,
-    'cover-letter':       buildCoverLetterPrompt,
-    'interview-prep':     buildInterviewPrompt,
-    'template-recommend': buildTemplatePrompt,
-    'ats-check':          buildAtsPrompt,
-    'parse-cv':           buildParseCvPrompt,
-    'compare-cv':         buildCompareCvPrompt
+    'enhance':                buildEnhancePrompt,
+    'score':                  buildScorePrompt,
+    'cover-letter':           buildCoverLetterPrompt,
+    'interview-prep':         buildInterviewPrompt,
+    'template-recommend':     buildTemplatePrompt,
+    'ats-check':              buildAtsPrompt,
+    'parse-cv':               buildParseCvPrompt,
+    'compare-cv':             buildCompareCvPrompt,
+    // Premium
+    'career-coach':           buildCareerCoachPrompt,
+    'mock-interview':         buildMockInterviewPrompt,
+    'star-answer':            buildStarAnswerPrompt,
+    'recruiter-feedback':     buildRecruiterFeedbackPrompt,
+    'salary-insights':        buildSalaryInsightsPrompt,
+    'career-progression':     buildCareerProgressionPrompt,
+    'portfolio-review':       buildPortfolioReviewPrompt,
+    'career-roadmap':         buildCareerRoadmapPrompt,
+    'linkedin-branding':      buildLinkedInBrandingPrompt,
+    'executive-cover-letter': buildExecutiveCoverLetterPrompt
   };
+
+  if (PREMIUM_ONLY.has(action) && auth.plan !== 'premium') {
+    return res.status(403).json({ error: 'This feature requires a Premium plan.' });
+  }
 
   const builder = builders[action];
   if (!builder) return res.status(400).json({ error: 'Unknown action: ' + action });
@@ -64,12 +97,16 @@ module.exports = async (req, res) => {
   try {
     const prompt = builder(payload);
 
-    // Model selection: always-light actions use Haiku regardless of plan.
-    // Quality actions use Sonnet for paid users, Haiku for free.
+    // Model selection:
+    //   Premium → always Sonnet (highest priority, even for light actions)
+    //   Pro / day_pass → Sonnet for heavy actions, Haiku for light
+    //   Free → always Haiku
     const plan = (payload.plan || 'free').toLowerCase();
+    const isPremium = plan === 'premium';
     const isPaid = plan === 'pro' || plan === 'premium' || plan === 'day_pass';
     const alwaysLight = ['score', 'template-recommend', 'parse-cv'];
-    const model = alwaysLight.includes(action) ? MODEL_LIGHT
+    const model = isPremium ? MODEL_HEAVY
+      : alwaysLight.includes(action) ? MODEL_LIGHT
       : isPaid ? MODEL_HEAVY
       : MODEL_LIGHT;
 
@@ -335,6 +372,198 @@ function buildCompareCvPrompt(p) {
       '',
       'Compare the old CV against the new one. Identify what has improved, what is new, what was removed, and flag anything that looks worse or missing. Be specific — reference actual content from both CVs.',
       jsonOnly('{ "improvements": [{ "category": "string", "old": "string", "new": "string", "verdict": "better | worse | new | removed" }], "summary": "string (2-3 sentence overall verdict)", "score": { "old": 0, "new": 0 } }')
+    ].join('\n')
+  };
+}
+
+/* ─────────────────── PREMIUM PROMPT BUILDERS ─────────────────── */
+
+const PREMIUM_STYLE = UK_STYLE + ' You are advising a premium-tier professional who expects specific, evidence-based guidance — not generic advice. Be direct, honest, and concrete.';
+
+function buildCareerCoachPrompt(p) {
+  return {
+    maxTokens: 2000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'COACHING QUESTION FROM THE CANDIDATE:',
+      (p.question || '').slice(0, 2000),
+      '',
+      'Give a thorough, personalised coaching response. Reference specifics from their CV where relevant. Structure your response with clear sections if needed.',
+      jsonOnly('{ "response": "string (full coaching response, markdown-formatted)", "actionItems": ["string — 3-5 concrete next steps"], "followUpQuestions": ["string — 2-3 questions to deepen the coaching session"] }')
+    ].join('\n')
+  };
+}
+
+function buildMockInterviewPrompt(p) {
+  var mode = p.mode || 'generate'; // 'generate' | 'evaluate'
+  if (mode === 'evaluate') {
+    return {
+      maxTokens: 2000,
+      system: PREMIUM_STYLE,
+      user: [
+        cvSummaryBlock(p),
+        '',
+        'INTERVIEW QUESTION ASKED:',
+        (p.interviewQuestion || '').slice(0, 1000),
+        '',
+        'CANDIDATE\'S ANSWER:',
+        (p.candidateAnswer || '').slice(0, 3000),
+        '',
+        'Evaluate this answer as a senior interviewer would. Score it, identify what was strong and what was weak, and provide a model answer for comparison.',
+        jsonOnly('{ "score": 0, "verdict": "Strong | Good | Needs Work | Weak", "strengths": ["string"], "weaknesses": ["string"], "modelAnswer": "string (~150 words — what a great answer looks like)", "tip": "string (single most important improvement)" }')
+      ].join('\n')
+    };
+  }
+  return {
+    maxTokens: 2500,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'TARGET ROLE / JOB DESCRIPTION:',
+      (p.jobTarget && p.jobTarget.description ? p.jobTarget.description : (p.jobTarget && p.jobTarget.title ? p.jobTarget.title : 'Not specified')).slice(0, 2000),
+      '',
+      'Generate 10 realistic interview questions this candidate will likely face. Include a mix: competency/STAR (3), technical/role-specific (3), CV-probing (2), situational (1), closing/motivation (1). For each, give the interviewer\'s hidden intent.',
+      jsonOnly('{ "questions": [{ "question": "string", "type": "competency | technical | cv-probing | situational | motivation", "intent": "string — what the interviewer is really assessing", "hint": "string — one-line tip for this specific candidate" }] }')
+    ].join('\n')
+  };
+}
+
+function buildStarAnswerPrompt(p) {
+  return {
+    maxTokens: 2000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'INTERVIEW QUESTION:',
+      (p.question || '').slice(0, 500),
+      '',
+      'RELEVANT EXPERIENCE / BULLET POINTS TO DRAW ON:',
+      (p.experienceNotes || '').slice(0, 2000),
+      '',
+      'Write a polished STAR-format answer (~250 words) tailored to this question using the experience provided. Natural, first-person, confident. British English.',
+      jsonOnly('{ "situation": "string (~50 words)", "task": "string (~40 words)", "action": "string (~100 words — the bulk of the answer)", "result": "string (~60 words — quantify where possible)", "fullAnswer": "string (the complete flowing answer combining all four parts)", "keywords": ["string — 5 keywords/phrases this answer should contain to score well"] }')
+    ].join('\n')
+  };
+}
+
+function buildRecruiterFeedbackPrompt(p) {
+  return {
+    maxTokens: 2500,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'You are a senior UK recruiter at a major search firm. You have 10 seconds to decide whether to call this candidate. Give your honest, unfiltered assessment of the CV — strengths, red flags, what would make you put it in the YES pile vs the NO pile.',
+      jsonOnly('{ "firstImpression": "string (gut reaction in 1-2 sentences — what a recruiter thinks in the first 10 seconds)", "verdict": "Strong Yes | Yes | Maybe | No", "strengths": [{ "point": "string", "impact": "string" }], "redFlags": [{ "flag": "string", "howToFix": "string" }], "whatsMissing": ["string"], "phoneScreenQuestions": ["string — 3 questions a recruiter would ask based on this CV"], "overallAdvice": "string (2-3 sentences of straight-talking advice)" }')
+    ].join('\n')
+  };
+}
+
+function buildSalaryInsightsPrompt(p) {
+  return {
+    maxTokens: 2000,
+    system: PREMIUM_STYLE,
+    user: [
+      'ROLE: ' + (p.role || (p.jobTarget && p.jobTarget.title) || 'Not specified'),
+      'LOCATION: ' + (p.location || (p.personal && p.personal.location) || 'United Kingdom'),
+      'YEARS OF EXPERIENCE: ' + (p.yearsExperience || 'Not specified'),
+      'INDUSTRY/SECTOR: ' + (p.industry || 'Not specified'),
+      'COMPANY SIZE: ' + (p.companySize || 'Not specified'),
+      'CURRENT SALARY (optional): ' + (p.currentSalary || 'Not provided'),
+      '',
+      cvSummaryBlock(p),
+      '',
+      'Provide salary benchmarking for this role in the UK/European market. Give ranges for junior, mid, and senior levels. Include negotiation advice specific to this candidate\'s profile. Base data on typical market rates — be realistic, not aspirational.',
+      jsonOnly('{ "currency": "GBP", "ranges": { "junior": { "min": 0, "max": 0, "label": "string" }, "mid": { "min": 0, "max": 0, "label": "string" }, "senior": { "min": 0, "max": 0, "label": "string" } }, "candidateEstimate": { "min": 0, "max": 0, "rationale": "string" }, "factors": [{ "factor": "string", "impact": "positive | negative | neutral", "detail": "string" }], "negotiationTips": ["string"], "marketContext": "string (2-3 sentences on market conditions for this role)", "disclaimer": "Salary data is estimated based on publicly available market information and should be used as a guide only." }')
+    ].join('\n')
+  };
+}
+
+function buildCareerProgressionPrompt(p) {
+  return {
+    maxTokens: 3000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'TARGET ROLE/LEVEL: ' + (p.targetRole || (p.jobTarget && p.jobTarget.title) || 'Not specified'),
+      'TARGET TIMELINE: ' + (p.targetTimeline || '2-3 years'),
+      '',
+      'Create a realistic, step-by-step career progression plan from the candidate\'s current position to their target. Be specific about skills to build, experience to gain, qualifications to consider, and network moves to make.',
+      jsonOnly('{ "currentLevel": "string", "targetLevel": "string", "estimatedTimeline": "string", "steps": [{ "phase": "string (e.g. \'Months 1-6\')", "title": "string", "focus": "string", "actions": ["string"], "milestones": ["string"] }], "skillGaps": [{ "skill": "string", "priority": "Critical | Important | Nice-to-have", "howToAcquire": "string" }], "qualifications": [{ "name": "string", "value": "string", "urgency": "string" }], "networkingMoves": ["string"], "risks": ["string — potential blockers and how to mitigate them"], "quickWins": ["string — things to do in the next 30 days"] }')
+    ].join('\n')
+  };
+}
+
+function buildPortfolioReviewPrompt(p) {
+  return {
+    maxTokens: 2500,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'PORTFOLIO URL: ' + (p.portfolioUrl || 'Not provided'),
+      'PORTFOLIO DESCRIPTION / PROJECTS:',
+      (p.portfolioDescription || '').slice(0, 3000),
+      '',
+      'TARGET ROLE/AUDIENCE: ' + (p.targetRole || 'Not specified'),
+      '',
+      'Review this professional portfolio against what hiring managers and recruiters actually look for. Be specific, honest, and actionable.',
+      jsonOnly('{ "overallScore": 0, "verdict": "string (one-sentence overall impression)", "strengths": [{ "area": "string", "detail": "string" }], "weaknesses": [{ "area": "string", "detail": "string", "fix": "string" }], "mustAdd": ["string — things that are missing and should be added"], "mustRemove": ["string — things that are hurting the portfolio"], "firstImpression": "string (what a hiring manager thinks in the first 30 seconds)", "recommendations": ["string — 5 prioritised, specific recommendations"], "standoutProject": "string (which project to lead with and why)" }')
+    ].join('\n')
+  };
+}
+
+function buildCareerRoadmapPrompt(p) {
+  return {
+    maxTokens: 3000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'ULTIMATE CAREER GOAL: ' + (p.careerGoal || p.targetRole || 'Not specified'),
+      'TIMELINE HORIZON: ' + (p.timeline || '5 years'),
+      '',
+      'Build a detailed career roadmap with clear milestones, skill nodes, and decision points. Think of it as a visual career map — each milestone should be concrete and achievable.',
+      jsonOnly('{ "currentPosition": "string", "destination": "string", "totalTimeline": "string", "milestones": [{ "id": "M1", "title": "string", "timeframe": "string (e.g. \'6 months\')", "description": "string", "keyDeliverables": ["string"], "skills": ["string"], "type": "role | qualification | project | network | pivot" }], "criticalPath": ["M1", "M2"], "alternativePaths": [{ "name": "string", "description": "string", "triggerCondition": "string" }], "earlyIndicators": ["string — signs you\'re on track at 3 months"], "risks": [{ "risk": "string", "mitigation": "string" }] }')
+    ].join('\n')
+  };
+}
+
+function buildLinkedInBrandingPrompt(p) {
+  return {
+    maxTokens: 3000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'TARGET AUDIENCE: ' + (p.targetAudience || p.targetRole || 'Not specified'),
+      'CURRENT LINKEDIN FOLLOWERS/CONNECTIONS: ' + (p.connections || 'Not specified'),
+      'CONTENT CREATION EXPERIENCE: ' + (p.contentExperience || 'Not specified'),
+      '',
+      'Build a LinkedIn personal brand strategy for this professional. Focus on thought leadership, positioning, and content that attracts the right opportunities.',
+      jsonOnly('{ "brandStatement": "string (their core personal brand in 1-2 sentences)", "positioning": "string (how to position themselves uniquely in their space)", "contentPillars": [{ "pillar": "string", "rationale": "string", "exampleTopics": ["string"] }], "contentCalendar": [{ "frequency": "string (e.g. \'2x per week\')", "format": "string (e.g. \'Text post\')", "pillar": "string", "example": "string (example post topic or hook)" }], "profileOptimisations": ["string — specific profile changes beyond headline/about"], "engagementStrategy": ["string — how to grow visibility and connections"], "30DayPlan": ["string — week-by-week actions for the first month"], "voiceGuidelines": { "tone": "string", "doUse": ["string"], "avoid": ["string"] } }')
+    ].join('\n')
+  };
+}
+
+function buildExecutiveCoverLetterPrompt(p) {
+  var lang = p.coverLetterLanguage || 'English';
+  var langInstruction = lang === 'English'
+    ? 'Write in sophisticated British English.'
+    : 'Write entirely in ' + lang + '.';
+  return {
+    maxTokens: 2000,
+    system: PREMIUM_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'Write a premium executive cover letter (~350 words) for the job description in jobTarget.description (or target role if no description). This is for a senior professional — the tone should be authoritative, strategic, and confident. No clichés. Open with a compelling hook that demonstrates business acumen. Reference specific achievements with numbers. Close with a clear, assertive call to action. ' + langInstruction,
+      jsonOnly('{ "coverLetter": "string", "subjectLine": "string (email subject line for sending this application)", "keySellingPoints": ["string — 3 headline achievements used in the letter"] }')
     ].join('\n')
   };
 }

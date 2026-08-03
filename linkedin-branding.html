@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>💡 LinkedIn Personal Branding &mdash; CV Central</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+  <script>(function(){try{var t=localStorage.getItem('cvcentral_dash_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}}())</script>
+  <style>
+    :root{--dv-bg:#0B0A12;--dv-side:#100D19;--dv-card:#161320;--dv-card-2:#1C1828;--dv-border:rgba(255,255,255,0.1);--dv-border-strong:rgba(255,255,255,0.18);--dv-text:#FFFFFF;--dv-muted:#B6B0C8;--dv-faint:#8B85A0;--font-display:'Fraunces',Georgia,serif;}
+    html[data-theme="light"]{--dv-bg:#F6F4FB;--dv-side:#14111F;--dv-card:#FFFFFF;--dv-card-2:#FBFAFF;--dv-border:#E8E4F2;--dv-border-strong:#D9D2EC;--dv-text:#1A1625;--dv-muted:#55506A;--dv-faint:#7B7590;}
+    body{background:var(--dv-bg);color:var(--dv-text);}
+    .app-shell{display:flex;min-height:100vh;}
+    .app-sidebar{width:230px;flex-shrink:0;background:var(--dv-side);padding:1.4rem 1.1rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .app-sidebar .logo{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0.2rem 1.6rem;text-decoration:none;}
+    .app-sidebar .brand-word{font-family:var(--font-display);font-weight:600;font-size:1.25rem;color:#fff;}
+    .app-sidebar .main-nav{display:flex;flex-direction:column;gap:0.15rem;flex:1;}
+    .app-sidebar .main-nav a{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.75rem;border-radius:10px;font-size:0.95rem;color:#B6B0C8;text-decoration:none;font-weight:500;}
+    .app-sidebar .main-nav a:hover,.app-sidebar .main-nav a.active{background:rgba(139,92,214,0.14);color:#fff;}
+    .app-sidebar .main-nav a.active{font-weight:600;}
+    .app-sidebar .nav-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;}
+    .app-sidebar .nav-label{font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;}
+    .theme-toggle-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;font-weight:600;font-size:0.85rem;background:rgba(139,92,214,0.14);color:#fff;border:1px solid rgba(139,92,214,0.3);padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;margin-top:0.75rem;}
+    .app-main{flex:1;min-width:0;padding:2rem 2.5rem;}
+    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;padding:0.9rem 1rem;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;}.app-main{padding:1.25rem;}}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:600;margin-bottom:0.25rem;}
+    .page-sub{font-size:0.9rem;color:var(--dv-muted);margin-bottom:2rem;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+    @media(max-width:960px){.two-col{grid-template-columns:1fr;}}
+    .card{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:1.5rem;margin-bottom:1rem;}
+    .field{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem;}
+    .field label{font-size:0.82rem;font-weight:600;color:var(--dv-muted);}
+    .field textarea,.field input,.field select{background:var(--dv-card-2);border:1.5px solid var(--dv-border-strong);border-radius:8px;padding:0.65rem 0.8rem;font-size:0.88rem;color:var(--dv-text);font-family:inherit;outline:none;transition:border-color 0.15s;width:100%;box-sizing:border-box;}
+    .field textarea:focus,.field input:focus{border-color:#5B2D8E;}
+    .spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:0.4rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .upgrade-gate{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;padding:3rem 2rem;text-align:center;max-width:480px;margin:4rem auto;}
+    .upgrade-gate h2{font-family:var(--font-display);font-size:1.4rem;font-weight:600;margin:0 0 0.75rem;}
+    .upgrade-gate p{color:var(--dv-muted);font-size:0.9rem;margin:0 0 1.5rem;}
+    .result-section{background:var(--dv-card);border:1px solid var(--dv-border);border-radius:14px;overflow:hidden;margin-bottom:1rem;}
+    .result-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--dv-border);}
+    .result-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dv-faint);}
+    .result-body{padding:1.25rem;font-size:0.88rem;line-height:1.65;color:var(--dv-text);}
+    .tip-item{font-size:0.87rem;line-height:1.6;padding-left:1.4rem;position:relative;margin-bottom:0.6rem;}
+    .tip-item::before{content:'→';position:absolute;left:0;color:#A78BFA;font-weight:700;}
+    .pill{display:inline-flex;align-items:center;font-size:0.78rem;font-weight:600;padding:0.3rem 0.7rem;border-radius:100px;margin:0.15rem;}
+    .pill-add{background:rgba(16,185,129,0.12);color:#34D399;border:1px solid rgba(16,185,129,0.2);}
+    .pill-warn{background:rgba(239,68,68,0.1);color:#F87171;border:1px solid rgba(239,68,68,0.15);}
+    .pill-neu{background:rgba(139,92,214,0.12);color:#A78BFA;border:1px solid rgba(139,92,214,0.2);}
+    .copy-btn{font-size:0.75rem;font-weight:600;padding:0.3rem 0.65rem;border-radius:6px;border:1.5px solid var(--dv-border-strong);background:transparent;color:var(--dv-muted);cursor:pointer;}
+    .copy-btn:hover{border-color:rgba(139,92,214,0.5);color:var(--dv-text);}
+    .copy-btn.copied{border-color:#34D399;color:#34D399;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <a href="index.html" class="logo"><svg width="28" height="28" viewBox="0 0 40 40"><rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/><rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/><rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/></svg><span class="brand-word">CV Central</span></a>
+    <nav class="main-nav">
+            <a href="dashboard.html">Dashboard</a><a href="cv-builder.html">CV Builder</a><a href="tracker.html">Application Tracker</a><a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
+      <div class="nav-divider"></div><div class="nav-label">Premium</div>
+      <a href="premium-hub.html">Premium Hub</a><a href="career-coach.html">Career Coach</a><a href="interview-coach.html">Interview Coach</a><a href="star-generator.html">STAR Generator</a>
+      <a href="recruiter-feedback.html">Recruiter Feedback</a><a href="salary-insights.html">Salary Insights</a><a href="career-planner.html">Career Planner</a>
+      <a href="portfolio-review.html">Portfolio Review</a>
+      <a href="career-roadmap.html">Career Roadmap</a>
+      <a href="linkedin-branding.html" class="active">LinkedIn Branding</a>
+      <div class="nav-divider"></div><a href="feedback.html">Feedback</a>
+    </nav>
+    <div style="flex:1"></div>
+    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge"></span></span>
+    <button class="theme-toggle-btn" id="themeToggleBtn">Switch to light mode</button>
+    <span id="user-name" style="font-size:0.78rem;color:#8B85A0;padding:0.5rem 0.75rem 0.2rem;display:block;word-break:break-all;"></span>
+    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+  </aside>
+  <div class="app-main">
+    <div id="loading" style="min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--dv-muted);">Loading&hellip;</div>
+    <div id="upgradeGate" hidden><div class="upgrade-gate"><div style="font-size:2.5rem;margin-bottom:1rem;">💡</div><h2>💡 LinkedIn Personal Branding</h2><p>This feature is exclusive to Premium members.</p><a href="dashboard.html" class="btn btn-primary">Upgrade to Premium</a></div></div>
+    <div id="mainContent" hidden>
+      <div class="page-title">💡 LinkedIn Personal Branding</div>
+      <div class="page-sub">Build a thought leadership strategy that attracts inbound opportunities on LinkedIn.</div>
+      <div class="two-col">
+        <div>
+          <div class="card">
+            <div class="field"><label for="lbAudience">Target audience / goal</label><input type="text" id="lbAudience" placeholder="e.g. attract CTO roles at Series A-B startups"></div>
+            <div class="field"><label for="lbConnections">LinkedIn connections / followers</label><input type="text" id="lbConnections" placeholder="e.g. 1,200 connections"></div>
+            <div class="field"><label for="lbContent">Current content creation (if any)</label><input type="text" id="lbContent" placeholder="e.g. occasional posts, none, weekly articles"></div>
+            <button class="btn btn-primary" id="lbBtn" style="width:100%;">Build my brand strategy →</button>
+          </div>
+        </div>
+        <div id="lbResults" hidden>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">Your Brand Statement</span></div>
+            <div class="result-body" id="lbStatement"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">Positioning</span></div>
+            <div class="result-body" id="lbPositioning"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">Content Pillars</span></div>
+            <div class="result-body" id="lbPillars"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">Posting Calendar</span></div>
+            <div class="result-body" id="lbCalendar"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">30-Day Action Plan</span></div>
+            <div class="result-body" id="lb30Day"></div>
+          </div>
+          <div class="result-section">
+            <div class="result-header"><span class="result-label">Voice Guidelines</span></div>
+            <div class="result-body" id="lbVoice"></div>
+          </div>
+        </div>
+        <div id="lbEmpty" style="display:flex;align-items:center;justify-content:center;min-height:200px;color:var(--dv-muted);text-align:center;font-size:0.88rem;">Fill in your details and click Build my brand strategy.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  'use strict';
+  var session=null,cvData=null;
+  (async function init(){
+    try{
+      session=await cvAuth.getSession();
+      if(!session){window.location.href='login.html';return;}
+      var profile=await cvAuth.getProfile(session.user.id);
+      var plan=(profile&&profile.plan)||'free';
+      document.getElementById('loading').style.display='none';
+      document.getElementById('user-name').textContent=session.user.email||'';
+      var b=document.getElementById('navPlanBadge'),w=document.getElementById('planBadgeWrap');
+      if(b){b.textContent=plan.toUpperCase();b.className='plan-badge '+plan;}if(w)w.hidden=false;
+      if(plan!=='premium'){document.getElementById('upgradeGate').hidden=false;return;}
+      document.getElementById('mainContent').hidden=false;
+      try{var s=localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData');if(s)cvData=JSON.parse(s);}catch(e){}
+    }catch(e){window.location.href='login.html';}
+  })();
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  window.esc=esc;
+  window.getSession=function(){return session;};
+  window.getCvData=function(){return cvData;};
+  function authHeaders(){return {'Content-Type':'application/json','Authorization':'Bearer '+(session&&session.access_token||'')};}
+  window.authHeaders=authHeaders;
+  (function(){var btn=document.getElementById('themeToggleBtn'),html=document.documentElement;function apply(t){if(t==='light'){html.setAttribute('data-theme','light');btn.textContent='Switch to dark mode';}else{html.removeAttribute('data-theme');btn.textContent='Switch to light mode';}}var s='';try{s=localStorage.getItem('cvcentral_dash_theme')||'';}catch(e){}apply(s==='light'?'light':'dark');btn.addEventListener('click',function(){var n=html.getAttribute('data-theme')==='light'?'dark':'light';try{localStorage.setItem('cvcentral_dash_theme',n);}catch(e){}apply(n);});})();
+  var lb=document.getElementById('logout-btn');if(lb){lb.style.display='block';lb.addEventListener('click',async function(){await cvAuth.signOut();window.location.href='login.html';});}
+})();
+</script>
+<script>
+document.getElementById('lbBtn').addEventListener('click',async function(){
+  var audience=document.getElementById('lbAudience').value.trim();
+  if(!audience)return;
+  var btn=this;btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Strategising…';
+  try{
+    var cvData=window.getCvData()||{};
+    var body=Object.assign({},cvData,{
+      targetAudience:audience,
+      connections:document.getElementById('lbConnections').value.trim(),
+      contentExperience:document.getElementById('lbContent').value.trim()
+    });
+    var res=await fetch('/api/ai?action=linkedin-branding',{method:'POST',headers:window.authHeaders(),body:JSON.stringify(body)});
+    var data=await res.json();
+    if(!res.ok){alert(data.error||'Failed.');return;}
+    document.getElementById('lbStatement').innerHTML='<div style="font-size:1rem;font-weight:600;font-style:italic;color:#C4A8F5;">"'+window.esc(data.brandStatement||'')+'"</div>';
+    document.getElementById('lbPositioning').textContent=data.positioning||'';
+    document.getElementById('lbPillars').innerHTML=(data.contentPillars||[]).map(function(p,i){
+      var colors=['#A78BFA','#60A5FA','#34D399','#FBBF24'];var c=colors[i%colors.length];
+      return '<div style="margin-bottom:1rem;padding:0.9rem;background:var(--dv-card-2);border-radius:10px;border-left:3px solid '+c+';"><div style="font-weight:700;font-size:0.9rem;color:'+c+';margin-bottom:0.3rem;">'+window.esc(p.pillar||'')+'</div><div style="font-size:0.82rem;color:var(--dv-muted);margin-bottom:0.5rem;">'+window.esc(p.rationale||'')+'</div><div style="display:flex;flex-wrap:wrap;gap:0.3rem;">'+(p.exampleTopics||[]).map(function(t){return '<span style="font-size:0.72rem;padding:0.2rem 0.5rem;border-radius:6px;background:rgba(255,255,255,0.06);color:var(--dv-muted);">'+window.esc(t)+'</span>';}).join('')+'</div></div>';
+    }).join('');
+    document.getElementById('lbCalendar').innerHTML=(data.contentCalendar||[]).map(function(e){return '<div style="display:grid;grid-template-columns:auto 1fr;gap:0.5rem 1rem;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--dv-border);"><div><div style="font-size:0.7rem;font-weight:700;color:var(--dv-faint);">'+window.esc(e.frequency||'')+'</div><div style="font-size:0.78rem;font-weight:600;color:#A78BFA;">'+window.esc(e.format||'')+'</div></div><div><div style="font-size:0.85rem;font-weight:600;">'+window.esc(e.example||'')+'</div><div style="font-size:0.78rem;color:var(--dv-faint);">Pillar: '+window.esc(e.pillar||'')+'</div></div></div>';}).join('');
+    document.getElementById('lb30Day').innerHTML=(data['30DayPlan']||[]).map(function(a,i){return '<div class="tip-item"><span style="color:var(--dv-faint);font-size:0.75rem;">'+(i+1)+'.</span> '+window.esc(a)+'</div>';}).join('');
+    var voice=data.voiceGuidelines||{};
+    document.getElementById('lbVoice').innerHTML='<div style="margin-bottom:0.5rem;"><strong>Tone:</strong> '+window.esc(voice.tone||'')+'</div>'
+      +'<div style="display:flex;gap:1rem;flex-wrap:wrap;">'
+      +'<div><div style="font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#34D399;margin-bottom:0.35rem;">Use</div>'+(voice.doUse||[]).map(function(s){return '<div style="font-size:0.82rem;margin-bottom:0.2rem;">✓ '+window.esc(s)+'</div>';}).join('')+'</div>'
+      +'<div><div style="font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#F87171;margin-bottom:0.35rem;">Avoid</div>'+(voice.avoid||[]).map(function(s){return '<div style="font-size:0.82rem;margin-bottom:0.2rem;">✗ '+window.esc(s)+'</div>';}).join('')+'</div>'
+      +'</div>';
+    document.getElementById('lbResults').hidden=false;
+    document.getElementById('lbEmpty').style.display='none';
+  }catch(e){alert('Network error.');}
+  finally{btn.disabled=false;btn.innerHTML='Build my brand strategy →';}
+});
+</script>
+</body>
+</html>
