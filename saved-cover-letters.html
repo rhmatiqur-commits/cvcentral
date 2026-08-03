@@ -160,7 +160,7 @@
 
   async function loadLetters(){
     try{
-      var r=await fetch('/api/cover-letters',{headers:authH()});
+      var r=await fetch('/api/saved-data?resource=cover-letters',{headers:authH()});
       var d=await r.json();
       letters=d.coverLetters||[];
       renderList();
@@ -203,7 +203,7 @@
   document.getElementById('deleteLetterBtn').addEventListener('click',async function(){
     if(!confirm('Delete this cover letter permanently?'))return;
     try{
-      await fetch('/api/cover-letters?id='+viewingId,{method:'DELETE',headers:authH()});
+      await fetch('/api/saved-data?resource=cover-letters&id='+viewingId,{method:'DELETE',headers:authH()});
       letters=letters.filter(function(l){return l.id!==viewingId;});
       document.getElementById('viewModal').style.display='none';
       renderList();

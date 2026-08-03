@@ -2218,7 +2218,7 @@
           if (!cvRaw) { toast('No CV data to save.', 'error'); return; }
           try {
             var sess = await cvAuth.getSession();
-            var r = await fetch('/api/cv-versions', {
+            var r = await fetch('/api/saved-data?resource=cv-versions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
               body: JSON.stringify({ name: name, cv_data: JSON.parse(cvRaw) })
@@ -2240,7 +2240,7 @@
           if (!title) return;
           try {
             var sess = await cvAuth.getSession();
-            var r = await fetch('/api/cover-letters', {
+            var r = await fetch('/api/saved-data?resource=cover-letters', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
               body: JSON.stringify({
@@ -2267,7 +2267,7 @@
             || (state.formData && state.formData.targetJob) || 'Interview session';
           try {
             var sess = await cvAuth.getSession();
-            var r = await fetch('/api/interview-sessions', {
+            var r = await fetch('/api/saved-data?resource=interview-sessions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
               body: JSON.stringify({ role: role, questions: questions })

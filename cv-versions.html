@@ -161,7 +161,7 @@
 
   async function loadVersions(){
     try{
-      var r=await fetch('/api/cv-versions',{headers:authH()});
+      var r=await fetch('/api/saved-data?resource=cv-versions',{headers:authH()});
       var d=await r.json();
       versions=d.versions||[];
       renderList();
@@ -198,7 +198,7 @@
     var name=document.getElementById('versionName').value.trim()||'My CV '+new Date().toLocaleDateString('en-GB');
     var cvData=JSON.parse(localStorage.getItem('cvcentral_cv_data')||localStorage.getItem('cvData')||'{}');
     try{
-      var r=await fetch('/api/cv-versions',{method:'POST',headers:authH(),body:JSON.stringify({name:name,cv_data:cvData})});
+      var r=await fetch('/api/saved-data?resource=cv-versions',{method:'POST',headers:authH(),body:JSON.stringify({name:name,cv_data:cvData})});
       if(!r.ok)throw new Error('Failed');
       var d=await r.json();
       versions.unshift(d.version);
@@ -210,7 +210,7 @@
   window.restoreVersion=async function(id){
     if(!confirm('Restore this version? Your current CV data will be replaced.'))return;
     try{
-      var r=await fetch('/api/cv-versions?id='+id+'&full=1',{headers:authH()});
+      var r=await fetch('/api/saved-data?resource=cv-versions&id='+id+'&full=1',{headers:authH()});
       var d=await r.json();
       if(!d.version||!d.version.cv_data)throw new Error('No data');
       localStorage.setItem('cvcentral_cv_data',JSON.stringify(d.version.cv_data));
@@ -221,7 +221,7 @@
   window.deleteVersion=async function(id){
     if(!confirm('Delete this version permanently?'))return;
     try{
-      await fetch('/api/cv-versions?id='+id,{method:'DELETE',headers:authH()});
+      await fetch('/api/saved-data?resource=cv-versions&id='+id,{method:'DELETE',headers:authH()});
       versions=versions.filter(function(v){return v.id!==id;});
       renderList();
     }catch(e){alert('Could not delete.');}

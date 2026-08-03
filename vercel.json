@@ -10,10 +10,8 @@
     "api/admin-analytics.js": { "maxDuration": 15 },
     "api/export-docx.js":     { "maxDuration": 30 },
     "api/tracker.js":         { "maxDuration": 15 },
-    "api/linkedin-optimiser.js":   { "maxDuration": 60 },
-    "api/cv-versions.js":          { "maxDuration": 15 },
-    "api/cover-letters.js":        { "maxDuration": 15 },
-    "api/interview-sessions.js":   { "maxDuration": 15 }
+    "api/linkedin-optimiser.js": { "maxDuration": 60 },
+    "api/saved-data.js":         { "maxDuration": 15 }
   },
   "headers": [
     {
