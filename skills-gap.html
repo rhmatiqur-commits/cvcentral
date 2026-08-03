@@ -26,16 +26,41 @@
     }
     body{background:var(--dv-bg);color:var(--dv-text);}
     .app-shell{display:flex;align-items:stretch;min-height:100vh;}
-    .app-sidebar{width:230px;flex-shrink:0;background:var(--dv-side);padding:1.4rem 1.1rem;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
-    .app-sidebar .logo{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0.2rem 1.6rem;text-decoration:none;}
-    .app-sidebar .brand-word{font-family:var(--font-display);font-weight:600;font-size:1.25rem;color:#fff;letter-spacing:-0.01em;}
-    .app-sidebar .main-nav{display:flex;flex-direction:column;gap:0.15rem;flex:1;}
-    .app-sidebar .main-nav a{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.75rem;border-radius:10px;font-size:0.95rem;color:#B6B0C8;text-decoration:none;font-weight:500;}
-    .app-sidebar .main-nav a:hover,.app-sidebar .main-nav a.active{background:rgba(139,92,214,0.14);color:#fff;}
-    .app-sidebar .main-nav a.active{color:#fff;font-weight:600;}
-    .theme-toggle-btn{display:flex;align-items:center;justify-content:center;gap:0.5rem;font-weight:600;font-size:0.85rem;background:rgba(139,92,214,0.14);color:#fff;border:1px solid rgba(139,92,214,0.3);padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;margin-top:0.75rem;}
-    .app-main{flex:1;min-width:0;background:var(--dv-bg);padding:2rem 2.5rem;}
-    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;flex-wrap:wrap;padding:0.9rem 1rem;}.app-sidebar .logo{padding:0 1rem 0 0;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;flex:none;}.app-main{padding:1.25rem;}}
+        .app-sidebar {
+      width: 248px; flex-shrink: 0; background: var(--dv-side);
+      padding: 1.4rem 1rem 1rem; display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .app-sidebar .logo { display: flex; align-items: center; gap: 0.55rem; padding: 0.2rem 0.4rem 1.5rem; text-decoration: none; }
+    .app-sidebar .logo-mark { width: 0; height: 0; background: none; }
+    .app-sidebar .brand-word { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; color: #FFFFFF; letter-spacing: -0.01em; }
+    .app-sidebar .main-nav { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; }
+    .app-sidebar .main-nav a:not(.btn), .app-sidebar .main-nav button:not(.btn) {
+      display: flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.75rem; border-radius: 9px;
+      font-size: 0.875rem; color: #8B85A0; text-decoration: none; font-weight: 500; font-family: var(--font-body);
+      background: none; border: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s, color 0.15s;
+    }
+    .app-sidebar .main-nav a:not(.btn) svg, .app-sidebar .main-nav button:not(.btn) svg { flex-shrink: 0; opacity: 0.7; transition: opacity 0.15s; }
+    .app-sidebar .main-nav a:not(.btn):hover, .app-sidebar .main-nav button:not(.btn):hover { background: rgba(139,92,214,0.12); color: #fff; }
+    .app-sidebar .main-nav a:not(.btn):hover svg, .app-sidebar .main-nav button:not(.btn):hover svg { opacity: 1; }
+    .app-sidebar .main-nav a.active { background: rgba(139,92,214,0.2); color: #fff; font-weight: 600; }
+    .app-sidebar .main-nav a.active svg { opacity: 1; }
+    .nav-section-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(139,133,160,0.55); padding: 0.9rem 0.75rem 0.3rem; pointer-events: none; }
+    .nav-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 0.5rem 0.5rem; }
+    .sidebar-bottom { border-top: 1px solid rgba(255,255,255,0.07); padding-top: 0.85rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .sidebar-user-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.4rem; }
+    .sidebar-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #5B2D8E, #7B4DB8); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0; font-family: var(--font-body); }
+    .sidebar-user-info { min-width: 0; flex: 1; }
+    .sidebar-user-info .user-email { font-size: 0.72rem; color: #55506A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .app-sidebar #planBadgeWrap { display: block; }
+    .app-sidebar .plan-badge { display: inline-block; width: 100%; box-sizing: border-box; text-align: center; font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+    .sidebar-bottom-btns { display: flex; gap: 0.4rem; }
+    .sidebar-bottom-btns button { flex: 1; font-size: 0.75rem; padding: 0.4rem 0.5rem; border-radius: 8px; font-family: var(--font-body); font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #8B85A0; transition: background 0.15s, color 0.15s; }
+    .sidebar-bottom-btns button:hover { background: rgba(139,92,214,0.15); color: #fff; border-color: rgba(139,92,214,0.3); }
+    .theme-toggle-btn { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-family: var(--font-body); font-weight: 500; font-size: 0.75rem; background: rgba(255,255,255,0.04); color: #8B85A0; border: 1px solid rgba(255,255,255,0.08); padding: 0.4rem 0.6rem; border-radius: 8px; cursor: pointer; flex: 1; }
+    .theme-toggle-btn:hover { background: rgba(139,92,214,0.15); color: #fff; border-color: rgba(139,92,244,0.3); }
+    @media(max-width:860px){.app-shell{flex-direction:column;}.app-sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;flex-wrap:wrap;padding:0.75rem 1rem;border-right:none;border-bottom:1px solid rgba(255,255,255,0.06);}.app-sidebar .logo{padding:0 1rem 0 0;}.app-sidebar .main-nav{flex-direction:row;flex-wrap:wrap;flex:none;}.nav-section-label{display:none;}.nav-divider{display:none;}.sidebar-bottom{border-top:none;padding-top:0;margin-top:0;margin-left:auto;}.sidebar-user-row{display:none;}.sidebar-bottom-btns{flex-direction:row;}}
     .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:600;color:var(--dv-text);}
     .page-sub{font-size:0.9rem;color:var(--dv-muted);margin-top:0.25rem;}
     .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
@@ -58,7 +83,7 @@
 </head>
 <body>
 <div class="app-shell">
-  <aside class="app-sidebar">
+    <aside class="app-sidebar">
     <a href="index.html" class="logo" aria-label="CV Central home">
       <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true">
         <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
@@ -68,29 +93,77 @@
       <span class="brand-word">CV Central</span>
     </a>
     <nav class="main-nav">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="cv-builder.html">CV Builder</a>
-      <a href="tracker.html">Application Tracker</a>
-      <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
-      <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
-      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;">Pro Tools</div>
-      <a href="cv-versions.html">CV Version Manager</a>
-      <a href="skills-gap.html" class="active">Skills Gap Analysis</a>
-      <a href="job-match.html">AI Job Match</a>
-      <a href="personal-statement.html">Personal Statement</a>
-      <a href="saved-cover-letters.html">Saved Cover Letters</a>
-      <a href="saved-interview-sessions.html">Interview Sessions</a>
-      <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
-      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;">Premium</div>
-      <a href="premium-hub.html">Premium Hub</a>
-      <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
-      <a href="feedback.html">Feedback</a>
+      <a href="dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="cv-builder.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        CV Builder
+      </a>
+      <a href="tracker.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Application Tracker
+      </a>
+      <a href="linkedin-optimiser.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.25 8.25h4.5V23h-4.5V8.25zM8.5 8.25h4.31v2.01h.06c.6-1.14 2.07-2.34 4.26-2.34 4.55 0 5.39 3 5.39 6.89V23h-4.5v-7.1c0-1.7-.03-3.88-2.36-3.88-2.37 0-2.73 1.85-2.73 3.76V23H8.5V8.25z"/></svg>
+        LinkedIn Optimiser
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Pro Tools</div>
+      <a href="cv-versions.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        CV Versions
+      </a>
+      <a href="skills-gap.html" class="active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Skills Gap
+      </a>
+      <a href="job-match.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        AI Job Match
+      </a>
+      <a href="personal-statement.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Personal Statement
+      </a>
+      <a href="saved-cover-letters.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Cover Letters
+      </a>
+      <a href="saved-interview-sessions.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Interview Sessions
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-section-label">Premium</div>
+      <a href="premium-hub.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Premium Hub
+      </a>
+      <div class="nav-divider"></div>
+      <a href="feedback.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Feedback
+      </a>
     </nav>
-    <div style="flex:1"></div>
-    <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
-    <button class="theme-toggle-btn" id="themeToggleBtn" type="button">Switch to light mode</button>
-    <span id="user-name" style="font-size:0.78rem;color:#8B85A0;padding:0.5rem 0.75rem 0.2rem;display:block;word-break:break-all;"></span>
-    <button id="logout-btn" class="btn btn-ghost btn-sm" style="display:none;width:100%;margin-top:0.5rem;">Sign out</button>
+    <div class="sidebar-bottom">
+      <span id="planBadgeWrap" hidden><span class="plan-badge" id="navPlanBadge">FREE</span></span>
+      <button id="upgradeLink" hidden class="btn btn-primary btn-sm" style="width:100%;" onclick="window._openUpgradeModal && window._openUpgradeModal()">Upgrade to Pro</button>
+      <div class="sidebar-user-row">
+        <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+        <div class="sidebar-user-info">
+          <span class="user-email" id="user-name"></span>
+        </div>
+      </div>
+      <div class="sidebar-bottom-btns">
+        <button id="themeToggleBtn" class="theme-toggle-btn" type="button">Light</button>
+        <button id="logout-btn" class="theme-toggle-btn" style="display:none;" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
+      </div>
+    </div>
   </aside>
   <div class="app-main">
     <div id="loading" style="min-height:60vh;display:flex;align-items:center;justify-content:center;color:var(--dv-muted);">Loading&hellip;</div>
