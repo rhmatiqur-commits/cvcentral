@@ -75,6 +75,11 @@ module.exports = async (req, res) => {
     'parse-cv':               buildParseCvPrompt,
     'compare-cv':             buildCompareCvPrompt,
     // Premium
+    // Pro
+    'skills-gap':             buildSkillsGapPrompt,
+    'job-match':              buildJobMatchPrompt,
+    'personal-statement':     buildPersonalStatementPrompt,
+    // Premium
     'career-coach':           buildCareerCoachPrompt,
     'mock-interview':         buildMockInterviewPrompt,
     'star-answer':            buildStarAnswerPrompt,
@@ -372,6 +377,64 @@ function buildCompareCvPrompt(p) {
       '',
       'Compare the old CV against the new one. Identify what has improved, what is new, what was removed, and flag anything that looks worse or missing. Be specific — reference actual content from both CVs.',
       jsonOnly('{ "improvements": [{ "category": "string", "old": "string", "new": "string", "verdict": "better | worse | new | removed" }], "summary": "string (2-3 sentence overall verdict)", "score": { "old": 0, "new": 0 } }')
+    ].join('\n')
+  };
+}
+
+/* ─────────────────── PRO PROMPT BUILDERS ─────────────────── */
+
+function buildSkillsGapPrompt(p) {
+  return {
+    maxTokens: 2500,
+    system: UK_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'TARGET ROLE / JOB DESCRIPTION:',
+      (p.jobTarget && p.jobTarget.description ? p.jobTarget.description : (p.jobTarget && p.jobTarget.title ? p.jobTarget.title : (p.targetRole || 'Not specified'))).slice(0, 2000),
+      '',
+      'Perform a skills gap analysis comparing the candidate\'s current skillset against what is required for their target role. Be specific and prioritised — focus on what will have the most impact on getting the role.',
+      jsonOnly('{ "matchScore": 0, "summary": "string (2-sentence overall assessment)", "hasSkills": [{ "skill": "string", "relevance": "High | Medium | Low", "note": "string — how this skill helps for the target role" }], "missingSkills": [{ "skill": "string", "priority": "Critical | Important | Nice-to-have", "howToAcquire": "string (course, certification, project, etc.)", "timeToLearn": "string (e.g. \'2-4 weeks\')" }], "partialSkills": [{ "skill": "string", "currentLevel": "string", "targetLevel": "string", "gap": "string" }], "quickWins": ["string — skills to add/strengthen in under 1 month"], "longTermGoals": ["string — skills that take longer but are worth the investment"] }')
+    ].join('\n')
+  };
+}
+
+function buildJobMatchPrompt(p) {
+  return {
+    maxTokens: 2500,
+    system: UK_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'JOB DESCRIPTION TO MATCH AGAINST:',
+      (p.jobDescription || (p.jobTarget && p.jobTarget.description) || '').slice(0, 3000),
+      '',
+      'Analyse how well this candidate matches the job description. Give a realistic match score and specific, actionable intelligence on what helps and hurts their application.',
+      jsonOnly('{ "matchScore": 0, "verdict": "Strong Match | Good Match | Partial Match | Poor Match", "summary": "string (3-sentence overall assessment)", "strengths": [{ "point": "string", "evidence": "string — specific CV content that supports this" }], "gaps": [{ "requirement": "string — what the JD asks for", "status": "Missing | Weak | Partial", "suggestion": "string — how to address it" }], "keywordsPresent": ["string"], "keywordsMissing": ["string"], "tailoringTips": ["string — specific changes to make to the CV for this application"], "coverLetterFocus": ["string — 3 points to emphasise in the cover letter"] }')
+    ].join('\n')
+  };
+}
+
+function buildPersonalStatementPrompt(p) {
+  var type = p.statementType || 'professional';
+  var instructions = {
+    professional: 'Write a compelling professional personal statement / profile (4-5 sentences, ~100 words) for the top of a CV. First-person, present tense. Summarises who they are, their key strengths, and their career goal. No clichés.',
+    ucas: 'Write a UCAS-style personal statement (~500 words) for a university application. Cover: why this subject, relevant experience, skills, future ambitions. Engaging opening, no clichés like "From a young age".',
+    linkedin: 'Write a LinkedIn About section (~250 words). Hook opening, value proposition, key achievements, personal touch, call to action. Short paragraphs. First person.',
+    graduate: 'Write a graduate CV personal statement (3-4 sentences) focusing on degree, transferable skills, and career motivation. Avoid generic phrases.'
+  };
+  return {
+    maxTokens: 2000,
+    system: UK_STYLE,
+    user: [
+      cvSummaryBlock(p),
+      '',
+      'TARGET ROLE / PROGRAMME: ' + (p.targetRole || (p.jobTarget && p.jobTarget.title) || 'Not specified'),
+      'STATEMENT TYPE: ' + type,
+      '',
+      instructions[type] || instructions.professional,
+      '',
+      jsonOnly('{ "statement": "string (the full personal statement)", "alternativeOpeners": ["string — 2 alternative opening sentences to choose from"], "keyThemes": ["string — 3 main themes woven into the statement"] }')
     ].join('\n')
   };
 }

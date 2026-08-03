@@ -128,6 +128,14 @@
       <a href="tracker.html">Application Tracker</a>
       <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
       <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;">Pro Tools</div>
+      <a href="cv-versions.html">CV Version Manager</a>
+      <a href="skills-gap.html">Skills Gap Analysis</a>
+      <a href="job-match.html">AI Job Match</a>
+      <a href="personal-statement.html">Personal Statement</a>
+      <a href="saved-cover-letters.html">Saved Cover Letters</a>
+      <a href="saved-interview-sessions.html">Interview Sessions</a>
+      <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
       <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8B85A0;padding:0.4rem 0.75rem 0.2rem;">Premium</div>
       <a href="premium-hub.html">Premium Hub</a>
       <div class="nav-divider" style="height:1px;background:rgba(255,255,255,0.08);margin:0.5rem 0.75rem;"></div>
@@ -493,6 +501,7 @@
 
             <div class="result-actions">
               <button class="btn btn-ghost" id="copyCoverLetter">Copy cover letter</button>
+              <button class="btn btn-ghost" id="saveCoverLetterBtn" title="Save to Saved Cover Letters (Pro+)" style="display:none;">💾 Save cover letter</button>
             </div>
 
             <!-- Interview prep card (Pro+) -->
@@ -519,6 +528,7 @@
                 <div style="margin-top:0.75rem;" id="interviewPrepActions" style="display:none;">
                   <button class="btn btn-ghost btn-sm" id="copyInterviewBtn" style="display:none;">Copy all questions</button>
                   <button class="btn btn-ghost btn-sm" id="regenerateInterviewBtn" style="display:none;margin-left:0.5rem;">Regenerate</button>
+                  <button class="btn btn-ghost btn-sm" id="saveInterviewSessionBtn" style="display:none;margin-left:0.5rem;" title="Save session (Pro+)">💾 Save session</button>
                 </div>
               </div>
             </div>
@@ -605,6 +615,7 @@
             <button class="btn btn-violet" id="downloadPdf">Download PDF</button>
             <button class="btn btn-ghost" id="downloadDocx" title="Download as Word document (.docx)">⬇ Word (.docx)</button>
             <button class="btn btn-primary" id="saveBtn">Save to CV Central</button>
+            <button class="btn btn-ghost" id="saveVersionBtn" title="Save a named snapshot of this CV (Pro+)" style="display:none;">💾 Save version</button>
           </div>
           <p class="hint" style="text-align:center;margin-top:0.75rem;color:var(--muted);font-size:0.8rem;">
             Free downloads include a watermark. <a href="index.html#pricing" style="color:var(--violet);font-weight:600;">Go Pro</a> for a clean PDF.
@@ -1894,6 +1905,8 @@
         qDiv.style.display = 'block';
         document.getElementById('copyInterviewBtn').style.display = 'inline-flex';
         document.getElementById('regenerateInterviewBtn').style.display = 'inline-flex';
+        var sib = document.getElementById('saveInterviewSessionBtn');
+        if (sib) sib.style.display = 'inline-flex';
         toast('Interview questions ready ✓', 'success');
       })
       .catch(function(err) {
@@ -1933,6 +1946,7 @@
       document.getElementById('interviewPrepQuestions').style.display = 'none';
       document.getElementById('copyInterviewBtn').style.display = 'none';
       document.getElementById('regenerateInterviewBtn').style.display = 'none';
+      var sib2 = document.getElementById('saveInterviewSessionBtn'); if (sib2) sib2.style.display = 'none';
       runInterviewPrep();
     });
     document.getElementById('copyInterviewBtn').addEventListener('click', function() {
@@ -2170,6 +2184,106 @@
         btn.textContent = 'Save to CV Central';
       }
     });
+
+    /* ---------- Pro save actions ---------- */
+    (function setupProSaveButtons() {
+      var isPro = false;
+
+      // Detect plan from profile once auth settles (auth.js sets window.cvAuth)
+      (async function () {
+        try {
+          var sess = await cvAuth.getSession();
+          if (!sess) return;
+          var prof = await cvAuth.getProfile(sess.user.id);
+          var plan = (prof && prof.plan) || 'free';
+          var expires = prof && prof.plan_expires_at;
+          isPro = plan === 'pro' || plan === 'premium' ||
+            (plan === 'day_pass' && expires && new Date(expires) > new Date());
+          if (isPro) {
+            var sv = document.getElementById('saveVersionBtn');
+            var scl = document.getElementById('saveCoverLetterBtn');
+            if (sv) sv.style.display = '';
+            if (scl) scl.style.display = '';
+          }
+        } catch (e) {}
+      })();
+
+      // Save CV Version
+      var saveVersionBtn = document.getElementById('saveVersionBtn');
+      if (saveVersionBtn) {
+        saveVersionBtn.addEventListener('click', async function () {
+          var name = prompt('Name this CV snapshot:', 'My CV ' + new Date().toLocaleDateString('en-GB'));
+          if (!name) return;
+          var cvRaw = localStorage.getItem('cvcentral_cv_data') || localStorage.getItem('cvData');
+          if (!cvRaw) { toast('No CV data to save.', 'error'); return; }
+          try {
+            var sess = await cvAuth.getSession();
+            var r = await fetch('/api/cv-versions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+              body: JSON.stringify({ name: name, cv_data: JSON.parse(cvRaw) })
+            });
+            if (!r.ok) throw new Error('Failed');
+            toast('CV version saved ✓', 'success');
+          } catch (e) { toast('Could not save version.', 'error'); }
+        });
+      }
+
+      // Save Cover Letter
+      var saveCLBtn = document.getElementById('saveCoverLetterBtn');
+      if (saveCLBtn) {
+        saveCLBtn.addEventListener('click', async function () {
+          var box = document.getElementById('coverLetterBox');
+          var text = box ? box.textContent.trim() : '';
+          if (!text) { toast('No cover letter to save — generate one first.', 'error'); return; }
+          var title = prompt('Name this cover letter:', (state.formData && state.formData.targetJob) || 'Cover Letter');
+          if (!title) return;
+          try {
+            var sess = await cvAuth.getSession();
+            var r = await fetch('/api/cover-letters', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+              body: JSON.stringify({
+                title: title,
+                content: text,
+                job_title: (state.formData && state.formData.targetJob) || '',
+                company: (state.formData && state.formData.targetCompany) || '',
+                language: 'English'
+              })
+            });
+            if (!r.ok) throw new Error('Failed');
+            toast('Cover letter saved ✓', 'success');
+          } catch (e) { toast('Could not save cover letter.', 'error'); }
+        });
+      }
+
+      // Save Interview Session — hook into interview generate flow
+      var saveIntBtn = document.getElementById('saveInterviewSessionBtn');
+      if (saveIntBtn) {
+        saveIntBtn.addEventListener('click', async function () {
+          // Collect Q+A from the rendered list
+          var qEls = document.querySelectorAll('#interviewPrepQuestions .interview-q');
+          var questions = [];
+          qEls.forEach(function (el) {
+            var q = el.querySelector('.q-text');
+            var t = el.querySelector('.q-tip');
+            questions.push({ question: q ? q.textContent.trim() : el.textContent.trim(), tip: t ? t.textContent.trim() : '' });
+          });
+          if (!questions.length) { toast('No interview questions to save.', 'error'); return; }
+          var role = (state.formData && state.formData.targetJob) || 'Interview session';
+          try {
+            var sess = await cvAuth.getSession();
+            var r = await fetch('/api/interview-sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.access_token },
+              body: JSON.stringify({ role: role, questions: questions })
+            });
+            if (!r.ok) throw new Error('Failed');
+            toast('Interview session saved ✓', 'success');
+          } catch (e) { toast('Could not save session.', 'error'); }
+        });
+      }
+    })();
 
     /* ---------- Templates & preview ---------- */
     function selectTemplate(name, isRecommendation) {
