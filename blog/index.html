@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV & Career Guides — CV Central Blog</title>
+  <meta name="description" content="Free CV writing guides, ATS tips, cover letter advice and career resources for UK and European job seekers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="../assets/logo-icon.svg" type="image/svg+xml">
+  <script>(function(){try{var t=localStorage.getItem('cvcentral_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()</script>
+  <style>
+    :root {
+      --bg:#0A0A14; --bg-card:#10101C; --bg-card2:#13131F;
+      --lime:#AAFF00; --lime-dim:rgba(170,255,0,0.1);
+      --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.15);
+      --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
+      --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
+      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
+      --font-display:'Fraunces',Georgia,serif; --mono:'JetBrains Mono',monospace;
+      --radius:12px;
+    }
+    html[data-theme="light"] {
+      --bg:#F6F4FB; --bg-card:#FFFFFF; --bg-card2:#FBFAFF;
+      --lime:#5B2D8E; --lime-dim:rgba(91,45,142,0.08);
+      --violet:#5B2D8E; --violet-bright:#7B4DB8;
+      --border:rgba(0,0,0,0.07); --border-bright:#D9D2EC;
+      --text:#1A1625; --text-2:#55506A; --text-3:#7B7590;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+    ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--violet);border-radius:3px;}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(10,10,20,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+    html[data-theme="light"] nav{background:rgba(246,244,251,0.92);}
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+    .nav-logo-word{font-family:var(--font-display);font-weight:600;font-size:1.15rem;color:var(--text);letter-spacing:-0.01em;}
+    .nav-logo-word .logo-accent{color:#7B4DB8;}
+    html[data-theme="light"] .nav-logo-word .logo-accent{color:var(--violet);}
+    .nav-links{display:flex;align-items:center;gap:32px;}
+    .nav-links a{font-size:0.875rem;color:var(--text-2);text-decoration:none;transition:color 0.2s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--text);}
+    .nav-actions{display:flex;align-items:center;gap:10px;}
+    .btn-ghost{font-size:0.875rem;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;padding:8px 16px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,background 0.2s;}
+    .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+    .btn-lime{font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:#0A0A00;background:#AAFF00;border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
+    .btn-lime:hover{background:#C4FF33;}
+    html[data-theme="light"] .btn-lime{background:var(--violet);color:#fff;}
+    .theme-toggle{background:none;border:none;cursor:pointer;color:var(--text-2);padding:8px;border-radius:8px;display:flex;align-items:center;transition:color 0.2s;}
+    .theme-toggle:hover{color:var(--text);}
+    @media(max-width:768px){.nav-links{display:none;} nav{padding:0 20px;}}
+
+    /* HERO */
+    .blog-hero{padding:120px 40px 60px;max-width:900px;margin:0 auto;text-align:center;}
+    .section-tag{display:inline-block;font-family:var(--mono);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lime);background:var(--lime-dim);padding:4px 12px;border-radius:100px;margin-bottom:20px;}
+    html[data-theme="light"] .section-tag{color:var(--violet);}
+    .blog-hero h1{font-family:var(--font-heading);font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;margin-bottom:16px;}
+    .blog-hero h1 em{font-style:normal;color:var(--lime);}
+    html[data-theme="light"] .blog-hero h1 em{color:var(--violet);}
+    .blog-hero p{font-size:1.05rem;color:var(--text-2);max-width:560px;margin:0 auto;}
+
+    /* GRID */
+    .blog-grid{max-width:1200px;margin:0 auto;padding:0 40px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;}
+    @media(max-width:768px){.blog-grid{padding:0 20px 60px;grid-template-columns:1fr;}}
+
+    .post-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:16px;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;}
+    .post-card:hover{border-color:var(--border-bright);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+    .post-tag{font-family:var(--mono);font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);background:var(--lime-dim);padding:3px 10px;border-radius:100px;display:inline-block;width:fit-content;}
+    html[data-theme="light"] .post-tag{color:var(--violet);}
+    .post-card h2{font-family:var(--font-heading);font-size:1.1rem;font-weight:700;line-height:1.3;color:var(--text);}
+    .post-card p{font-size:0.88rem;color:var(--text-2);line-height:1.6;flex:1;}
+    .post-meta{display:flex;align-items:center;justify-content:space-between;font-size:0.78rem;color:var(--text-3);font-family:var(--mono);}
+    .post-arrow{color:var(--lime);font-size:1rem;}
+    html[data-theme="light"] .post-arrow{color:var(--violet);}
+
+    /* EMPTY STATE */
+    .blog-empty{text-align:center;padding:80px 40px;color:var(--text-2);}
+    .blog-empty h2{font-size:1.3rem;margin-bottom:12px;color:var(--text);}
+
+    /* CTA BANNER */
+    .blog-cta{max-width:1200px;margin:0 auto 80px;padding:0 40px;}
+    .cta-box{background:linear-gradient(135deg,var(--violet-dim),rgba(170,255,0,0.05));border:1px solid var(--border-bright);border-radius:20px;padding:48px;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;}
+    .cta-box h3{font-family:var(--font-heading);font-size:1.5rem;font-weight:800;margin-bottom:8px;}
+    .cta-box h3 em{font-style:normal;color:var(--lime);}
+    html[data-theme="light"] .cta-box h3 em{color:var(--violet);}
+    .cta-box p{color:var(--text-2);font-size:0.95rem;}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:48px 40px 32px;}
+    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+    .footer-brand p{font-size:0.85rem;color:var(--text-2);margin-top:14px;line-height:1.6;max-width:260px;}
+    .footer-col h4{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px;font-family:var(--mono);}
+    .footer-col a{display:block;font-size:0.88rem;color:var(--text-2);text-decoration:none;margin-bottom:10px;transition:color 0.2s;}
+    .footer-col a:hover{color:var(--text);}
+    .footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+    .footer-bottom p{font-size:0.78rem;color:var(--text-3);}
+    @media(max-width:768px){.footer-inner{grid-template-columns:1fr 1fr;} footer{padding:40px 20px 24px;}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo" aria-label="CV Central">
+    <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0;">
+      <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+      <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+      <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+    </svg>
+    <span class="nav-logo-word">CV<span class="logo-accent">Central</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="../index.html#features">Features</a>
+    <a href="../index.html#pricing">Pricing</a>
+    <a href="index.html" class="active">Blog</a>
+  </div>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg id="themeIconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="themeIconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="../login.html" class="btn-ghost">Sign in</a>
+    <a href="../signup.html" class="btn-lime">Get started</a>
+  </div>
+</nav>
+
+<section class="blog-hero">
+  <div class="section-tag">CV Central Blog</div>
+  <h1>CV & Career Guides for<br><em>European Job Seekers</em></h1>
+  <p>Free guides on CV writing, ATS optimisation, cover letters, and landing interviews — built for the UK and European job market.</p>
+</section>
+
+<div class="blog-grid" id="blogGrid">
+  <!-- Articles injected here by publish_blog.py -->
+</div>
+
+<div class="blog-cta">
+  <div class="cta-box">
+    <div>
+      <h3>Ready to score your <em>dream role?</em></h3>
+      <p>Put these tips into action with an AI-powered CV that scores itself and tells you exactly what to fix.</p>
+    </div>
+    <a href="../signup.html" class="btn-lime" style="white-space:nowrap;">Try free — £1.99 for 14 days</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="../index.html" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;">
+        <svg width="24" height="24" viewBox="0 0 40 40" aria-hidden="true">
+          <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
+          <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
+          <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+        </svg>
+        <span style="font-family:var(--font-display);font-weight:600;font-size:1.1rem;color:var(--text);">CV<span style="color:#AAFF00;" class="footer-logo-accent">Central</span></span>
+      </a>
+      <p>AI-powered CV builder built for job seekers across Europe. Score, enhance, and land more interviews.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="../cv-builder.html">CV Builder</a>
+      <a href="../index.html#features">Features</a>
+      <a href="../index.html#pricing">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <a href="../signup.html">Sign up</a>
+      <a href="../login.html">Sign in</a>
+      <a href="../dashboard.html">Dashboard</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="../privacy.html">Privacy Policy</a>
+      <a href="../terms.html">Terms of Service</a>
+      <a href="mailto:info@cvcentral.io">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 CV Central is a trading name of Clavent Ltd, Registered in England and Wales, Company No. 17278057.</p>
+    <p style="color:var(--text-3);">Made with ♥ for job seekers across Europe</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var html = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var sunIcon = document.getElementById('themeIconSun');
+  var moonIcon = document.getElementById('themeIconMoon');
+  function applyTheme(t){
+    if(t==='light'){html.setAttribute('data-theme','light');sunIcon.style.display='block';moonIcon.style.display='none';}
+    else{html.removeAttribute('data-theme');sunIcon.style.display='none';moonIcon.style.display='block';}
+  }
+  var saved='';try{saved=localStorage.getItem('cvcentral_theme')||'';}catch(e){}
+  applyTheme(saved==='light'?'light':'dark');
+  if(btn){btn.addEventListener('click',function(){
+    var isLight=html.getAttribute('data-theme')==='light';
+    var next=isLight?'dark':'light';
+    try{localStorage.setItem('cvcentral_theme',next);}catch(e){}
+    applyTheme(next);
+  });}
+})();
+</script>
+</body>
+</html>
