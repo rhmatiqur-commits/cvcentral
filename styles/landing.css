@@ -436,6 +436,19 @@ ul, ol { list-style: none; }
 }
 .link:hover::after, .link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
 
+/* Touch targets.
+   These links sit at ~22px tall, which is under the 24px WCAG 2.2 minimum
+   and well under the 44px comfortable-tap size. Expand the hit area with a
+   pseudo-element rather than padding so nothing shifts visually. */
+@media (pointer: coarse) {
+  .link::before {
+    content: '';
+    position: absolute;
+    inset: -0.7rem -0.5rem;
+  }
+  .brand { padding-block: 0.5rem; margin-block: -0.5rem; }
+}
+
 /* ==========================================================================
    07  NAVIGATION
    ========================================================================== */
@@ -1611,6 +1624,10 @@ mark.hl {
   display: block; font-size: 0.9rem; color: var(--on-ink-2);
   padding: 0.32rem 0;
   transition: color 0.22s var(--ease);
+}
+/* Stacked link lists are the easiest place to mis-tap — give them room. */
+@media (pointer: coarse) {
+  .foot__col a { padding: 0.7rem 0; }
 }
 .foot__col a:hover { color: var(--lime); }
 .foot__bottom {
