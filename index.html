@@ -1,791 +1,1275 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV Central — AI CV Builder for the European Job Market</title>
-  <meta name="description" content="Build, score and optimise your CV with AI built for Europe's job market. Start your 14-day trial for £1.99.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#5B2D8E">
-  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CV Central">
-  <script>(function(){try{var t=localStorage.getItem('cvcentral_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})()</script>
-  <style>
-    :root {
-      --bg:#0A0A14; --bg-card:#10101C; --bg-card2:#13131F;
-      --lime:#AAFF00; --lime-dim:rgba(170,255,0,0.1);
-      --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.15);
-      --border:rgba(255,255,255,0.06); --border-bright:rgba(255,255,255,0.11);
-      --text:#FFFFFF; --text-2:#9999AA; --text-3:#55556A;
-      --font:'Inter',system-ui,sans-serif; --font-heading:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
-      --font-display:'Fraunces',Georgia,serif; --mono:'JetBrains Mono',monospace;
-      --radius:12px;
-      --canvas-opacity:0.35;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>CV Central — AI CV Builder, ATS Checker &amp; Interview Prep</title>
+<meta name="description" content="CV Central turns your CV into a stronger application. AI CV builder, ATS optimisation, job-specific tailoring, cover letter generator and interview preparation — built for the UK and European job market.">
+<link rel="canonical" href="https://cvcentral.io/">
+
+<meta name="theme-color" content="#08070C" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#5B2D8E">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CV Central">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://cvcentral.io/">
+<meta property="og:title" content="CV Central — AI CV Builder, ATS Checker &amp; Interview Prep">
+<meta property="og:description" content="AI-powered tools that turn your CV into a stronger application — from ATS optimisation to personalised cover letters and interview preparation.">
+<meta property="og:image" content="https://cvcentral.io/cvcentral-logo-horizontal.png">
+<meta property="og:image:alt" content="CV Central">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CV Central — AI CV Builder, ATS Checker &amp; Interview Prep">
+<meta name="twitter:description" content="AI-powered tools that turn your CV into a stronger application — from ATS optimisation to personalised cover letters and interview preparation.">
+<meta name="twitter:image" content="https://cvcentral.io/cvcentral-logo-horizontal.png">
+
+<link rel="icon" href="assets/logo-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CV Central">
+
+<!-- Fonts: Fraunces (display, brand face — also used in the app UI),
+     Manrope (interface/body), JetBrains Mono (data, indices, labels) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+
+<link rel="stylesheet" href="styles/landing.css">
+
+<!-- Supabase OAuth returns to "/" with the session in the URL fragment.
+     Hand it straight to the dashboard before anything else renders. -->
+<script>
+(function(){
+  if (window.location.hash && window.location.hash.indexOf('access_token=') > -1) {
+    window.location.replace('dashboard.html' + window.location.hash);
+    return;
+  }
+  // Scroll reveals hide their content until observed. Gate that on JS actually
+  // running, so a failed/blocked landing.js leaves a readable page rather than
+  // a screen of invisible sections.
+  document.documentElement.classList.add('js');
+})();
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://cvcentral.io/#organization",
+      "name": "CV Central",
+      "url": "https://cvcentral.io/",
+      "logo": "https://cvcentral.io/cvcentral-logo-square.png",
+      "email": "info@cvcentral.io",
+      "description": "AI career platform for CV building, ATS optimisation, tailored applications and interview preparation.",
+      "parentOrganization": { "@type": "Organization", "name": "Clavent Ltd" }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://cvcentral.io/#website",
+      "url": "https://cvcentral.io/",
+      "name": "CV Central",
+      "publisher": { "@id": "https://cvcentral.io/#organization" },
+      "inLanguage": "en-GB"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "CV Central",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://cvcentral.io/",
+      "publisher": { "@id": "https://cvcentral.io/#organization" },
+      "featureList": [
+        "AI CV builder",
+        "ATS compatibility score",
+        "Job description matching",
+        "AI cover letter generator",
+        "Interview preparation",
+        "Application tracker"
+      ],
+      "offers": [
+        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "GBP" },
+        { "@type": "Offer", "name": "Job Pass", "price": "1.19", "priceCurrency": "GBP", "description": "One-off 3-day pass" },
+        { "@type": "Offer", "name": "Pro", "price": "9.99", "priceCurrency": "GBP", "description": "Per month. 14-day trial for £1.99." }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is an ATS and why does it matter for my CV?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An applicant tracking system is software that parses and filters CVs before a recruiter reads them. If your CV is formatted in a way the parser cannot read, or is missing the terminology used in the job description, the application can end there. CV Central scores your CV for ATS compatibility and shows you exactly what to change."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use CV Central for free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The Free plan includes one CV with unlimited edits, one ATS score, one AI enhancement, one cover letter, basic templates and PDF download. Pro unlocks unlimited use and starts with a 14-day trial for £1.99."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does CV Central write a different CV for each job?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It tailors one. Paste a job description and CV Central compares it against your CV, identifies the skills, keywords, experience and achievements that matter for that role, and rewrites your CV to match it — while keeping every claim true to what you actually did."
+          }
+        }
+      ]
     }
-    html[data-theme="light"] {
-      --bg:#F6F4FB; --bg-card:#FFFFFF; --bg-card2:#FBFAFF;
-      --lime:#5B2D8E; --lime-dim:rgba(91,45,142,0.08);
-      --violet:#5B2D8E; --violet-bright:#7B4DB8; --violet-dim:rgba(91,45,142,0.10);
-      --border:rgba(0,0,0,0.07); --border-bright:#D9D2EC;
-      --text:#1A1625; --text-2:#55506A; --text-3:#7B7590;
-      --canvas-opacity:0.12;
-    }
-    html[data-theme="light"] .btn-lime,
-    html[data-theme="light"] .btn-primary { color:#FFFFFF; background:var(--violet); }
-    html[data-theme="light"] .btn-lime:hover,
-    html[data-theme="light"] .btn-primary:hover { background:var(--violet-bright); }
-    html[data-theme="light"] .sc-num,
-    html[data-theme="light"] .sc-fill-lime,
-    html[data-theme="light"] .sc-badge,
-    html[data-theme="light"] .hero-tag,
-    html[data-theme="light"] .hero-tag-dot,
-    html[data-theme="light"] .stat-num,
-    html[data-theme="light"] .section-tag,
-    html[data-theme="light"] .save-badge,
-    html[data-theme="light"] .popular-badge,
-    html[data-theme="light"] .plan-trial,
-    html[data-theme="light"] .feat-icon,
-    html[data-theme="light"] .how-num { filter:none; }
-    html[data-theme="light"] .popular-badge { background:var(--violet); color:#fff; }
-    html[data-theme="light"] .plan-trial { color:var(--violet); border-color:rgba(91,45,142,0.35); }
-    html[data-theme="light"] .plan-feats li::before { color:var(--violet); }
-    html[data-theme="light"] .how-num { color:var(--violet); }
-    html[data-theme="light"] .stat-num { color:var(--violet); }
-    html[data-theme="light"] .section-tag { color:var(--violet); background:var(--lime-dim); }
-    html[data-theme="light"] .sc-badge { color:var(--violet); background:var(--lime-dim); }
-    html[data-theme="light"] .sc-num { color:var(--violet); }
-    html[data-theme="light"] .sc-fill-lime { background:linear-gradient(90deg,#9B6DD6,var(--violet)); }
-    html[data-theme="light"] .sc-bar-val { color:var(--violet); }
-    html[data-theme="light"] .ai-box { background:rgba(91,45,142,0.07); border-color:rgba(91,45,142,0.18); }
-    html[data-theme="light"] .ai-label { color:var(--violet-bright); }
-    html[data-theme="light"] .ai-tip strong { color:var(--violet); }
-    html[data-theme="light"] .hero-h1 em,
-    html[data-theme="light"] .section-h2 em,
-    html[data-theme="light"] .cta-h2 em { color:var(--violet); }
-    html[data-theme="light"] .hero-tag { color:var(--violet); }
-    html[data-theme="light"] .hero-tag-dot { background:var(--violet); }
-    html[data-theme="light"] .btn-plan-lime { background:var(--violet); color:#fff; }
-    html[data-theme="light"] .btn-plan-lime:hover { background:var(--violet-bright); }
-    html[data-theme="light"] .btn-plan-violet { background:rgba(91,45,142,0.12); color:var(--violet); }
-    html[data-theme="light"] .save-badge { color:var(--violet); background:var(--lime-dim); }
-    html[data-theme="light"] .testi-stars { color:var(--violet); }
-    html[data-theme="light"] .feat-icon { background:var(--lime-dim); }
-    html[data-theme="light"] .feat-icon svg { color:var(--violet); }
-    html[data-theme="light"] #neural-canvas { opacity:var(--canvas-opacity); }
-    html[data-theme="light"] .footer-logo-accent { color:var(--violet) !important; }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
-    ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:var(--bg);} ::-webkit-scrollbar-thumb{background:var(--violet);border-radius:3px;}
-
-    /* NAV */
-    nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px;background:rgba(10,10,20,0.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);transition:background 0.3s,border-color 0.3s;}
-    html[data-theme="light"] nav{background:rgba(246,244,251,0.92);}
-    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
-    .nav-logo-word{font-family:var(--font-display);font-weight:600;font-size:1.15rem;color:var(--text);letter-spacing:-0.01em;transition:color 0.3s;}
-    .nav-logo-word .logo-accent{color:#7B4DB8;}
-    html[data-theme="light"] .nav-logo-word .logo-accent{color:var(--violet);}
-    .nav-links{display:flex;align-items:center;gap:32px;}
-    .nav-links a{font-size:0.875rem;color:var(--text-2);text-decoration:none;transition:color 0.2s;}
-    .nav-links a:hover{color:var(--text);}
-    .nav-actions{display:flex;align-items:center;gap:10px;}
-    .btn-ghost{font-size:0.875rem;font-weight:500;color:var(--text-2);background:none;border:none;cursor:pointer;padding:8px 16px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,background 0.2s;}
-    .btn-ghost:hover{color:var(--text);background:rgba(255,255,255,0.05);}
-    html[data-theme="light"] .btn-ghost:hover{background:rgba(0,0,0,0.05);}
-    .btn-lime{font-family:var(--font-heading);font-size:0.875rem;font-weight:700;color:#0A0A00;background:#AAFF00;border:none;cursor:pointer;padding:9px 20px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s;}
-    .btn-lime:hover{background:#C4FF33;}
-    html[data-theme="light"] .btn-lime{background:var(--violet);color:#fff;}
-    html[data-theme="light"] .btn-lime:hover{background:var(--violet-bright);}
-    /* Theme toggle */
-    .theme-toggle{width:36px;height:36px;border-radius:50%;background:transparent;border:1px solid var(--border-bright);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:background 0.2s,color 0.2s,border-color 0.2s;flex-shrink:0;}
-    .theme-toggle:hover{background:rgba(255,255,255,0.08);color:var(--text);}
-    html[data-theme="light"] .theme-toggle:hover{background:rgba(0,0,0,0.06);}
-    @media(max-width:768px){.nav-links{display:none;} nav{padding:0 20px;}}
-
-    /* HERO */
-    #hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding-top:64px;}
-    #neural-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0.35;}
-    .hero-inner{position:relative;z-index:2;width:100%;max-width:1200px;margin:0 auto;padding:80px 40px;display:grid;grid-template-columns:1fr 420px;gap:60px;align-items:center;}
-    .hero-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);margin-bottom:24px;}
-    .hero-tag-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse-dot 1.6s ease-in-out infinite;}
-    @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
-    .hero-h1{font-family:var(--font-display);font-size:clamp(2.6rem,5vw,4rem);font-weight:700;line-height:1.05;letter-spacing:-0.02em;margin-bottom:20px;}
-    .hero-h1 em{font-style:normal;color:var(--lime);}
-    .hero-sub{font-size:1.05rem;color:var(--text-2);line-height:1.7;margin-bottom:36px;max-width:480px;}
-    .hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:40px;}
-    .btn-primary{font-family:var(--font-heading);font-size:1rem;font-weight:700;color:#0A0A00;background:var(--lime);border:none;cursor:pointer;padding:14px 28px;border-radius:var(--radius);text-decoration:none;transition:background 0.2s,transform 0.1s;letter-spacing:-0.02em;display:inline-flex;align-items:center;gap:6px;}
-    .btn-primary:hover{background:#C4FF33;}
-    .btn-primary:active{transform:scale(0.97);}
-    .btn-outline{font-size:0.95rem;font-weight:600;color:var(--text-2);background:transparent;border:1px solid var(--border-bright);cursor:pointer;padding:13px 22px;border-radius:var(--radius);text-decoration:none;transition:color 0.2s,border-color 0.2s,background 0.2s;}
-    .btn-outline:hover{color:var(--text);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04);}
-    .hero-proof{display:flex;align-items:center;gap:16px;}
-    .av-stack{display:flex;} .av{width:32px;height:32px;border-radius:50%;border:2px solid var(--bg);margin-left:-8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-    .av:first-child{margin-left:0;} .av-a{background:#5B2D8E;color:#AAFF00;} .av-b{background:#2D5B8E;color:#AAE0FF;} .av-c{background:#8E5B2D;color:#FFD9AA;} .av-d{background:#2D8E5B;color:#AAFFD9;}
-    .proof-txt{font-size:0.82rem;color:var(--text-2);} .proof-txt strong{color:var(--text);font-weight:600;}
-    @media(max-width:900px){.hero-inner{grid-template-columns:1fr;padding:60px 24px;} .hero-right{display:none;}}
-
-    /* SCORE CARD */
-    .hero-right{position:relative;}
-    .score-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:28px;position:relative;overflow:hidden;transform-style:preserve-3d;transition:transform 0.12s ease-out;will-change:transform;}
-    .score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(170,255,0,0.5),transparent);}
-    .sc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-    .sc-label{font-family:var(--mono);font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);}
-    .sc-badge{font-family:var(--mono);font-size:0.68rem;font-weight:700;color:var(--lime);background:var(--lime-dim);padding:3px 10px;border-radius:100px;}
-    .sc-score{display:flex;align-items:flex-end;gap:4px;margin-bottom:4px;}
-    .sc-num{font-size:3.5rem;font-weight:900;color:var(--lime);line-height:1;font-family:var(--mono);letter-spacing:-0.04em;}
-    .sc-denom{font-size:1.2rem;font-weight:700;color:var(--text-3);margin-bottom:10px;}
-    .sc-sub{font-size:0.8rem;color:var(--text-2);margin-bottom:20px;}
-    .sc-bars{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
-    .sc-bar-row{display:flex;flex-direction:column;gap:5px;}
-    .sc-bar-meta{display:flex;justify-content:space-between;}
-    .sc-bar-name{font-size:0.78rem;color:var(--text-2);}
-    .sc-bar-val{font-size:0.78rem;font-weight:700;font-family:var(--mono);color:var(--lime);}
-    .sc-track{height:5px;background:rgba(255,255,255,0.05);border-radius:10px;overflow:hidden;}
-    .sc-fill{height:100%;border-radius:10px;width:0;transition:width 1.4s cubic-bezier(0.4,0,0.2,1);}
-    .sc-fill-lime{background:linear-gradient(90deg,var(--violet),var(--lime));}
-    .ai-box{background:rgba(91,45,142,0.12);border:1px solid rgba(91,45,142,0.25);border-radius:10px;padding:14px 16px;}
-    .ai-label{font-size:0.68rem;font-weight:700;color:var(--violet-bright);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-family:var(--mono);}
-    .ai-tip{font-size:0.79rem;color:var(--text-2);line-height:1.5;}
-    .ai-tip strong{color:var(--lime);}
-
-    /* STATS BAR */
-    .stats-bar{position:relative;z-index:2;background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 0;}
-    .stats-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:flex;justify-content:space-around;gap:24px;flex-wrap:wrap;}
-    .stat-item{text-align:center;}
-    .stat-num{font-family:var(--mono);font-size:1.6rem;font-weight:800;color:var(--lime);}
-    .stat-label{font-size:0.78rem;color:var(--text-2);margin-top:2px;}
-
-    /* SECTIONS */
-    .section-inner{max-width:1200px;margin:0 auto;padding:96px 40px;}
-    .section-tag{display:inline-block;font-family:var(--mono);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--lime);background:var(--lime-dim);padding:4px 12px;border-radius:100px;margin-bottom:16px;}
-    .section-h2{font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;letter-spacing:-0.01em;line-height:1.15;margin-bottom:12px;}
-    .section-h2 em{font-style:normal;color:var(--lime);}
-    .section-sub{font-size:1rem;color:var(--text-2);max-width:560px;line-height:1.7;}
-    @media(max-width:768px){.section-inner{padding:64px 24px;} .stats-inner{padding:0 24px;}}
-
-    /* FEATURES */
-    #features{border-top:1px solid var(--border);}
-    .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
-    .feat-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:16px;padding:28px;transition:border-color 0.3s,transform 0.3s;}
-    .feat-card:hover{border-color:rgba(170,255,0,0.2);transform:translateY(-3px);}
-    .feat-icon{width:44px;height:44px;border-radius:12px;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
-    .feat-icon svg{color:var(--lime);}
-    .feat-title{font-size:1rem;font-weight:700;letter-spacing:-0.01em;margin-bottom:8px;}
-    .feat-desc{font-size:0.88rem;color:var(--text-2);line-height:1.6;}
-    @media(max-width:900px){.features-grid{grid-template-columns:repeat(2,1fr);}}
-    @media(max-width:600px){.features-grid{grid-template-columns:1fr;}}
-
-    /* HOW IT WORKS */
-    #how{border-top:1px solid var(--border);}
-    .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;position:relative;}
-    .how-grid::before{content:'';position:absolute;top:28px;left:12.5%;right:12.5%;height:1px;background:linear-gradient(90deg,transparent,var(--violet),var(--lime),var(--violet),transparent);opacity:0.4;}
-    .how-step{text-align:center;padding:0 16px;}
-    .how-num{width:56px;height:56px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:var(--mono);font-size:1rem;font-weight:800;color:var(--lime);position:relative;z-index:1;}
-    .how-title{font-size:0.95rem;font-weight:700;margin-bottom:8px;}
-    .how-p{font-size:0.82rem;color:var(--text-2);line-height:1.65;}
-    @media(max-width:768px){.how-grid{grid-template-columns:repeat(2,1fr);gap:32px;} .how-grid::before{display:none;}}
-
-    /* PRICING */
-    #pricing{border-top:1px solid var(--border);}
-    .pricing-toggle{display:inline-flex;align-items:center;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:100px;padding:5px;margin-top:32px;gap:4px;}
-    .toggle-opt{font-size:0.82rem;font-weight:600;padding:6px 16px;border-radius:100px;cursor:pointer;transition:all 0.2s;color:var(--text-2);user-select:none;display:flex;align-items:center;gap:6px;}
-    .toggle-opt.active{background:var(--violet);color:var(--text);}
-    .save-badge{font-size:0.65rem;font-weight:700;color:var(--lime);background:var(--lime-dim);padding:2px 7px;border-radius:100px;}
-    .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;}
-    .price-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;transition:transform 0.3s;display:flex;flex-direction:column;}
-    .price-card:hover{transform:translateY(-4px);}
-    .price-card.popular{border-color:rgba(170,255,0,0.3);}
-    .price-card.popular::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--violet),var(--lime));}
-    .price-card.pass-card{border-color:rgba(170,255,0,0.25);}
-    .popular-badge{display:inline-block;font-size:0.63rem;font-weight:700;color:#0A0A00;background:var(--lime);padding:3px 10px;border-radius:100px;margin-bottom:12px;font-family:var(--mono);letter-spacing:0.05em;text-transform:uppercase;}
-    .plan-tagline{font-size:0.73rem;color:var(--text-3);margin-bottom:14px;line-height:1.4;}
-    .plan-name{font-family:var(--font-heading);font-size:0.95rem;font-weight:700;margin-bottom:4px;}
-    .plan-price{font-size:2.1rem;font-weight:900;font-family:var(--mono);letter-spacing:-0.04em;color:var(--text);margin-bottom:2px;}
-    .plan-price span{font-size:0.9rem;font-weight:400;color:var(--text-2);}
-    .plan-period{font-size:0.78rem;color:var(--text-2);margin-bottom:6px;}
-    .plan-trial{display:inline-block;font-size:0.75rem;font-weight:700;color:var(--lime);border:1px dashed rgba(170,255,0,0.4);padding:4px 10px;border-radius:8px;margin-bottom:16px;}
-    .plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;flex:1;}
-    .plan-feats li{font-size:0.82rem;color:var(--text-2);display:flex;align-items:flex-start;gap:7px;line-height:1.4;}
-    .plan-feats li::before{content:'✓';color:var(--lime);font-weight:700;flex-shrink:0;margin-top:1px;}
-    .plan-feats li.feat-no{color:var(--text-3);}
-    .plan-feats li.feat-no::before{content:'✕';color:var(--text-3);}
-    .plan-feats .feat-divider{height:1px;background:var(--border);margin:6px 0;pointer-events:none;list-style:none;}
-    .plan-feats .feat-divider::before{display:none;}
-    .btn-plan{display:block;text-align:center;padding:11px;border-radius:var(--radius);font-family:var(--font-heading);font-weight:700;font-size:0.88rem;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;margin-top:auto;}
-    .btn-plan-lime{background:#AAFF00;color:#0A0A00;} .btn-plan-lime:hover{background:#C4FF33;}
-    .btn-plan-violet{background:var(--violet);color:#fff;} .btn-plan-violet:hover{background:var(--violet-bright);}
-    .btn-plan-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border-bright);} .btn-plan-ghost:hover{border-color:rgba(255,255,255,0.25);color:var(--text);}
-    html[data-theme="light"] .plan-feats li::before{color:var(--violet);}
-    html[data-theme="light"] .btn-plan-lime{background:var(--violet);color:#fff;} html[data-theme="light"] .btn-plan-lime:hover{background:var(--violet-bright);}
-    @media(max-width:1100px){.pricing-grid{grid-template-columns:repeat(2,1fr);}}
-    @media(max-width:600px){.pricing-grid{grid-template-columns:1fr;}}
-
-    /* TESTIMONIALS */
-    #testimonials{border-top:1px solid var(--border);}
-    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
-    .testi-card{background:var(--bg-card);border:1px solid var(--border-bright);border-radius:16px;padding:28px;}
-    .testi-stars{color:var(--lime);font-size:0.85rem;margin-bottom:14px;letter-spacing:2px;}
-    .testi-text{font-size:0.9rem;color:var(--text-2);line-height:1.7;margin-bottom:20px;}
-    .testi-author{display:flex;align-items:center;gap:12px;}
-    .testi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;}
-    .testi-name{font-size:0.85rem;font-weight:700;}
-    .testi-role{font-size:0.78rem;color:var(--text-3);}
-    @media(max-width:900px){.testi-grid{grid-template-columns:1fr;}}
-
-    /* CTA */
-    #cta{border-top:1px solid var(--border);}
-    .cta-inner{text-align:center;max-width:640px;margin:0 auto;}
-    .cta-h2{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:700;letter-spacing:-0.01em;margin-bottom:16px;line-height:1.1;}
-    .cta-h2 em{font-style:normal;color:var(--lime);}
-    .cta-sub{font-size:1rem;color:var(--text-2);margin-bottom:36px;line-height:1.7;}
-    .cta-note{font-size:0.8rem;color:var(--text-3);margin-top:16px;}
-
-    /* FOOTER */
-    footer{border-top:1px solid var(--border);padding:48px 40px 32px;}
-    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
-    .footer-brand p{font-size:0.85rem;color:var(--text-2);margin-top:14px;line-height:1.6;max-width:260px;}
-    .footer-col h4{font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px;font-family:var(--mono);}
-    .footer-col a{display:block;font-size:0.88rem;color:var(--text-2);text-decoration:none;margin-bottom:10px;transition:color 0.2s;}
-    .footer-col a:hover{color:var(--text);}
-    .footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-    .footer-bottom p{font-size:0.78rem;color:var(--text-3);}
-    @media(max-width:768px){.footer-inner{grid-template-columns:1fr 1fr;} footer{padding:40px 24px 24px;}}
-    @media(max-width:480px){.footer-inner{grid-template-columns:1fr;}}
-
-    /* REVEAL */
-    .reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
-    .reveal.visible{opacity:1;transform:none;}
-  </style>
+  ]
+}
+</script>
 </head>
 <body>
 
-<nav>
-  <a href="#" class="nav-logo" aria-label="CV Central">
-    <svg width="26" height="26" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0;">
-      <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
-      <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
-      <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════════════════ MASTHEAD ── -->
+<header class="masthead" id="masthead">
+  <a class="brand" href="/" aria-label="CV Central — home">
+    <svg class="brand__mark" width="24" height="24" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+      <rect x="4" y="20" width="7" height="14" rx="1.5" fill="#5B2D8E"/>
+      <rect x="14" y="12" width="7" height="22" rx="1.5" fill="#7B4DB8"/>
+      <rect x="24" y="4" width="7" height="30" rx="1.5" fill="#AAFF00"/>
     </svg>
-    <span class="nav-logo-word">CV<span class="logo-accent">Central</span></span>
+    <span class="brand__word">CV<i>Central</i></span>
   </a>
-  <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#how">How it works</a>
+
+  <nav class="nav" aria-label="Primary">
+    <a href="#analysis">Product</a>
+    <a href="#journey">How it works</a>
+    <a href="#product">Features</a>
     <a href="#pricing">Pricing</a>
-    <a href="blog/index.html">Blog</a>
-  </div>
-  <div class="nav-actions">
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark">
-      <svg id="themeIconSun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="themeIconMoon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <a href="blog/index.html">Resources</a>
+  </nav>
+
+  <div class="masthead__actions">
+    <a class="masthead__login" href="login.html">Log in</a>
+    <a class="btn" href="signup.html">Get started<svg class="btn__arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="drawer">
+      <span></span><span></span><span></span>
     </button>
-    <a href="login.html" class="btn-ghost">Sign in</a>
-    <a href="signup.html" class="btn-lime">Get started</a>
   </div>
-</nav>
+</header>
 
-<!-- HERO -->
-<section id="hero">
-  <canvas id="neural-canvas"></canvas>
-  <div class="hero-inner">
-    <div class="hero-left">
-      <div class="hero-tag"><span class="hero-tag-dot"></span>Built for the European job market</div>
-      <h1 class="hero-h1">Get hired with a CV that<br><em>actually scores.</em></h1>
-      <p class="hero-sub">AI-powered CV builder, scorer, and coach — built for job seekers across Europe. Start in minutes, land faster.</p>
-      <div class="hero-actions">
-        <a href="signup.html" class="btn-primary">✦ Start 14-day trial — £1.99</a>
-        <a href="cv-builder.html" class="btn-outline">Try free first</a>
-      </div>
-      <div class="hero-proof">
-        <div class="av-stack">
-          <div class="av av-a">AK</div><div class="av av-b">JT</div><div class="av av-c">PR</div><div class="av av-d">SM</div>
-        </div>
-        <p class="proof-txt"><strong>2,400+ European professionals</strong> have improved their CV score</p>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="score-card" id="scoreCard">
-        <div class="sc-head">
-          <span class="sc-label">CV Score</span>
-          <span class="sc-badge">AI ANALYSIS</span>
-        </div>
-        <div class="sc-score">
-          <span class="sc-num" id="scoreNum">0</span>
-          <span class="sc-denom">/100</span>
-        </div>
-        <p class="sc-sub">Top 8% of European applicants in your field</p>
-        <div class="sc-bars">
-          <div class="sc-bar-row">
-            <div class="sc-bar-meta"><span class="sc-bar-name">ATS Compatibility</span><span class="sc-bar-val">92%</span></div>
-            <div class="sc-track"><div class="sc-fill sc-fill-lime" data-w="92"></div></div>
-          </div>
-          <div class="sc-bar-row">
-            <div class="sc-bar-meta"><span class="sc-bar-name">Keyword Match</span><span class="sc-bar-val">78%</span></div>
-            <div class="sc-track"><div class="sc-fill sc-fill-lime" data-w="78"></div></div>
-          </div>
-          <div class="sc-bar-row">
-            <div class="sc-bar-meta"><span class="sc-bar-name">Impact Language</span><span class="sc-bar-val">85%</span></div>
-            <div class="sc-track"><div class="sc-fill sc-fill-lime" data-w="85"></div></div>
-          </div>
-          <div class="sc-bar-row">
-            <div class="sc-bar-meta"><span class="sc-bar-name">Readability</span><span class="sc-bar-val">71%</span></div>
-            <div class="sc-track"><div class="sc-fill sc-fill-lime" data-w="71"></div></div>
-          </div>
-        </div>
-        <div class="ai-box">
-          <div class="ai-label">AI Recommendation</div>
-          <p class="ai-tip">Add <strong>3 quantified achievements</strong> to push your score past 90 and move into the top 5% of applicants.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stats-inner">
-    <div class="stat-item"><div class="stat-num">87%</div><div class="stat-label">of users improved their score in one session</div></div>
-    <div class="stat-item"><div class="stat-num">4.8★</div><div class="stat-label">average user rating</div></div>
-    <div class="stat-item"><div class="stat-num">2 min</div><div class="stat-label">average time to a scored CV</div></div>
-    <div class="stat-item"><div class="stat-num">10</div><div class="stat-label">languages supported for cover letters across Europe</div></div>
+<!-- Mobile drawer -->
+<div class="drawer" id="drawer" hidden>
+  <nav class="drawer__nav" aria-label="Mobile">
+    <a href="#analysis"><span>01</span>Product</a>
+    <a href="#journey"><span>02</span>How it works</a>
+    <a href="#product"><span>03</span>Features</a>
+    <a href="#pricing"><span>04</span>Pricing</a>
+    <a href="blog/index.html"><span>05</span>Resources</a>
+  </nav>
+  <div class="drawer__foot">
+    <a class="btn btn--ghost" href="login.html">Log in</a>
+    <a class="btn" href="cv-builder.html">Build my CV<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 </div>
 
-<!-- FEATURES -->
-<section id="features">
-  <div class="section-inner">
-    <div class="section-tag">Features</div>
-    <h2 class="section-h2">Everything you need.<br><em>Nothing you don't.</em></h2>
-    <p class="section-sub">Six tools working together to get you from rough draft to interview invite.</p>
-    <div class="features-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <div class="feat-title">AI CV Enhancement</div>
-        <div class="feat-desc">Transforms rough notes into polished, ATS-ready bullet points that recruiters actually read.</div>
+<main id="main">
+
+<!-- ══════════════════════════════════════════════════════════════ HERO ── -->
+<section id="hero" aria-labelledby="hero-title">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__aura" aria-hidden="true"></div>
+  <div class="hero__aura hero__aura--2" aria-hidden="true"></div>
+
+  <div class="shell hero__inner">
+    <p class="hero__eyebrow micro"><span class="pulse" aria-hidden="true"></span><b>AI career platform</b> <span class="hero__eyebrow-rest">&middot; built for the UK &amp; Europe</span></p>
+
+    <h1 class="display t-hero hero__title" id="hero-title">
+      <span class="reveal-line"><span style="--d:.05s">Your CV.</span></span>
+      <span class="reveal-line"><span style="--d:.15s">Your next</span></span>
+      <span class="reveal-line"><span style="--d:.25s"><em class="em">opportunity.</em></span></span>
+    </h1>
+
+    <div class="hero__foot">
+      <div>
+        <p class="lead" data-reveal="fade" style="--d:.5s">AI-powered tools that turn your CV into a stronger application — from ATS optimisation to personalised cover letters and interview preparation.</p>
+        <div class="hero__actions" data-reveal="fade" style="--d:.6s">
+          <a class="btn btn--lg" href="cv-builder.html">Build my CV<svg class="btn__arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn--lg btn--ghost" href="#analysis">See how it works</a>
+        </div>
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
-        <div class="feat-title">CV Score & Analysis</div>
-        <div class="feat-desc">Get a score out of 100 with specific, ranked improvements to push you past the shortlist filter.</div>
+
+      <ul class="hero__ticker" data-reveal="fade" style="--d:.7s">
+        <li>ATS score</li>
+        <li>Job matching</li>
+        <li>Cover letters</li>
+        <li>Interview prep</li>
+      </ul>
+    </div>
+
+    <!-- Live analysis panel — the product, not a decoration -->
+    <aside class="hero__panel" id="heroPanel" aria-label="Example CV analysis">
+      <div class="ui">
+        <div class="ui__bar">
+          <div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="ui__title">CV analysis</span>
+        </div>
+        <div class="scan">
+          <div class="doc">
+            <p class="doc__name">Amara Okonkwo</p>
+            <p class="doc__meta">Marketing Manager &middot; Manchester</p>
+            <div class="doc__rule"></div>
+            <div class="doc__block">
+              <p class="doc__h">Experience</p>
+              <p class="doc__role">Senior Marketing Executive</p>
+              <p class="doc__org">Northgate Retail &middot; 2022&ndash;present</p>
+              <p class="doc__li"><span>Grew organic pipeline <mark class="hl">42% in 9 months</mark> across 4 markets</span></p>
+              <p class="doc__li"><span>Led a team of 5 on a <mark class="hl">£1.2m</mark> annual budget</span></p>
+            </div>
+            <div class="doc__block">
+              <p class="doc__h">Skills</p>
+              <div class="doc__tags">
+                <span class="doc__tag is-hot">Campaign strategy</span>
+                <span class="doc__tag is-hot">Budget ownership</span>
+                <span class="doc__tag">SQL</span>
+                <span class="doc__tag is-hot">Team leadership</span>
+                <span class="doc__tag">GA4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="verdict">
+          <div class="ring" style="width:52px;height:52px">
+            <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+              <circle class="ring__bg" cx="26" cy="26" r="22" fill="none" stroke-width="4"/>
+              <circle class="ring__val" id="heroRing" cx="26" cy="26" r="22" fill="none" stroke-width="4"
+                      stroke-dasharray="138.2" stroke-dashoffset="138.2"/>
+            </svg>
+          </div>
+          <div>
+            <p class="ui-label">ATS compatibility</p>
+            <p><span class="verdict__num" data-count="94">0</span><span class="verdict__den">/100</span></p>
+          </div>
+        </div>
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v12H8l-4 4V4z"/></svg></div>
-        <div class="feat-title">Cover Letter Generator</div>
-        <div class="feat-desc">Tailored cover letters for each role in 30 seconds. Available in 10 languages.</div>
+    </aside>
+  </div>
+
+  <p class="hero__scrollcue"><i aria-hidden="true"></i>Scroll</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ MARQUEE ── -->
+<div class="marquee band--ink-2" aria-hidden="true">
+  <div class="marquee__row">
+    <span class="marquee__item"><i>◆</i>AI CV Builder</span>
+    <span class="marquee__item"><i>◆</i>ATS Score</span>
+    <span class="marquee__item"><i>◆</i>Keyword Match</span>
+    <span class="marquee__item"><i>◆</i>Cover Letters</span>
+    <span class="marquee__item"><i>◆</i>Interview Prep</span>
+    <span class="marquee__item"><i>◆</i>LinkedIn Optimiser</span>
+    <span class="marquee__item"><i>◆</i>Skills Gap</span>
+    <span class="marquee__item"><i>◆</i>Job Match</span>
+    <span class="marquee__item"><i>◆</i>Application Tracker</span>
+    <span class="marquee__item"><i>◆</i>STAR Answers</span>
+    <span class="marquee__item"><i>◆</i>Personal Statement</span>
+    <span class="marquee__item"><i>◆</i>CV Versions</span>
+  </div>
+  <div class="marquee__row">
+    <span class="marquee__item"><i>◆</i>AI CV Builder</span>
+    <span class="marquee__item"><i>◆</i>ATS Score</span>
+    <span class="marquee__item"><i>◆</i>Keyword Match</span>
+    <span class="marquee__item"><i>◆</i>Cover Letters</span>
+    <span class="marquee__item"><i>◆</i>Interview Prep</span>
+    <span class="marquee__item"><i>◆</i>LinkedIn Optimiser</span>
+    <span class="marquee__item"><i>◆</i>Skills Gap</span>
+    <span class="marquee__item"><i>◆</i>Job Match</span>
+    <span class="marquee__item"><i>◆</i>Application Tracker</span>
+    <span class="marquee__item"><i>◆</i>STAR Answers</span>
+    <span class="marquee__item"><i>◆</i>Personal Statement</span>
+    <span class="marquee__item"><i>◆</i>CV Versions</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ 01 · THE PROBLEM ── -->
+<section class="band band--ink" id="problem" aria-labelledby="problem-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">01</span><span>The problem</span><span class="index__rule"></span><span>Before a human reads a word</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="problem-title">
+        <span class="reveal-line"><span>Rejected before</span></span>
+        <span class="reveal-line"><span style="--d:.1s">a human even</span></span>
+        <span class="reveal-line"><span style="--d:.2s"><em class="em">sees your CV.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.3s">Recruitment is filtered by software before it is judged by people. Applicant tracking systems parse your CV first, recruiters give what survives a few seconds, and a generic application reads exactly like the two hundred sent before it.</p>
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-        <div class="feat-title">LinkedIn Import</div>
-        <div class="feat-desc">Upload your LinkedIn data export and prefill your entire CV in seconds. No copy-pasting.</div>
+    </div>
+
+    <div class="funnel">
+      <div class="funnel__viz" data-reveal="fade">
+        <div class="dots" id="funnelDots" role="img" aria-label="Illustration: a pool of applications narrowing at each stage of hiring"></div>
+        <p class="funnel__legend">
+          <span><i style="background:var(--violet-lit)"></i>In play</span>
+          <span><i style="background:var(--lime)"></i>Through</span>
+          <span><i style="background:rgba(255,255,255,0.14)"></i>Filtered out</span>
+        </p>
+        <p class="micro" style="margin-top:1.25rem;color:var(--on-ink-3);text-transform:none;letter-spacing:0.04em;font-size:0.68rem;line-height:1.6">Illustrative — the shape of a hiring funnel, not measured data.</p>
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v3M16 4v3"/></svg></div>
-        <div class="feat-title">Multiple Templates</div>
-        <div class="feat-desc">Clean, professional templates built to pass European ATS systems — with custom colour schemes.</div>
+
+      <ol class="stages" id="stages">
+        <li class="stage" data-stage="0">
+          <span class="stage__k">01</span>
+          <div>
+            <h3 class="stage__t">Applications sent</h3>
+            <p class="stage__p">You apply. So does everyone else. Volume is the entire problem — and it is not solved by applying harder.</p>
+          </div>
+        </li>
+        <li class="stage" data-stage="1">
+          <span class="stage__k">02</span>
+          <div>
+            <h3 class="stage__t">ATS filtering</h3>
+            <p class="stage__p">Software parses your file before a person does. Columns it can't read, headings it doesn't recognise, terminology that doesn't match the advert — the application ends here, silently.</p>
+          </div>
+        </li>
+        <li class="stage" data-stage="2">
+          <span class="stage__k">03</span>
+          <div>
+            <h3 class="stage__t">Recruiter screening</h3>
+            <p class="stage__p">What survives gets seconds of human attention. Responsibilities without outcomes, and outcomes without numbers, get skimmed straight past.</p>
+          </div>
+        </li>
+        <li class="stage" data-stage="3">
+          <span class="stage__k">04</span>
+          <div>
+            <h3 class="stage__t">Interview</h3>
+            <p class="stage__p">The few that read as an obvious match for <em>this</em> role — not any role — make it into the room.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <p class="pullquote" data-reveal="fade" style="margin-top:clamp(3rem,7vw,5.5rem)">The filter isn&rsquo;t judging you. It&rsquo;s judging your&nbsp;file.</p>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════════ 02 · AI CV ANALYSIS ── -->
+<section class="band band--paper pin" id="analysis" aria-labelledby="analysis-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">02</span><span>AI analysis</span><span class="index__rule"></span><span>Read it the way a machine does</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="analysis-title">
+        <span class="reveal-line"><span>Your CV,</span></span>
+        <span class="reveal-line"><span style="--d:.1s"><em class="em">analysed by AI.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.2s">CV Central reads your CV the way an applicant tracking system does, then the way a recruiter does. You get a score, the reason behind it, and the specific edit that moves it.</p>
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div class="feat-title">PDF Download</div>
-        <div class="feat-desc">Download a pixel-perfect PDF ready to send to any European employer or upload to any job board.</div>
+    </div>
+  </div>
+
+  <!-- Only the demonstration is pinned. The heading scrolls away above it,
+       so the held content always fits the viewport. -->
+  <div class="pin__track">
+    <div class="pin__sticky">
+      <div class="shell">
+        <div class="analysis">
+        <div data-reveal="wipe">
+          <div class="ui" id="analysisDoc">
+            <div class="ui__bar">
+              <div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span class="ui__title">amara-okonkwo-cv.pdf</span>
+            </div>
+            <div class="scan">
+              <div class="doc">
+                <p class="doc__name">Amara Okonkwo</p>
+                <p class="doc__meta">Marketing Manager &middot; Manchester &middot; amara@example.com</p>
+                <div class="doc__rule"></div>
+
+                <div class="doc__block">
+                  <p class="doc__h">Profile</p>
+                  <p class="doc__li"><span>Marketing lead with <mark class="hl">seven years</mark> across retail and B2B, specialising in <mark class="hl">performance campaigns and budget ownership</mark>.</span></p>
+                </div>
+
+                <div class="doc__block">
+                  <p class="doc__h">Experience</p>
+                  <p class="doc__role">Senior Marketing Executive</p>
+                  <p class="doc__org">Northgate Retail &middot; 2022&ndash;present</p>
+                  <p class="doc__li"><span>Grew organic pipeline <mark class="hl">42% in 9 months</mark> across 4 European markets</span></p>
+                  <p class="doc__li"><span>Led a team of 5 on a <mark class="hl">£1.2m</mark> annual budget</span></p>
+                  <p class="doc__li"><span>Cut cost per acquisition <mark class="hl">by a third</mark> through channel reallocation</span></p>
+                </div>
+
+                <div class="doc__block">
+                  <p class="doc__h">Skills</p>
+                  <div class="doc__tags">
+                    <span class="doc__tag is-hot">Campaign strategy</span>
+                    <span class="doc__tag is-hot">Budget ownership</span>
+                    <span class="doc__tag is-hot">Team leadership</span>
+                    <span class="doc__tag">GA4</span>
+                    <span class="doc__tag">SQL</span>
+                    <span class="doc__tag">HubSpot</span>
+                  </div>
+                </div>
+
+                <div class="doc__block">
+                  <p class="doc__h">Education</p>
+                  <p class="doc__role">BA (Hons) Marketing, 2:1</p>
+                  <p class="doc__org">University of Leeds &middot; 2018</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="metrics" id="metrics">
+            <div class="metric" style="--d:.05s">
+              <span class="metric__name">ATS compatibility</span>
+              <span class="metric__val"><span class="metric__from">78</span><span aria-hidden="true">&rarr;</span><span class="metric__to" data-count="94">94</span></span>
+              <div class="metric__bar"><div class="ui-track"><div class="ui-fill" data-w="94"></div></div></div>
+            </div>
+            <div class="metric" style="--d:.15s">
+              <span class="metric__name">Keyword match</span>
+              <span class="metric__val"><span class="metric__from">Good</span><span aria-hidden="true">&rarr;</span><span class="metric__to">Excellent</span></span>
+              <div class="metric__bar"><div class="ui-track"><div class="ui-fill" data-w="91"></div></div></div>
+            </div>
+            <div class="metric" style="--d:.25s">
+              <span class="metric__name">Impact language</span>
+              <span class="metric__val"><span class="metric__to" style="color:#8A5A00">Needs work</span></span>
+              <div class="metric__bar"><div class="ui-track"><div class="ui-fill" data-w="58" style="background:linear-gradient(90deg,#8A5CD6,#FFB020)"></div></div></div>
+            </div>
+            <div class="metric" style="--d:.35s">
+              <span class="metric__name">Formatting</span>
+              <span class="metric__val"><span class="metric__to">Strong</span></span>
+              <div class="metric__bar"><div class="ui-track"><div class="ui-fill" data-w="88"></div></div></div>
+            </div>
+          </div>
+
+          <div class="analysis__note" data-reveal="fade" style="--d:.45s">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.3A7 7 0 0 0 12 2Z"/><path d="M9 22h6"/></svg>
+            <p><strong>Next edit:</strong> three of your bullets describe responsibilities rather than results. Add a number to each — scale, budget, timeframe or percentage — and impact language moves from <em>needs work</em> to <em>strong</em>.</p>
+          </div>
+        </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section id="how">
-  <div class="section-inner">
-    <div class="section-tag">How it works</div>
-    <h2 class="section-h2">From zero to interview-ready<br><em>in under 10 minutes.</em></h2>
-    <div class="how-grid">
-      <div class="how-step reveal">
-        <div class="how-num">01</div>
-        <div class="how-title">Build your CV</div>
-        <p class="how-p">Fill in your details or import from LinkedIn. Our builder guides you section by section.</p>
+<!-- ══════════════════════════════════════════════ 03 · ATS OPTIMISATION ── -->
+<section class="band band--ink" id="ats" aria-labelledby="ats-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">03</span><span>ATS optimisation</span><span class="index__rule"></span><span>Six steps, one pass</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="ats-title">
+        <span class="reveal-line"><span>Don&rsquo;t let an</span></span>
+        <span class="reveal-line"><span style="--d:.1s">algorithm decide</span></span>
+        <span class="reveal-line"><span style="--d:.2s"><em class="em">your future.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.3s">You can&rsquo;t opt out of the parser. You can make sure it reads you correctly. CV Central runs your CV against the job you actually want and tells you what the machine is missing.</p>
       </div>
-      <div class="how-step reveal">
-        <div class="how-num">02</div>
-        <div class="how-title">Enhance with AI</div>
-        <p class="how-p">Claude AI rewrites your bullet points to be specific, quantified, and recruiter-ready.</p>
-      </div>
-      <div class="how-step reveal">
-        <div class="how-num">03</div>
-        <div class="how-title">Score & optimise</div>
-        <p class="how-p">Get your score out of 100, see exactly what to fix, and improve in one click.</p>
-      </div>
-      <div class="how-step reveal">
-        <div class="how-num">04</div>
-        <div class="how-title">Download & land</div>
-        <p class="how-p">Export a polished PDF, generate a tailored cover letter, and start applying.</p>
+    </div>
+
+    <div class="ats">
+      <ol class="ats__rail" id="atsRail">
+        <li class="ats__step" data-step="0">
+          <div>
+            <p class="ats__k">01</p>
+            <p class="ats__t">CV uploaded</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+        </li>
+        <li class="ats__step" data-step="1">
+          <div>
+            <p class="ats__k">02</p>
+            <p class="ats__t">Parsed &amp; analysed</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+        </li>
+        <li class="ats__step" data-step="2">
+          <div>
+            <p class="ats__k">03</p>
+            <p class="ats__t">Job description compared</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M9 9h6v6H9z"/></svg>
+        </li>
+        <li class="ats__step" data-step="3">
+          <div>
+            <p class="ats__k">04</p>
+            <p class="ats__t">Keywords identified</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </li>
+        <li class="ats__step" data-step="4">
+          <div>
+            <p class="ats__k">05</p>
+            <p class="ats__t">Weaknesses detected</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        </li>
+        <li class="ats__step" data-step="5">
+          <div>
+            <p class="ats__k">06</p>
+            <p class="ats__t">CV improved</p>
+          </div>
+          <svg class="ats__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        </li>
+      </ol>
+
+      <div class="ats__readout" data-reveal="fade">
+        <div>
+          <p class="ui-label" style="margin-bottom:0.5rem">ATS score, this run</p>
+          <p class="ats__delta"><span data-count="94" data-from="78">78</span><small>/ 100</small></p>
+        </div>
+        <p class="body-copy" style="max-width:42ch">Every fix is shown as a change you can accept or reject — a rewritten bullet, a missing skill, a heading the parser couldn&rsquo;t read. Nothing is invented on your behalf.</p>
+        <div>
+          <p class="ui-label" style="margin-bottom:0.7rem;color:var(--fg-3)">Changes in this run</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+            <span class="ui-chip ui-chip--lime">+ stakeholder management</span>
+            <span class="ui-chip ui-chip--lime">+ P&amp;L ownership</span>
+            <span class="ui-chip ui-chip--miss">missing: CRM</span>
+            <span class="ui-chip">reformatted: skills column</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section id="pricing">
-  <div class="section-inner">
-    <div class="section-tag">Pricing</div>
-    <h2 class="section-h2">Simple pricing.<br><em>No surprises.</em></h2>
-    <p class="section-sub">Start free, grab a one-time pass, or go Pro. Every plan includes a 14-day trial for £1.99.</p>
-    <div class="pricing-toggle" role="group" aria-label="Billing period">
-      <span class="toggle-opt active" onclick="setPricing('monthly',this)">Monthly</span>
-      <span class="toggle-opt" onclick="setPricing('annual',this)">Annual <span class="save-badge">Save 25%</span></span>
-    </div>
-    <div class="pricing-grid">
+<!-- ═════════════════════════════════════════════════════ 04 · JOB MATCH ── -->
+<section class="band band--paper" id="match" aria-labelledby="match-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">04</span><span>Job matching</span><span class="index__rule"></span><span>One role at a time</span></p>
 
-      <!-- FREE -->
-      <div class="price-card reveal">
-        <div class="plan-name">Free</div>
-        <div class="plan-price">£0<span>/mo</span></div>
-        <div class="plan-period">Forever free</div>
-        <p class="plan-tagline">Perfect for first-time users &amp; students</p>
-        <ul class="plan-feats">
-          <li>1 CV</li>
-          <li>Unlimited edits</li>
-          <li>1 ATS Score</li>
-          <li>1 AI CV Enhancement</li>
-          <li>1 Cover Letter</li>
-          <li>5 Interview Questions</li>
+    <div class="stack-head">
+      <h2 class="display t-mega" id="match-title">
+        <span class="reveal-line"><span>One CV</span></span>
+        <span class="reveal-line"><span style="--d:.1s"><em class="em">isn&rsquo;t enough.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.2s">Paste the advert. CV Central compares it against your CV line by line, finds what that specific employer is actually asking for, and tailors your application to it — without inventing anything you didn&rsquo;t do.</p>
+      </div>
+    </div>
+
+    <div class="match" id="matchBlock">
+      <div class="match__col">
+        <p class="ui-label" style="margin-bottom:0.75rem;color:var(--fg-3)">Job description</p>
+        <div class="match__jd">
+          <p style="font-family:var(--f-display);font-size:1.15rem;font-weight:600;letter-spacing:-0.03em;color:var(--fg);margin-bottom:0.75rem">Marketing Manager</p>
+          <p>We&rsquo;re looking for a marketing manager to own <b style="--d:.1s">campaign strategy</b> across four European markets. You&rsquo;ll take full <b style="--d:.2s">budget ownership</b> of a seven-figure spend, work closely with sales on <b style="--d:.3s">pipeline growth</b>, and take on <b style="--d:.4s">team leadership</b> for a group of five.</p>
+          <p style="margin-top:0.85rem">Experience with <b style="--d:.5s">CRM platforms</b> and <b style="--d:.6s">stakeholder management</b> at board level is essential. You will report into the CMO and present performance at <b style="--d:.7s">board level</b> each quarter.</p>
+          <p style="margin-top:0.85rem;font-size:0.8rem;color:var(--fg-3)">Manchester &middot; Hybrid, 3 days on site &middot; Permanent, full time</p>
+        </div>
+      </div>
+
+      <div class="match__mid" aria-hidden="true">
+        <span class="match__flow"></span>
+        <span class="match__engine">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3"/><path d="M12 19v3"/><path d="M2 12h3"/><path d="M19 12h3"/><circle cx="12" cy="12" r="4.5"/><path d="m5 5 2.2 2.2"/><path d="m16.8 16.8 2.2 2.2"/><path d="m19 5-2.2 2.2"/><path d="M7.2 16.8 5 19"/></svg>
+        </span>
+        <span class="match__flow"></span>
+      </div>
+
+      <div class="match__col">
+        <p class="ui-label" style="margin-bottom:0.75rem;color:var(--fg-3)">Tailored CV</p>
+        <div class="match__out">
+          <div class="match__row" style="--d:.3s"><span>Skills</span><span class="ui-chip ui-chip--lime">4 matched, 1 added</span></div>
+          <div class="match__row" style="--d:.4s"><span>Keywords</span><span class="ui-chip ui-chip--lime">11 of 12 present</span></div>
+          <div class="match__row" style="--d:.5s"><span>Experience order</span><span class="ui-chip">resequenced</span></div>
+          <div class="match__row" style="--d:.6s"><span>Achievements</span><span class="ui-chip">3 requantified</span></div>
+          <div class="match__row" style="--d:.7s"><span>Profile summary</span><span class="ui-chip">rewritten for role</span></div>
+          <div class="match__row" style="--d:.8s"><span>Saved as</span><span class="ui-chip">Marketing Mgr &mdash; v3</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ 05 · COVER LETTER ── -->
+<section class="band band--ink" id="letter" aria-labelledby="letter-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">05</span><span>Cover letters</span><span class="index__rule"></span><span>Written from what you actually did</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="letter-title">
+        <span class="reveal-line"><span>Then tell them</span></span>
+        <span class="reveal-line"><span style="--d:.1s">why you&rsquo;re the</span></span>
+        <span class="reveal-line"><span style="--d:.2s"><em class="em">right person.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.3s">A cover letter written from three real inputs — not a template with your name dropped into it. Available in ten languages for applications across Europe.</p>
+      </div>
+    </div>
+
+    <div class="letter">
+      <div data-reveal="fade">
+        <div class="letter__inputs">
+          <div class="letter__input">
+            <i aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></i>
+            Your CV
+          </div>
+          <p class="letter__plus" aria-hidden="true">+</p>
+          <div class="letter__input">
+            <i aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></i>
+            The job description
+          </div>
+          <p class="letter__plus" aria-hidden="true">+</p>
+          <div class="letter__input">
+            <i aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></i>
+            What you actually did
+          </div>
+        </div>
+        <p class="body-copy" style="margin-top:1.5rem">Every claim in the letter traces back to a line in your CV. Edit it, regenerate it, or save it against the application in your tracker.</p>
+      </div>
+
+      <div data-reveal="scale">
+        <div class="letter__page" id="letterPage">
+          <p class="ui-label" style="color:#6A6380;margin-bottom:1.1rem">Cover letter &mdash; Marketing Manager</p>
+          <!-- Text lives in the markup so it is crawlable and readable without
+               JS; landing.js clears it and types it back in on scroll. -->
+          <p><span class="type-out" id="typeOut">Dear Hiring Team,
+
+I&rsquo;m writing about the Marketing Manager role at Northgate Retail. Your advert asks for someone who can own campaign strategy across four European markets — that is the job I have been doing for the last two years.
+
+I lead a five-person team with full ownership of a £1.2m annual budget. In the last nine months we grew organic pipeline by 42% and cut cost per acquisition by a third by reallocating spend across channels.
+
+I&rsquo;d welcome the chance to talk about what the first ninety days could look like.</span><span class="caret" id="caret" aria-hidden="true"></span></p>
+          <p class="sig" id="letterSig">Amara Okonkwo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ 06 · INTERVIEW PREP ── -->
+<section class="band band--paper" id="interview" aria-labelledby="interview-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">06</span><span>Interview preparation</span><span class="index__rule"></span><span>Rehearse before it counts</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="interview-title">
+        <span class="reveal-line"><span>The application</span></span>
+        <span class="reveal-line"><span style="--d:.1s">doesn&rsquo;t end with</span></span>
+        <span class="reveal-line"><span style="--d:.2s"><em class="em">the invitation.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.3s">Getting the interview is the halfway point. CV Central generates the questions this role is likely to ask, helps you structure real answers from your own experience, and tells you where they&rsquo;re thin.</p>
+      </div>
+    </div>
+
+    <div class="interview">
+      <div class="qa">
+        <div class="bubble bubble--q" data-reveal="fade">
+          <p class="bubble__who"><span>Interviewer</span></p>
+          <p>&ldquo;Tell me about a time you demonstrated leadership.&rdquo;</p>
+        </div>
+        <div class="bubble bubble--a" data-reveal="fade" style="--d:.15s">
+          <p class="bubble__who"><span>Your answer</span></p>
+          <p>&ldquo;When our channel budget was cut mid-year, I took the team through a reallocation plan — reprioritised four markets, moved spend into organic, and kept everyone briefed weekly. We came in under budget and pipeline still grew.&rdquo;</p>
+        </div>
+      </div>
+
+      <div class="feedback">
+        <p class="ui-label" style="color:var(--fg-3);margin-bottom:0.35rem">AI feedback</p>
+        <div class="fb" data-reveal="fade" style="--d:.25s">
+          <span class="fb__dot" aria-hidden="true"></span>
+          <span class="fb__t">Situation &amp; task are clear</span>
+          <span class="fb__v">Strong</span>
+        </div>
+        <div class="fb" data-reveal="fade" style="--d:.35s">
+          <span class="fb__dot" aria-hidden="true"></span>
+          <span class="fb__t">Action is specific and yours</span>
+          <span class="fb__v">Strong</span>
+        </div>
+        <div class="fb" data-reveal="fade" style="--d:.45s">
+          <span class="fb__dot fb__dot--warn" aria-hidden="true"></span>
+          <span class="fb__t">Result needs a number</span>
+          <span class="fb__v">Fix this</span>
+        </div>
+        <p class="body-copy" style="font-size:0.86rem;margin-top:0.6rem" data-reveal="fade">&ldquo;Under budget&rdquo; and &ldquo;still grew&rdquo; are the weakest words in a strong answer. Say by how much.</p>
+        <div class="star-row" data-reveal="fade" style="--d:.55s">
+          <span class="ui-chip">STAR structure</span>
+          <span class="ui-chip">Role-specific questions</span>
+          <span class="ui-chip">Company research</span>
+          <span class="ui-chip">Follow-up prompts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ 07 · JOURNEY ── -->
+<section class="band band--ink" id="journey" aria-labelledby="journey-title">
+  <div class="journey__pin" id="journeyPin">
+    <div class="journey__head">
+      <p class="index"><span class="index__num">07</span><span>The journey</span><span class="index__rule"></span><span>Six stages, one platform</span></p>
+      <h2 class="display t-large" id="journey-title" style="max-width:14ch">From CV to <em class="em">career.</em></h2>
+    </div>
+
+    <!--
+      One list, two behaviours. Above 1024px landing.js pins the section and
+      drives this track with translateX; below that (and under reduced motion)
+      CSS turns the same element into a native scroll-snap rail.
+    -->
+    <ol class="journey__track" id="journeyTrack" aria-label="The CV Central journey, in six stages">
+      <li class="jcard" data-j="0">
+        <span class="jcard__n">01</span>
+        <div>
+          <h3 class="jcard__t">Build</h3>
+          <p class="jcard__p">Start from scratch, upload an existing CV, or import your LinkedIn export. Guided section by section, formatted to UK and European conventions.</p>
+          <a class="link jcard__link" href="cv-builder.html">Open the builder<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+      <li class="jcard" data-j="1">
+        <span class="jcard__n">02</span>
+        <div>
+          <h3 class="jcard__t">Optimise</h3>
+          <p class="jcard__p">Score the CV for ATS compatibility, keyword coverage, impact language and formatting. Accept the rewrites that make sense to you.</p>
+          <a class="link jcard__link" href="cv-builder.html?open=analyse">Run an analysis<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+      <li class="jcard" data-j="2">
+        <span class="jcard__n">03</span>
+        <div>
+          <h3 class="jcard__t">Apply</h3>
+          <p class="jcard__p">Tailor the CV to a specific advert, generate a matching cover letter, and save the pair as a named version you can reuse.</p>
+          <a class="link jcard__link" href="job-match.html">Match a job<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+      <li class="jcard" data-j="3">
+        <span class="jcard__n">04</span>
+        <div>
+          <h3 class="jcard__t">Prepare</h3>
+          <p class="jcard__p">Generate the questions this role is likely to ask, draft STAR answers from your real experience, and research the company.</p>
+          <a class="link jcard__link" href="interview-coach.html">Start prep<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+      <li class="jcard" data-j="4">
+        <span class="jcard__n">05</span>
+        <div>
+          <h3 class="jcard__t">Interview</h3>
+          <p class="jcard__p">Rehearse against a mock interviewer, get feedback on structure and specificity, and go in knowing what you&rsquo;ll say.</p>
+          <a class="link jcard__link" href="interview-coach.html">Practise now<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+      <li class="jcard" data-j="5">
+        <span class="jcard__n">06</span>
+        <div>
+          <h3 class="jcard__t">Get hired</h3>
+          <p class="jcard__p">Track every application, stage and follow-up in one place — so nothing goes quiet because you forgot to chase it.</p>
+          <a class="link jcard__link" href="tracker.html">Open the tracker<span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </li>
+    </ol>
+
+    <div class="journey__meter" aria-hidden="true">
+      <span class="micro">Build</span>
+      <span class="journey__bar"><i id="journeyBar"></i></span>
+      <span class="micro">Hired</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ 08 · PRODUCT SHOWCASE ── -->
+<section class="band band--paper" id="product" aria-labelledby="product-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">08</span><span>The platform</span><span class="index__rule"></span><span>Six products, one CV</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="product-title">
+        <span class="reveal-line"><span>Everything the</span></span>
+        <span class="reveal-line"><span style="--d:.1s">application <em class="em">needs.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.2s">Each tool works on the same CV, so an improvement in one place shows up everywhere else. No re-uploading, no re-explaining who you are.</p>
+      </div>
+    </div>
+
+    <div class="products">
+
+      <!-- AI CV BUILDER -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.01</span>
+          <h3 class="product__t">AI CV Builder</h3>
+          <p class="product__p">A guided builder that writes with you. Rough notes go in, specific and quantified bullets come out — in a layout a parser can actually read.</p>
+          <ul class="product__list">
+            <li>LinkedIn import</li><li>ATS templates</li><li>PDF &amp; DOCX</li><li>Version history</li>
+          </ul>
+          <a class="btn btn--ghost" href="cv-builder.html">Open the builder<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">CV Builder &middot; Step 3 of 5</span></div>
+            <div class="ui__body" style="display:grid;gap:0.9rem">
+              <div>
+                <p class="ui-label" style="margin-bottom:0.45rem">Your note</p>
+                <p style="font-size:0.82rem;color:#948DA6;line-height:1.6">&ldquo;ran the marketing team, did campaigns, budget was quite big&rdquo;</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.6rem;color:#8A5CD6">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                <span class="ui-label" style="color:#8A5CD6">AI enhancement</span>
+              </div>
+              <div style="padding:0.9rem;border-radius:6px;background:rgba(170,255,0,0.07);border:1px solid rgba(170,255,0,0.22)">
+                <p style="font-size:0.82rem;line-height:1.65;color:#fff">Led a five-person marketing team with full ownership of a <strong style="color:var(--lime)">£1.2m annual budget</strong>, delivering campaigns across <strong style="color:var(--lime)">four European markets</strong>.</p>
+              </div>
+              <div style="display:flex;gap:0.4rem">
+                <span class="ui-chip ui-chip--lime">Accept</span>
+                <span class="ui-chip">Regenerate</span>
+                <span class="ui-chip">Keep mine</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ATS OPTIMISER -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.02</span>
+          <h3 class="product__t">ATS Optimiser</h3>
+          <p class="product__p">A score out of 100 with the reasoning attached. Compatibility, keyword coverage, impact language and formatting — each with the exact edit that moves it.</p>
+          <ul class="product__list">
+            <li>Compatibility score</li><li>Keyword gaps</li><li>Formatting checks</li><li>Ranked fixes</li>
+          </ul>
+          <a class="btn btn--ghost" href="cv-builder.html?open=analyse">Score my CV<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">ATS Optimiser</span></div>
+            <div class="ui__body" style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
+              <div class="ring" style="width:92px;height:92px">
+                <svg width="92" height="92" viewBox="0 0 92 92" aria-hidden="true">
+                  <circle class="ring__bg" cx="46" cy="46" r="39" fill="none" stroke-width="6"/>
+                  <circle class="ring__val" cx="46" cy="46" r="39" fill="none" stroke-width="6"
+                          stroke-dasharray="245" stroke-dashoffset="14.7"/>
+                </svg>
+                <span class="ring__num" style="font-size:1.5rem">94</span>
+              </div>
+              <div style="flex:1;min-width:150px;display:grid;gap:0.65rem">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#948DA6;margin-bottom:0.3rem"><span>Keyword coverage</span><span class="mono" style="color:var(--lime)">91%</span></div>
+                  <div class="ui-track"><div class="ui-fill" style="width:91%"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#948DA6;margin-bottom:0.3rem"><span>Impact language</span><span class="mono" style="color:#FFB020">58%</span></div>
+                  <div class="ui-track"><div class="ui-fill" style="width:58%;background:linear-gradient(90deg,#8A5CD6,#FFB020)"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#948DA6;margin-bottom:0.3rem"><span>Formatting</span><span class="mono" style="color:var(--lime)">88%</span></div>
+                  <div class="ui-track"><div class="ui-fill" style="width:88%"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- JOB MATCHER -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.03</span>
+          <h3 class="product__t">Job Matcher</h3>
+          <p class="product__p">Paste any advert and see how you actually stack up against it — matched skills, missing keywords, and the experience worth moving to the top of the page.</p>
+          <ul class="product__list">
+            <li>Match score</li><li>Skills gap</li><li>Resequencing</li><li>Saved versions</li>
+          </ul>
+          <a class="btn btn--ghost" href="job-match.html">Match a job<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">Job Match &middot; Marketing Manager</span></div>
+            <div class="ui__body" style="display:grid;gap:1rem">
+              <div style="display:flex;align-items:baseline;gap:0.6rem">
+                <span class="mono" style="font-size:2.1rem;font-weight:700;color:var(--lime);letter-spacing:-0.05em;line-height:1">86%</span>
+                <span style="font-size:0.78rem;color:#948DA6">match against this advert</span>
+              </div>
+              <div>
+                <p class="ui-label" style="margin-bottom:0.5rem">Matched</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+                  <span class="ui-chip ui-chip--lime">Campaign strategy</span>
+                  <span class="ui-chip ui-chip--lime">Budget ownership</span>
+                  <span class="ui-chip ui-chip--lime">Team leadership</span>
+                  <span class="ui-chip ui-chip--lime">Pipeline growth</span>
+                </div>
+              </div>
+              <div>
+                <p class="ui-label" style="margin-bottom:0.5rem">Missing from your CV</p>
+                <div style="display:flex;flex-wrap:wrap;gap:0.35rem">
+                  <span class="ui-chip ui-chip--miss">CRM platforms</span>
+                  <span class="ui-chip ui-chip--miss">Board reporting</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- COVER LETTER GENERATOR -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.04</span>
+          <h3 class="product__t">Cover Letter Generator</h3>
+          <p class="product__p">A letter built from your CV and the advert in front of you, in the language the role is advertised in. Edit it, regenerate it, keep it with the application.</p>
+          <ul class="product__list">
+            <li>10 languages</li><li>Tone control</li><li>Saved letters</li><li>One per application</li>
+          </ul>
+          <a class="btn btn--ghost" href="saved-cover-letters.html">Write a letter<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">Cover Letters</span></div>
+            <div class="ui__body" style="display:grid;gap:0.55rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:0.7rem 0.85rem;border:1px solid rgba(255,255,255,0.09);border-radius:6px;background:rgba(138,92,214,0.08)">
+                <div><p style="font-size:0.82rem;font-weight:700">Marketing Manager &mdash; Northgate</p><p style="font-size:0.7rem;color:#948DA6">English (UK) &middot; edited 2 days ago</p></div>
+                <span class="ui-chip ui-chip--lime">Sent</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:0.7rem 0.85rem;border:1px solid rgba(255,255,255,0.09);border-radius:6px">
+                <div><p style="font-size:0.82rem;font-weight:700">Brand Lead &mdash; Havas</p><p style="font-size:0.7rem;color:#948DA6">Français &middot; draft</p></div>
+                <span class="ui-chip">Draft</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:0.7rem 0.85rem;border:1px solid rgba(255,255,255,0.09);border-radius:6px">
+                <div><p style="font-size:0.82rem;font-weight:700">Growth Manager &mdash; Zalando</p><p style="font-size:0.7rem;color:#948DA6">Deutsch &middot; draft</p></div>
+                <span class="ui-chip">Draft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- INTERVIEW COACH -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.05</span>
+          <h3 class="product__t">Interview Coach</h3>
+          <p class="product__p">Likely questions for the role, STAR answers built from your own experience, and honest feedback on where an answer goes vague.</p>
+          <ul class="product__list">
+            <li>Role-specific questions</li><li>STAR generator</li><li>Answer feedback</li><li>Saved sessions</li>
+          </ul>
+          <a class="btn btn--ghost" href="interview-coach.html">Start prep<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">Interview Coach &middot; Session 2</span></div>
+            <div class="ui__body" style="display:grid;gap:0.7rem">
+              <div style="padding:0.85rem;border-radius:6px;background:rgba(138,92,214,0.12);border:1px solid rgba(138,92,214,0.28)">
+                <p class="ui-label" style="margin-bottom:0.4rem">Question 4 of 8</p>
+                <p style="font-size:0.86rem;line-height:1.5">&ldquo;Walk me through a campaign that underperformed. What did you change?&rdquo;</p>
+              </div>
+              <div style="display:grid;gap:0.4rem">
+                <div style="display:flex;justify-content:space-between;font-size:0.76rem"><span style="color:#948DA6">Situation</span><span class="mono" style="color:var(--lime);font-size:0.7rem">CLEAR</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.76rem"><span style="color:#948DA6">Action</span><span class="mono" style="color:var(--lime);font-size:0.7rem">CLEAR</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:0.76rem"><span style="color:#948DA6">Result</span><span class="mono" style="color:#FFB020;font-size:0.7rem">ADD A NUMBER</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- APPLICATION TRACKER -->
+      <article class="product">
+        <div class="product__copy" data-reveal="fade">
+          <span class="product__n">P.06</span>
+          <h3 class="product__t">Application Tracker</h3>
+          <p class="product__p">Every application, the CV version you sent, the letter that went with it, and what stage it&rsquo;s at. One place, so nothing goes quiet by accident.</p>
+          <ul class="product__list">
+            <li>Stage pipeline</li><li>Version linking</li><li>Follow-up dates</li><li>Notes</li>
+          </ul>
+          <a class="btn btn--ghost" href="tracker.html">Open the tracker<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="product__vis" data-reveal="wipe">
+          <div class="ui">
+            <div class="ui__bar"><div class="ui__dots" aria-hidden="true"><i></i><i></i><i></i></div><span class="ui__title">Application Tracker</span></div>
+            <div class="ui__body" style="display:grid;gap:0.5rem">
+              <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;align-items:center;padding:0.65rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.07)">
+                <div><p style="font-size:0.8rem;font-weight:700">Marketing Manager</p><p style="font-size:0.7rem;color:#948DA6">Northgate Retail &middot; CV v3</p></div>
+                <span class="ui-chip ui-chip--lime">Interview</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;align-items:center;padding:0.65rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.07)">
+                <div><p style="font-size:0.8rem;font-weight:700">Brand Lead</p><p style="font-size:0.7rem;color:#948DA6">Havas &middot; CV v2</p></div>
+                <span class="ui-chip">Applied</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;align-items:center;padding:0.65rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.07)">
+                <div><p style="font-size:0.8rem;font-weight:700">Growth Manager</p><p style="font-size:0.7rem;color:#948DA6">Zalando &middot; CV v3</p></div>
+                <span class="ui-chip">Screening</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:0.75rem;align-items:center;padding:0.65rem 0.8rem">
+                <div><p style="font-size:0.8rem;font-weight:700">Head of Marketing</p><p style="font-size:0.7rem;color:#948DA6">Monzo &middot; follow up Fri</p></div>
+                <span class="ui-chip ui-chip--miss">No reply</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ 09 · WHO ── -->
+<section class="band band--ink band--tight" id="proof" aria-labelledby="proof-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">09</span><span>Who it&rsquo;s for</span><span class="index__rule"></span><span>Serious about the next move</span></p>
+
+    <h2 class="display t-large" id="proof-title" style="max-width:20ch;margin-bottom:clamp(2.5rem,5vw,4rem)">
+      <span class="reveal-line"><span>Built for people who are serious</span></span>
+      <span class="reveal-line"><span style="--d:.1s">about their <em class="em">next move.</em></span></span>
+    </h2>
+
+    <div class="principles" style="margin-bottom:clamp(3rem,6vw,4.5rem)">
+      <div class="principle" data-reveal="fade">
+        <h3>UK and European conventions</h3>
+        <p>CV, not r&eacute;sum&eacute;. British spelling, European date formats, and the section conventions employers here actually expect — not a US template with the spelling changed.</p>
+      </div>
+      <div class="principle" data-reveal="fade" style="--d:.1s">
+        <h3>Nothing invented on your behalf</h3>
+        <p>Every rewrite is a suggestion you accept or reject, traced back to something already in your CV. The AI sharpens what you did. It doesn&rsquo;t make things up.</p>
+      </div>
+      <div class="principle" data-reveal="fade" style="--d:.2s">
+        <h3>No lock-in</h3>
+        <p>Start free. Take a one-off pass for a single application if that&rsquo;s all you need. Cancel a subscription in one click — Stripe-secured checkout, no phone calls.</p>
+      </div>
+    </div>
+
+    <!--
+      TESTIMONIALS — PLACEHOLDER STRUCTURE.
+      No verified customer reviews exist yet, so nothing is claimed here.
+      To publish real ones: replace each .proof__slot with a <blockquote>,
+      and add the reviewer's name and role. Do not add star ratings or
+      aggregateRating structured data without genuine, attributable reviews.
+    -->
+    <div class="proof" aria-label="Customer reviews — not yet published">
+      <figure class="proof__card" data-reveal="fade">
+        <span class="proof__badge">Review slot 01</span>
+        <div class="proof__slot">Awaiting a verified customer review</div>
+      </figure>
+      <figure class="proof__card" data-reveal="fade" style="--d:.1s">
+        <span class="proof__badge">Review slot 02</span>
+        <div class="proof__slot">Awaiting a verified customer review</div>
+      </figure>
+      <figure class="proof__card" data-reveal="fade" style="--d:.2s">
+        <span class="proof__badge">Review slot 03</span>
+        <div class="proof__slot">Awaiting a verified customer review</div>
+      </figure>
+    </div>
+    <p class="micro" style="margin-top:1.25rem;text-transform:none;letter-spacing:0.04em;font-size:0.72rem;line-height:1.6;max-width:56ch">We publish reviews only once they&rsquo;re real and attributable. Used CV Central? <a class="link" href="feedback.html">Tell us how it went</a>.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ 10 · PRICING ── -->
+<section class="band band--paper" id="pricing" aria-labelledby="pricing-title">
+  <div class="shell">
+    <p class="index"><span class="index__num">10</span><span>Pricing</span><span class="index__rule"></span><span>Priced in GBP &middot; VAT may apply</span></p>
+
+    <div class="stack-head">
+      <h2 class="display t-mega" id="pricing-title">
+        <span class="reveal-line"><span>Pay for what</span></span>
+        <span class="reveal-line"><span style="--d:.1s">you <em class="em">actually use.</em></span></span>
+      </h2>
+      <div class="stack-head__aside">
+        <p class="body-copy" data-reveal="fade" style="--d:.2s">One free CV to see whether this works for you. A one-off pass if you&rsquo;ve got a single application to get right. A subscription only if you&rsquo;re in an active search.</p>
+      </div>
+    </div>
+
+    <div class="plans">
+
+      <div class="plan" data-reveal="fade">
+        <div class="plan__head">
+          <h3 class="plan__name">Free</h3>
+          <p class="plan__price">£0<em> forever</em></p>
+          <p class="plan__for">First-time users and students</p>
+        </div>
+        <ul class="plan__feats">
+          <li>1 CV, unlimited edits</li>
+          <li>1 ATS score</li>
+          <li>1 AI enhancement</li>
+          <li>1 cover letter</li>
+          <li>5 interview questions</li>
           <li>Basic templates</li>
           <li>PDF download</li>
-          <li>Basic resume parser</li>
-          <li class="feat-no">DOCX export</li>
-          <li class="feat-no">Multiple CVs</li>
-          <li class="feat-no">Application Tracker</li>
         </ul>
-        <a href="signup.html" class="btn-plan btn-plan-ghost">Get started free</a>
+        <div class="plan__cta">
+          <a class="btn btn--ghost" href="signup.html">Start building<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="plan__note">No card required</p>
+        </div>
       </div>
 
-      <!-- JOB PASS -->
-      <div class="price-card pass-card reveal">
-        <div class="popular-badge" style="background:rgba(170,255,0,0.15);color:var(--lime);">⚡ One-time</div>
-        <div class="plan-name">Job Pass</div>
-        <div class="plan-price">£1.19<span> / 3 days</span></div>
-        <div class="plan-period">one-off, no subscription</div>
-        <p class="plan-tagline">Perfect for one-off job applications</p>
-        <ul class="plan-feats">
-          <li>Everything in Free, plus:</li>
-          <li class="feat-divider" aria-hidden="true"></li>
+      <div class="plan" data-reveal="fade">
+        <div class="plan__head">
+          <span class="plan__tag plan__tag--quiet">One-off</span>
+          <h3 class="plan__name">Job Pass</h3>
+          <p class="plan__price">£1.19<em> / 3 days</em></p>
+          <p class="plan__for">One application you need to get right</p>
+        </div>
+        <ul class="plan__feats">
+          <li>Everything in Free</li>
           <li>Unlimited CVs</li>
-          <li>Unlimited ATS Scores</li>
-          <li>Unlimited CV Enhancements</li>
-          <li>Unlimited Cover Letters</li>
-          <li>Unlimited Interview Prep</li>
-          <li>CV Comparison</li>
+          <li>Unlimited ATS scores</li>
+          <li>Unlimited enhancements</li>
+          <li>Unlimited cover letters</li>
+          <li>Unlimited interview prep</li>
           <li>All templates</li>
           <li>DOCX export</li>
-          <li>Priority AI</li>
         </ul>
-        <a href="signup.html" class="btn-plan btn-plan-ghost">Get Job Pass</a>
+        <div class="plan__cta">
+          <a class="btn btn--ghost" href="signup.html">Get a Job Pass<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="plan__note">No subscription</p>
+        </div>
       </div>
 
-      <!-- PRO -->
-      <div class="price-card popular reveal">
-        <div class="popular-badge">Most Popular</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-price" id="proPrice">£9.99<span>/mo</span></div>
-        <div class="plan-period" id="proPeriod">per month</div>
-        <div class="plan-trial">✨ Try 14 days for £1.99</div>
-        <p class="plan-tagline">Perfect for active job seekers</p>
-        <ul class="plan-feats">
-          <li>Everything in Job Pass, plus:</li>
-          <li class="feat-divider" aria-hidden="true"></li>
+      <div class="plan" data-reveal="fade">
+        <div class="plan__head">
+          <span class="plan__tag">14 days for £1.99</span>
+          <h3 class="plan__name">Pro</h3>
+          <p class="plan__price">£9.99<em> / month &middot; or £99 / year</em></p>
+          <p class="plan__for">An active job search</p>
+        </div>
+        <ul class="plan__feats">
+          <li>Everything in Job Pass</li>
           <li>LinkedIn Profile Optimiser</li>
           <li>AI Personal Statement</li>
           <li>Skills Gap Analysis</li>
-          <li>AI Job Match Analysis</li>
+          <li>AI Job Match</li>
           <li>Application Tracker</li>
           <li>CV Version Manager</li>
-          <li>Save Cover Letters</li>
-          <li>Save Interview Sessions</li>
-          <li>Priority Support</li>
+          <li>Saved letters &amp; sessions</li>
+          <li>Priority support</li>
         </ul>
-        <a href="signup.html" class="btn-plan btn-plan-lime" id="proBtnLabel">Get Pro</a>
-        <p style="text-align:center;font-size:0.72rem;color:var(--text-3);margin-top:8px;" id="proTrialNote">then £9.99/month — cancel anytime</p>
+        <div class="plan__cta">
+          <a class="btn" href="signup.html">Start building<svg class="btn__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="plan__note">Then £9.99/month.<br>Cancel anytime, one click.</p>
+        </div>
       </div>
 
-      <!-- PREMIUM -->
-      <div class="price-card reveal" style="opacity:0.75;pointer-events:none;user-select:none;">
-        <div class="popular-badge" style="background:var(--bg-card2);color:var(--text-2);">Coming Soon</div>
-        <div class="plan-name">Premium</div>
-        <div class="plan-price" id="premiumPrice">£19.99<span>/mo</span></div>
-        <div class="plan-period" id="premiumPeriod">per month</div>
-        <p class="plan-tagline">Perfect for serious professionals &amp; career changers</p>
-        <ul class="plan-feats">
-          <li>Everything in Pro, plus:</li>
-          <li class="feat-divider" aria-hidden="true"></li>
+      <div class="plan plan--soon" data-reveal="fade">
+        <div class="plan__head">
+          <span class="plan__tag plan__tag--quiet">Coming soon</span>
+          <h3 class="plan__name">Premium</h3>
+          <p class="plan__price">£19.99<em> / month</em></p>
+          <p class="plan__for">Career changers and senior moves</p>
+        </div>
+        <ul class="plan__feats">
+          <li>Everything in Pro</li>
           <li>AI Career Coach</li>
           <li>Mock Interview Coach</li>
           <li>STAR Answer Generator</li>
           <li>Recruiter Feedback Simulation</li>
           <li>Salary Insights</li>
           <li>Career Progression Planner</li>
-          <li>Executive CV Templates</li>
-          <li>LinkedIn Personal Branding</li>
-          <li>AI Career Roadmap</li>
+          <li>Executive templates</li>
         </ul>
-        <span class="btn-plan btn-plan-ghost" style="cursor:not-allowed;" id="premiumBtnLabel">Coming soon</span>
+        <div class="plan__cta">
+          <span class="plan__note">Not yet available</span>
+        </div>
       </div>
 
     </div>
-    <!-- Trust bar -->
-    <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:40px;padding:20px 24px;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:16px;max-width:600px;margin-left:auto;margin-right:auto;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.2rem;">🔒</span>
-        <div><div style="font-size:0.82rem;font-weight:700;">Stripe-secured</div><div style="font-size:0.73rem;color:var(--text-2);">Bank-grade encryption</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.2rem;">✅</span>
-        <div><div style="font-size:0.82rem;font-weight:700;">Cancel anytime</div><div style="font-size:0.73rem;color:var(--text-2);">One click — no phone calls</div></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.2rem;">💸</span>
-        <div><div style="font-size:0.82rem;font-weight:700;">No hidden fees</div><div style="font-size:0.73rem;color:var(--text-2);">Price shown is price charged</div></div>
-      </div>
-    </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--text-3);margin-top:14px;">VAT may apply</p>
-  </div>
-</section>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials">
-  <div class="section-inner">
-    <div class="section-tag">Reviews</div>
-    <h2 class="section-h2">Trusted by job seekers across Europe</h2>
-    <div class="testi-grid">
-      <div class="testi-card reveal">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"Went from a score of 54 to 89 in one session. Got an interview at Deloitte the following week. The AI suggestions were specific and actually made sense."</p>
-        <div class="testi-author"><div class="testi-av" style="background:#2D5B8E;color:#AAE0FF;">JT</div><div><div class="testi-name">James T.</div><div class="testi-role">Software Engineer, London</div></div></div>
-      </div>
-      <div class="testi-card reveal">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"The LinkedIn import saved me hours. Pulled in all my jobs, education and skills in seconds. Cover letter generator is brilliant for tailoring each application."</p>
-        <div class="testi-author"><div class="testi-av" style="background:#5B2D8E;color:#AAFF00;">PR</div><div><div class="testi-name">Priya R.</div><div class="testi-role">Marketing Manager, Manchester</div></div></div>
-      </div>
-      <div class="testi-card reveal">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"Finally a CV builder that knows UK conventions. No US résumé nonsense. Transparent pricing too — paid £1.99 and knew exactly what I was getting."</p>
-        <div class="testi-author"><div class="testi-av" style="background:#2D8E5B;color:#AAFFD9;">SM</div><div><div class="testi-name">Sarah M.</div><div class="testi-role">NHS Nurse, Birmingham</div></div></div>
-      </div>
+    <div class="assurances">
+      <span class="assurance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Stripe-secured checkout
+      </span>
+      <span class="assurance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+        Cancel anytime, one click
+      </span>
+      <span class="assurance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        The price shown is the price charged
+      </span>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section id="cta" style="border-top:1px solid var(--border);">
-  <div class="section-inner">
-    <div class="cta-inner">
-      <h2 class="cta-h2">Ready to score<br><em>your dream role?</em></h2>
-      <p class="cta-sub">Join 2,400+ European professionals who've already upgraded their CV. Start your 14-day trial for £1.99 — cancel anytime.</p>
-      <a href="signup.html" class="btn-primary" style="font-size:1.05rem;padding:16px 36px;">✦ Start for £1.99</a>
-      <p class="cta-note">No commitment. Cancel anytime. Stripe-secured checkout.</p>
+<!-- ════════════════════════════════════════════════════════ FINAL CTA ── -->
+<section class="band band--ink" id="cta" aria-labelledby="cta-title">
+  <div class="hero__aura" aria-hidden="true"></div>
+  <div class="shell cta__inner">
+    <h2 class="display t-mega cta__title" id="cta-title">
+      <span class="reveal-line"><span>Your next</span></span>
+      <span class="reveal-line"><span style="--d:.1s">opportunity</span></span>
+      <span class="reveal-line"><span style="--d:.2s"><em class="em">starts here.</em></span></span>
+    </h2>
+    <p class="lead cta__sub" data-reveal="fade" style="--d:.25s">Build a stronger CV. Apply with confidence. Walk into your next interview prepared.</p>
+    <div class="cta__actions" data-reveal="fade" style="--d:.35s">
+      <a class="btn btn--lg" href="cv-builder.html">Build my CV<svg class="btn__arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn--lg btn--ghost" href="#pricing">See pricing</a>
     </div>
+    <p class="micro" data-reveal="fade" style="--d:.45s;text-transform:none;letter-spacing:0.04em">Free to start &middot; no card required</p>
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <a href="#" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;">
-        <svg width="24" height="24" viewBox="0 0 40 40" aria-hidden="true">
-          <rect x="4" y="20" width="7" height="14" rx="2" fill="#5B2D8E"/>
-          <rect x="14" y="12" width="7" height="22" rx="2" fill="#7B4DB8"/>
-          <rect x="24" y="4" width="7" height="30" rx="2" fill="#AAFF00"/>
-        </svg>
-        <span style="font-family:var(--font-display);font-weight:600;font-size:1.1rem;color:var(--text);">CV<span style="color:#AAFF00;" class="footer-logo-accent">Central</span></span>
-      </a>
-      <p>AI-powered CV builder built for job seekers across Europe. Score, enhance, and land more interviews.</p>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════ FOOTER ── -->
+<footer class="site-foot">
+  <div class="shell">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <a class="brand" href="/" aria-label="CV Central — home">
+          <svg class="brand__mark" width="22" height="22" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+            <rect x="4" y="20" width="7" height="14" rx="1.5" fill="#5B2D8E"/>
+            <rect x="14" y="12" width="7" height="22" rx="1.5" fill="#7B4DB8"/>
+            <rect x="24" y="4" width="7" height="30" rx="1.5" fill="#AAFF00"/>
+          </svg>
+          <span class="brand__word">CV<i>Central</i></span>
+        </a>
+        <p>An AI career platform for building, optimising and tracking job applications across the UK and Europe.</p>
+      </div>
+
+      <div class="foot__col">
+        <h3>Product</h3>
+        <a href="cv-builder.html">CV Builder</a>
+        <a href="job-match.html">Job Match</a>
+        <a href="saved-cover-letters.html">Cover Letters</a>
+        <a href="interview-coach.html">Interview Coach</a>
+        <a href="tracker.html">Application Tracker</a>
+        <a href="linkedin-optimiser.html">LinkedIn Optimiser</a>
+      </div>
+
+      <div class="foot__col">
+        <h3>Company</h3>
+        <a href="#pricing">Pricing</a>
+        <a href="blog/index.html">Resources</a>
+        <a href="feedback.html">Feedback</a>
+        <a href="mailto:info@cvcentral.io">Contact</a>
+      </div>
+
+      <div class="foot__col">
+        <h3>Account</h3>
+        <a href="signup.html">Sign up</a>
+        <a href="login.html">Log in</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
     </div>
-    <div class="footer-col">
-      <h4>Product</h4>
-      <a href="cv-builder.html">CV Builder</a>
-      <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
+
+    <div class="foot__bottom">
+      <p>&copy; 2026 CV Central is a trading name of Clavent Ltd, registered in England and Wales, company no. 17278057.</p>
+      <p>Built for job seekers across the UK and Europe.</p>
     </div>
-    <div class="footer-col">
-      <h4>Account</h4>
-      <a href="signup.html">Sign up</a>
-      <a href="login.html">Sign in</a>
-      <a href="dashboard.html">Dashboard</a>
-    </div>
-    <div class="footer-col">
-      <h4>Legal</h4>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms of Service</a>
-      <a href="mailto:info@cvcentral.io">Contact</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>&copy; 2026 CV Central is a trading name of Clavent Ltd, Registered in England and Wales, Company No. 17278057.</p>
-    <p style="color:var(--text-3);">Made with ♥ for job seekers across Europe</p>
   </div>
 </footer>
 
-<script>
-// ── Neural Canvas ──
-(function(){
-  var canvas = document.getElementById('neural-canvas');
-  var ctx = canvas.getContext('2d');
-  var nodes = [];
-  var W, H;
-  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-  resize();
-  window.addEventListener('resize', resize);
-  for(var i=0;i<60;i++){
-    nodes.push({
-      x:Math.random()*W, y:Math.random()*H,
-      vx:(Math.random()-0.5)*0.4, vy:(Math.random()-0.5)*0.4,
-      r:Math.random()*2+1,
-      lime:Math.random()>0.4
-    });
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    for(var i=0;i<nodes.length;i++){
-      var n=nodes[i];
-      n.x+=n.vx; n.y+=n.vy;
-      if(n.x<0||n.x>W)n.vx*=-1;
-      if(n.y<0||n.y>H)n.vy*=-1;
-      for(var j=i+1;j<nodes.length;j++){
-        var m=nodes[j];
-        var dx=n.x-m.x, dy=n.y-m.y;
-        var dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<130){
-          ctx.beginPath();
-          ctx.moveTo(n.x,n.y); ctx.lineTo(m.x,m.y);
-          var op=1-dist/130;
-          ctx.strokeStyle=n.lime?'rgba(170,255,0,'+op*0.3+')':'rgba(123,77,184,'+op*0.35+')';
-          ctx.lineWidth=0.7;
-          ctx.stroke();
-        }
-      }
-      ctx.beginPath();
-      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
-      ctx.fillStyle=n.lime?'rgba(170,255,0,0.7)':'rgba(123,77,184,0.6)';
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-// ── 3D Score Card tilt ──
-(function(){
-  var card = document.getElementById('scoreCard');
-  if(!card) return;
-  card.parentElement.addEventListener('mousemove',function(e){
-    var r=card.getBoundingClientRect();
-    var dx=(e.clientX-r.left-r.width/2)/(r.width/2);
-    var dy=(e.clientY-r.top-r.height/2)/(r.height/2);
-    card.style.transform='perspective(800px) rotateX('+(-dy*7)+'deg) rotateY('+(dx*7)+'deg) scale(1.02)';
-  });
-  card.parentElement.addEventListener('mouseleave',function(){
-    card.style.transform='perspective(800px) rotateX(0) rotateY(0) scale(1)';
-  });
-})();
-
-// ── Score counter animation ──
-(function(){
-  var triggered=false;
-  var obs=new IntersectionObserver(function(entries){
-    if(entries[0].isIntersecting&&!triggered){
-      triggered=true;
-      var el=document.getElementById('scoreNum');
-      if(!el) return;
-      var start=performance.now();
-      var target=87;
-      (function tick(now){
-        var t=Math.min((now-start)/1200,1);
-        var ease=1-Math.pow(1-t,3);
-        el.textContent=Math.round(target*ease);
-        if(t<1) requestAnimationFrame(tick);
-      })(start);
-      setTimeout(function(){
-        document.querySelectorAll('.sc-fill').forEach(function(fill){
-          fill.style.width=fill.dataset.w+'%';
-        });
-      },300);
-    }
-  },{threshold:0.4});
-  var card=document.getElementById('scoreCard');
-  if(card) obs.observe(card);
-})();
-
-// ── Pricing toggle ──
-function setPricing(mode, el){
-  document.querySelectorAll('.toggle-opt').forEach(function(o){o.classList.remove('active');});
-  el.classList.add('active');
-  var annual = mode==='annual';
-  document.getElementById('proPrice').innerHTML = annual ? '£99<span>/yr</span>' : '£9.99<span>/mo</span>';
-  document.getElementById('proPeriod').textContent = annual ? 'per year (save £20.88)' : 'per month';
-  document.getElementById('premiumPrice').innerHTML = annual ? '£199<span>/yr</span>' : '£19.99<span>/mo</span>';
-  document.getElementById('premiumPeriod').textContent = annual ? 'per year (save £40.88)' : 'per month';
-  document.getElementById('proBtnLabel').textContent = annual ? 'Get Pro — Annual' : 'Get Pro';
-  document.getElementById('proTrialNote').textContent = annual ? 'then £99/year — cancel anytime' : 'then £9.99/month — cancel anytime';
-  // Job Pass is always one-time — no change needed
-}
-
-// ── Reveal on scroll ──
-(function(){
-  var obs=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-  },{threshold:0.12});
-  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
-})();
-
-// Redirect to dashboard if OAuth token lands on homepage
-(function(){
-  if(window.location.hash && window.location.hash.indexOf('access_token=') > -1){
-    window.location.replace('dashboard.html' + window.location.hash);
-  }
-})();
-
-// ── Theme toggle ──
-(function(){
-  var html = document.documentElement;
-  var btn = document.getElementById('themeToggle');
-  var sunIcon = document.getElementById('themeIconSun');
-  var moonIcon = document.getElementById('themeIconMoon');
-  var canvas = document.getElementById('neural-canvas');
-
-  function applyTheme(theme){
-    if(theme === 'light'){
-      html.setAttribute('data-theme','light');
-      sunIcon.style.display = 'block';
-      moonIcon.style.display = 'none';
-      if(canvas) canvas.style.opacity = '0.12';
-    } else {
-      html.removeAttribute('data-theme');
-      sunIcon.style.display = 'none';
-      moonIcon.style.display = 'block';
-      if(canvas) canvas.style.opacity = '0.35';
-    }
-  }
-
-  // Init from storage
-  var saved = '';
-  try { saved = localStorage.getItem('cvcentral_theme') || ''; } catch(e){}
-  applyTheme(saved === 'light' ? 'light' : 'dark');
-
-  if(btn){
-    btn.addEventListener('click', function(){
-      var isLight = html.getAttribute('data-theme') === 'light';
-      var next = isLight ? 'dark' : 'light';
-      try { localStorage.setItem('cvcentral_theme', next); } catch(e){}
-      applyTheme(next);
-    });
-  }
-})();
-</script>
-  <script src="js/pwa.js"></script>
+<script src="js/landing.js" defer></script>
+<script src="js/analytics.js" defer></script>
+<script src="js/pwa.js" defer></script>
 </body>
 </html>

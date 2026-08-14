@@ -5,7 +5,10 @@
  * or Stripe requests — those always need a live network round-trip.
  */
 
-const CACHE_VERSION = 'cvcentral-v1';
+// Bumped to v2 with the landing page redesign — the precached '/' and
+// '/index.html' now depend on landing.css / landing.js, so the old cache
+// would serve an unstyled shell offline.
+const CACHE_VERSION = 'cvcentral-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -13,8 +16,10 @@ const APP_SHELL = [
   '/cv-builder.html',
   '/login.html',
   '/signup.html',
+  '/styles/landing.css',
   '/styles/main.css',
   '/styles/builder.css',
+  '/js/landing.js',
   '/js/auth.js',
   '/js/chatbot.js',
   '/assets/logo-icon.svg',
