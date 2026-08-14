@@ -5,10 +5,15 @@
  * or Stripe requests — those always need a live network round-trip.
  */
 
-// Bumped to v2 with the landing page redesign — the precached '/' and
-// '/index.html' now depend on landing.css / landing.js, so the old cache
-// would serve an unstyled shell offline.
-const CACHE_VERSION = 'cvcentral-v2';
+// IMPORTANT: bump this whenever any file listed in APP_SHELL changes.
+// The worker only re-runs install() when this file's bytes change, so an
+// edit to a precached page with the version left alone leaves every client
+// holding the previous copy — that is exactly how the fixed cv-builder.html
+// failed to reach users who had installed v2 beforehand.
+//
+// v2 — landing page redesign ('/' and '/index.html' gained landing.css/js)
+// v3 — cv-builder.html renderTags fix
+const CACHE_VERSION = 'cvcentral-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
