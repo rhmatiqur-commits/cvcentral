@@ -1627,29 +1627,35 @@
     });
 
     /* ---------- Tag inputs ---------- */
+    // Renders the chips for one tag group ('skills' | 'languages' | 'certifications').
+    // Declared at this scope — not inside the per-wrap loop below — because the CV
+    // upload and LinkedIn import both call it by key from prefillFields().
+    function renderTags(key) {
+      var wrap = document.querySelector('.tag-input-wrap[data-tags="' + key + '"]');
+      if (!wrap) return;
+      var input = wrap.querySelector('input');
+      wrap.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
+      (state[key] || []).forEach(function (tag, i) {
+        var chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.appendChild(document.createTextNode(tag));
+        var x = document.createElement('button');
+        x.type = 'button';
+        x.setAttribute('aria-label', 'Remove ' + tag);
+        x.textContent = '×';
+        x.addEventListener('click', function () {
+          state[key].splice(i, 1);
+          renderTags(key);
+          saveDraft();
+        });
+        chip.appendChild(x);
+        wrap.insertBefore(chip, input);
+      });
+    }
+
     document.querySelectorAll('.tag-input-wrap').forEach(function (wrap) {
       var key = wrap.dataset.tags;
       var input = wrap.querySelector('input');
-
-      function renderTags() {
-        wrap.querySelectorAll('.tag-chip').forEach(function (c) { c.remove(); });
-        state[key].forEach(function (tag, i) {
-          var chip = document.createElement('span');
-          chip.className = 'tag-chip';
-          chip.appendChild(document.createTextNode(tag));
-          var x = document.createElement('button');
-          x.type = 'button';
-          x.setAttribute('aria-label', 'Remove ' + tag);
-          x.textContent = '×';
-          x.addEventListener('click', function () {
-            state[key].splice(i, 1);
-            renderTags();
-            saveDraft();
-          });
-          chip.appendChild(x);
-          wrap.insertBefore(chip, input);
-        });
-      }
 
       input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ',') {
@@ -1657,18 +1663,18 @@
           var v = input.value.trim().replace(/,$/, '');
           if (v && state[key].indexOf(v) === -1) {
             state[key].push(v);
-            renderTags();
+            renderTags(key);
             saveDraft();
           }
           input.value = '';
         } else if (e.key === 'Backspace' && !input.value && state[key].length) {
           state[key].pop();
-          renderTags();
+          renderTags(key);
           saveDraft();
         }
       });
       wrap.addEventListener('click', function () { input.focus(); });
-      renderTags();
+      renderTags(key);
     });
 
     /* ---------- Step 4: job target ---------- */
