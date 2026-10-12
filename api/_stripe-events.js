@@ -49,26 +49,69 @@ function getStripe() {
 /**
  * Returns the exact bytes Stripe signed, or null when they cannot be known.
  *
- * Returning null is deliberate and important: if a platform body parser has
- * already turned the request into an object, re-serialising it would produce
- * different bytes and the signature could never match. Pretending to verify
- * against a reconstructed body would be worse than not verifying at all,
- * because it would look correct. The caller treats null as a hard failure.
+ * THE ORDER HERE IS LOAD-BEARING.
+ *
+ * On Vercel's Node runtime `req.body` is a lazy getter. The platform
+ * documents it as "only computed when it is accessed", and computing it
+ * drains the request stream and parses the result — for Stripe's
+ * application/json that produces an object, and the original bytes are then
+ * gone for good. So the stream is read FIRST, and `req.body` is not touched
+ * at all while the stream can still provide anything.
+ *
+ * An earlier revision of this file inspected `req.body` on its first line.
+ * That access alone triggered the getter, so every signature check failed
+ * with 400 — safely, but it would have stopped every subscription
+ * activation, renewal and cancellation. Hence the comment, and the
+ * regression test that reproduces it with a lazy getter.
+ *
+ * Note this needs no platform configuration. `config.api.bodyParser` is a
+ * Next.js API-route option and is not honoured for standalone functions in
+ * api/, and NODEJS_HELPERS=0 would disable `req.query` across the whole API,
+ * which several endpoints route on.
+ *
+ * The fallback exists because nothing guarantees the stream is still
+ * readable in every deployment configuration — something upstream may
+ * already have consumed it. Then the bytes survive only if the platform
+ * handed us a Buffer (application/octet-stream) or a string (text/plain).
+ * A parsed object cannot be turned back into the signed bytes, and
+ * re-serialising it would produce a different payload that could never
+ * verify, so that path returns null and the caller refuses the request.
+ * Pretending to verify would be worse than not verifying, because it would
+ * look correct.
  */
 function readRawBody(req) {
-  if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
-  if (typeof req.body === 'string' && req.body.length) {
-    return Promise.resolve(Buffer.from(req.body, 'utf8'));
+  const canStream =
+    typeof req.on === 'function' &&
+    req.readableEnded !== true &&
+    req.readable !== false;
+
+  if (canStream) {
+    return new Promise(function (resolve, reject) {
+      const chunks = [];
+      req.on('data', function (c) { chunks.push(c); });
+      req.on('end', function () { resolve(Buffer.concat(chunks)); });
+      req.on('error', reject);
+    });
   }
-  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length) {
-    return Promise.resolve(null); // parsed upstream — raw bytes are gone
+
+  return Promise.resolve(bodyAsRawBytes(req));
+}
+
+/**
+ * Last resort, reached only once the stream can no longer be read — so
+ * touching the getter at this point cannot lose anything not already lost.
+ */
+function bodyAsRawBytes(req) {
+  let body;
+  try {
+    body = req.body;
+  } catch (e) {
+    // Vercel's getter throws on malformed JSON. Nothing verifiable here.
+    return null;
   }
-  return new Promise(function (resolve, reject) {
-    const chunks = [];
-    req.on('data', function (c) { chunks.push(c); });
-    req.on('end', function () { resolve(Buffer.concat(chunks)); });
-    req.on('error', reject);
-  });
+  if (Buffer.isBuffer(body)) return body;
+  if (typeof body === 'string' && body.length) return Buffer.from(body, 'utf8');
+  return null; // parsed object, or no body at all
 }
 
 /** Verifies the signature, then processes the event. Always fails closed. */
@@ -255,6 +298,6 @@ async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscription
 }
 
 module.exports = {
-  handleStripeWebhook, processEvent, readRawBody,
+  handleStripeWebhook, processEvent, readRawBody, bodyAsRawBytes,
   updateUserPlan, getUserByStripeCustomerId, PLAN_TO_TIER,
 };

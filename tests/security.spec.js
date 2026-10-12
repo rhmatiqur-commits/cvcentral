@@ -278,6 +278,84 @@ test.describe('C-3 webhook signature verification', () => {
     data: { object: { metadata: { userId: USER_ID, planKey: 'day_pass' }, payment_status: 'paid', customer: 'cus_test' } },
   });
 
+  /**
+   * A request shaped like one on Vercel's Node runtime: a readable stream
+   * carrying the bytes, plus a `body` LAZY GETTER that is only computed when
+   * accessed and which destroys the stream when it is — the platform parses
+   * and consumes the request at that moment, after which the signed bytes are
+   * unrecoverable.
+   *
+   * `bodyGetterTouched` records whether anything read `req.body`, which is the
+   * precise thing the implementation must not do before reading the stream.
+   */
+  function lazyBodyReq(rawBody, headers) {
+    const req = Readable.from([Buffer.from(rawBody, 'utf8')]);
+    req.method = 'POST';
+    req.headers = Object.assign({ 'content-type': 'application/json' }, headers || {});
+    req.query = {};
+
+    let touched = false;
+    let parsed;
+    Object.defineProperty(req, 'body', {
+      configurable: true,
+      get: function () {
+        if (!touched) {
+          touched = true;
+          try { parsed = JSON.parse(rawBody); } catch (e) { parsed = undefined; }
+          req.destroy(); // the platform consumed the stream to parse it
+        }
+        return parsed;
+      },
+    });
+    Object.defineProperty(req, 'bodyGetterTouched', {
+      configurable: true,
+      get: function () { return touched; },
+    });
+    return req;
+  }
+
+  test('verifies a signed event without touching the lazy req.body getter', async () => {
+    process.env.STRIPE_WEBHOOK_SECRET = WH_SECRET;
+    const calls = stubFetch({});
+    const { handleStripeWebhook } = load('api/_stripe-events.js');
+    const req = lazyBodyReq(EVENT, { 'stripe-signature': signed(EVENT) });
+    const res = mockRes();
+
+    await handleStripeWebhook(req, res);
+
+    // The regression this guards: inspecting req.body first triggered the
+    // getter, destroyed the signed bytes, and rejected a genuine event with
+    // 400 — which would have stopped every activation, renewal and
+    // cancellation in production.
+    expect(req.bodyGetterTouched, 'req.body was read before the stream').toBe(false);
+    expect(res.statusCode).toBe(200);
+
+    const writes = calls.filter(c => c.url.indexOf('profiles') !== -1 && c.init.method === 'POST');
+    expect(writes.length).toBe(1);
+    const body = JSON.parse(writes[0].init.body);
+    expect(body.id).toBe(USER_ID);
+    expect(body.plan).toBe('day_pass');
+  });
+
+  test('fails closed if something upstream already consumed the stream', async () => {
+    process.env.STRIPE_WEBHOOK_SECRET = WH_SECRET;
+    const calls = stubFetch({});
+    const { handleStripeWebhook } = load('api/_stripe-events.js');
+    const req = lazyBodyReq(EVENT, { 'stripe-signature': signed(EVENT) });
+
+    // Simulate middleware having parsed the body before we were called: the
+    // bytes are gone, and a parsed object must never be re-serialised and
+    // treated as verifiable.
+    void req.body;
+    expect(req.bodyGetterTouched).toBe(true);
+
+    const res = mockRes();
+    await handleStripeWebhook(req, res);
+
+    expect(res.statusCode).toBe(400);
+    expect(calls.length).toBe(0);
+  });
+
   test('fails closed when STRIPE_WEBHOOK_SECRET is not configured', async () => {
     const calls = stubFetch({});
     const { handleStripeWebhook } = load('api/_stripe-events.js');
