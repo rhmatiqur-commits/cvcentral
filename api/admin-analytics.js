@@ -3,16 +3,20 @@
  *
  * Reads the analytics_events table (see migration "create_analytics_events_table")
  * with the service-role key and returns aggregated funnel + daily-activity
- * numbers for the admin dashboard. Same x-admin-key gate as
+ * numbers for the admin dashboard. Same admin authorisation as
  * api/admin-feedback.js and api/admin-data.js — no client ever reads
  * analytics_events directly (its RLS policy only allows INSERT).
  *
  * Method: GET /api/admin-analytics
- * Auth:   header  x-admin-key: <ADMIN_PASSWORD>
+ * Auth:   header  Authorization: Bearer <supabase access token>
+ *
+ * SECURITY (remediation of audit finding C-1): replaced the shared
+ * `x-admin-key` password, which was published in admin.html, with a verified
+ * Supabase session checked against ADMIN_USER_IDS. Fails closed when unset.
  */
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://exzkmavkzqknoghopwhq.supabase.co';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'CVCentral2026!';
+const { requireAdmin } = require('./_auth');
 
 // Ordered so the funnel reads top-to-bottom as the real user journey.
 const FUNNEL_STEPS = [
@@ -30,18 +34,20 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', 'https://cvcentral.io');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-admin-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Use GET' });
 
-  if (!process.env.SUPABASE_SERVICE_KEY) {
-    return res.status(500).json({ error: 'SUPABASE_SERVICE_KEY not set' });
+  try {
+    await requireAdmin(req);
+  } catch (e) {
+    return res.status(e.status || 401).json({ error: e.message || 'Unauthorized' });
   }
 
-  const key = req.headers['x-admin-key'];
-  if (!key || key !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  if (!process.env.SUPABASE_SERVICE_KEY) {
+    console.error('[admin-analytics] SUPABASE_SERVICE_KEY not set');
+    return res.status(503).json({ error: 'Service unavailable' });
   }
 
   try {

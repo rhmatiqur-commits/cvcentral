@@ -30,7 +30,25 @@
  *   charged the regular amount when the trial ends.
  */
 
+const { verifyUser } = require('./_auth');
+const { handleStripeWebhook } = require('./_stripe-events');
+
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://exzkmavkzqknoghopwhq.supabase.co';
+
+// Redirect targets handed to Stripe must stay on our own origins, otherwise a
+// caller could point a real Stripe checkout at a page they control.
+const ALLOWED_REDIRECT_PREFIXES = [
+  'https://cvcentral.io/',
+  'https://www.cvcentral.io/',
+];
+
+function safeRedirect(url, fallback) {
+  if (typeof url !== 'string') return fallback;
+  for (var i = 0; i < ALLOWED_REDIRECT_PREFIXES.length; i++) {
+    if (url.indexOf(ALLOWED_REDIRECT_PREFIXES[i]) === 0) return url;
+  }
+  return fallback;
+}
 
 // Hardcoded Job Pass price (£1.19 one-time, created 2026-07-16)
 const DAY_PASS_PRICE_ID = 'price_1TtoeJRwetsWzvA0zINPt3Ht';
@@ -62,29 +80,54 @@ module.exports = async (req, res) => {
 
   const action = (req.query && req.query.action) || '';
 
-  // Webhook — no API key auth; uses Stripe signature
-  if (action === 'webhook') return handleWebhook(req, res);
+  // Webhook — authenticated by Stripe signature, not by a user session.
+  // Delegated to the single shared implementation (C-3).
+  //
+  // NOTE: this route cannot disable the platform body parser independently of
+  // the rest of this function, so the exact signed bytes may not be
+  // recoverable here. The shared handler then refuses the request rather than
+  // guessing. /api/webhook is the supported endpoint - see DEPLOYMENT notes.
+  if (action === 'webhook') return handleStripeWebhook(req, res);
 
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set' });
-  }
-  if (!process.env.SUPABASE_SERVICE_KEY) {
-    return res.status(500).json({ error: 'SUPABASE_SERVICE_KEY not set' });
-  }
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Use POST' });
   }
 
+  // SECURITY (remediation of audit finding C-2): every user-specific billing
+  // action requires a verified Supabase session and takes its identity from
+  // that session. A userId in the request body is ignored entirely.
+  //
+  // Previously each handler read userId straight from the body with no
+  // authentication at all, so any caller could read another account's
+  // subscription, cancel it, or mint a Stripe billing-portal link granting
+  // interactive access to that billing account.
+  let callerId, callerEmail;
   try {
-    if (action === 'create-checkout')  return await createCheckout(req, res);
-    if (action === 'get-subscription') return await getSubscription(req, res);
-    if (action === 'confirm-payment')  return await confirmPayment(req, res);
-    if (action === 'cancel')           return await cancelSubscription(req, res);
-    if (action === 'create-portal')    return await createPortalSession(req, res);
-    return res.status(400).json({ error: 'Unknown action: ' + action });
+    const caller = await verifyUser(req);
+    callerId = caller.id;
+    callerEmail = caller.email;
+  } catch (e) {
+    return res.status(e.status || 401).json({ error: e.message || 'Please sign in.' });
+  }
+
+  // Configuration is checked only after the caller is authenticated, so an
+  // anonymous request cannot probe which environment variables are present.
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.SUPABASE_SERVICE_KEY) {
+    console.error('[payment] missing STRIPE_SECRET_KEY or SUPABASE_SERVICE_KEY');
+    return res.status(503).json({ error: 'Billing is temporarily unavailable' });
+  }
+
+  try {
+    if (action === 'create-checkout')  return await createCheckout(req, res, callerId, callerEmail);
+    if (action === 'get-subscription') return await getSubscription(req, res, callerId);
+    if (action === 'confirm-payment')  return await confirmPayment(req, res, callerId);
+    if (action === 'cancel')           return await cancelSubscription(req, res, callerId);
+    if (action === 'create-portal')    return await createPortalSession(req, res, callerId);
+    return res.status(400).json({ error: 'Unknown action' });
   } catch (err) {
-    console.error('[payment]', err);
-    return res.status(500).json({ error: err.message || 'Payment error' });
+    // Generic to the client; detail stays in the function log.
+    console.error('[payment]', action, err);
+    return res.status(500).json({ error: 'Payment error' });
   }
 };
 
@@ -123,11 +166,6 @@ async function getUserProfile(userId) {
   return Array.isArray(rows) ? rows[0] : null;
 }
 
-async function getUserByStripeCustomerId(customerId) {
-  const rows = await supabaseQuery('profiles?stripe_customer_id=eq.' + encodeURIComponent(customerId));
-  return Array.isArray(rows) ? rows[0] : null;
-}
-
 async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscriptionId, planExpiresAt) {
   // Use upsert so this works even if no profile row exists yet
   const body = { id: userId };
@@ -155,12 +193,13 @@ async function updateUserPlan(userId, plan, stripeCustomerId, stripeSubscription
 // 1. Create Checkout Session
 // ─────────────────────────────────────────────────────────────
 
-async function createCheckout(req, res) {
-  const { userId, email, fullName, planKey, successUrl, cancelUrl } = req.body || {};
+async function createCheckout(req, res, userId, verifiedEmail) {
+  const { fullName, planKey, successUrl, cancelUrl } = req.body || {};
 
-  if (!userId || !email || !planKey) {
-    return res.status(400).json({ error: 'userId, email, and planKey required' });
-  }
+  // userId and email come from the verified session, never from the body.
+  const email = verifiedEmail;
+  if (!planKey) return res.status(400).json({ error: 'planKey required' });
+  if (!email)   return res.status(400).json({ error: 'Account has no email address' });
 
   const stripe = getStripe();
 
@@ -178,8 +217,8 @@ async function createCheckout(req, res) {
     await updateUserPlan(userId, undefined, customerId, undefined);
   }
 
-  const successBase = successUrl || 'https://cvcentral.io/dashboard.html';
-  const cancelBase  = cancelUrl  || 'https://cvcentral.io/dashboard.html';
+  const successBase = safeRedirect(successUrl, 'https://cvcentral.io/dashboard.html');
+  const cancelBase  = safeRedirect(cancelUrl,  'https://cvcentral.io/dashboard.html');
 
   // ── Job Pass (one-time payment, 72h Pro access) ──────────
   if (planKey === 'day_pass') {
@@ -207,9 +246,8 @@ async function createCheckout(req, res) {
   const priceId = priceIds[basePlanKey];
 
   if (!priceId) {
-    return res.status(400).json({
-      error: `No Stripe price for "${basePlanKey}". Add it to STRIPE_PRICE_IDS env var.`,
-    });
+    console.error('[create-checkout] no Stripe price configured for', basePlanKey);
+    return res.status(400).json({ error: 'That plan is not available right now.' });
   }
 
   // Base session params
@@ -262,142 +300,14 @@ async function createCheckout(req, res) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 2. Webhook — handle Stripe events
-// ─────────────────────────────────────────────────────────────
-
-async function handleWebhook(req, res) {
-  const stripe = getStripe();
-  const sig = req.headers['stripe-signature'];
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  let event;
-
-  // Try to verify signature
-  // Note: Vercel auto-parses the body as JSON, so we reconstruct the raw string.
-  // This works for test events. For production, consider using a Next.js API route
-  // with bodyParser: false, or the Stripe CLI for local testing.
-  try {
-    const rawBody = typeof req.body === 'string'
-      ? req.body
-      : JSON.stringify(req.body);
-
-    if (secret && sig) {
-      event = stripe.webhooks.constructEvent(rawBody, sig, secret);
-    } else {
-      // No secret configured — accept event without verification (sandbox only)
-      console.warn('[webhook] No STRIPE_WEBHOOK_SECRET set — skipping signature check');
-      event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    }
-  } catch (err) {
-    console.error('[webhook] Signature error:', err.message);
-    return res.status(400).json({ error: 'Webhook error: ' + err.message });
-  }
-
-  console.log('[webhook]', event.type);
-
-  try {
-    switch (event.type) {
-
-      // ── User completed checkout ──────────────────────────────
-      case 'checkout.session.completed': {
-        const session = event.data.object;
-        const userId  = session.metadata && session.metadata.userId;
-        const planKey = session.metadata && session.metadata.planKey;
-        if (!userId) break;
-
-        if (planKey === 'day_pass' && session.payment_status === 'paid') {
-          // One-time payment: grant 72 hours of Pro access
-          const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString();
-          await updateUserPlan(userId, 'day_pass', session.customer, null, expiresAt);
-          console.log('[webhook] day_pass activated:', userId, 'expires:', expiresAt);
-        } else if (session.subscription) {
-          const tier = PLAN_TO_TIER[planKey] || 'pro';
-          await updateUserPlan(userId, tier, session.customer, session.subscription);
-          console.log('[webhook] activated:', userId, '->', tier);
-        }
-        break;
-      }
-
-      // ── Subscription changed ────────────────────────────────
-      case 'customer.subscription.updated': {
-        const sub     = event.data.object;
-        const userId  = sub.metadata && sub.metadata.userId;
-        const planKey = sub.metadata && sub.metadata.planKey;
-        const tier    = PLAN_TO_TIER[planKey] || 'pro';
-        const user    = userId ? { id: userId } : await getUserByStripeCustomerId(sub.customer);
-
-        if (user) {
-          if (sub.status === 'active' || sub.status === 'trialing') {
-            await updateUserPlan(user.id, tier, sub.customer, sub.id);
-            console.log('[webhook] updated:', user.id, '->', tier, '(' + sub.status + ')');
-          } else if (sub.status === 'canceled' || sub.status === 'unpaid') {
-            await updateUserPlan(user.id, 'free', sub.customer, null);
-            console.log('[webhook] downgraded:', user.id, '-> free');
-          }
-        }
-        break;
-      }
-
-      // ── Subscription cancelled ──────────────────────────────
-      case 'customer.subscription.deleted': {
-        const sub    = event.data.object;
-        const userId = sub.metadata && sub.metadata.userId;
-        const user   = userId ? { id: userId } : await getUserByStripeCustomerId(sub.customer);
-        if (user) {
-          await updateUserPlan(user.id, 'free', sub.customer, null);
-          console.log('[webhook] cancelled:', user.id, '-> free');
-        }
-        break;
-      }
-
-      // ── Payment succeeded (e.g. trial converted) ─────────────
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object;
-        if (invoice.subscription && invoice.customer) {
-          const stripe = getStripe();
-          const sub = await stripe.subscriptions.retrieve(invoice.subscription);
-          const userId  = sub.metadata && sub.metadata.userId;
-          const planKey = sub.metadata && sub.metadata.planKey;
-          const user = userId ? { id: userId } : await getUserByStripeCustomerId(invoice.customer);
-          if (user && sub.status === 'active') {
-            const tier = PLAN_TO_TIER[planKey] || 'pro';
-            await updateUserPlan(user.id, tier, invoice.customer, invoice.subscription);
-            console.log('[webhook] invoice paid:', user.id, '->', tier);
-          }
-        }
-        break;
-      }
-
-      // ── Payment failed ──────────────────────────────────────
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object;
-        console.warn('[webhook] Payment failed for customer:', invoice.customer, '— not downgrading yet');
-        // Stripe will retry. Downgrade only when subscription status → unpaid/canceled.
-        break;
-      }
-
-      default:
-        // Ignore other events
-        break;
-    }
-  } catch (err) {
-    console.error('[webhook] Processing error:', err);
-    // Still return 200 so Stripe doesn't retry
-  }
-
-  return res.status(200).json({ received: true });
-}
-
-// ─────────────────────────────────────────────────────────────
 // 3. Get subscription status
 // ─────────────────────────────────────────────────────────────
 
-async function getSubscription(req, res) {
-  const { userId } = req.body || {};
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
+async function getSubscription(req, res, userId) {
+  // Scoped to the authenticated caller; the Stripe ids are read from their
+  // own profile row, so another account is not reachable.
   const profile = await getUserProfile(userId);
-  if (!profile) return res.status(404).json({ error: 'User not found' });
+  if (!profile) return res.status(404).json({ error: 'Not found' });
 
   let subscription = null;
   if (profile.stripe_subscription_id) {
@@ -419,9 +329,8 @@ async function getSubscription(req, res) {
 // 4. Confirm payment after redirect from Stripe
 // ─────────────────────────────────────────────────────────────
 
-async function confirmPayment(req, res) {
-  const { userId, sessionId } = req.body || {};
-  if (!userId) return res.status(400).json({ error: 'userId required' });
+async function confirmPayment(req, res, userId) {
+  const { sessionId } = req.body || {};
 
   // Use the Stripe checkout session to confirm payment
   if (sessionId) {
@@ -429,6 +338,15 @@ async function confirmPayment(req, res) {
       const stripe = getStripe();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
       console.log('[confirm-payment] session status:', session.status, 'payment_status:', session.payment_status);
+
+      // Ownership check: the session must be the one this caller started.
+      // Without it, any signed-in user could present a checkout session id
+      // belonging to someone else and have a plan applied to their account.
+      const sessionUserId = session.metadata && session.metadata.userId;
+      if (sessionUserId !== userId) {
+        console.warn('[confirm-payment] session/user mismatch for user', userId);
+        return res.status(403).json({ error: 'Forbidden' });
+      }
 
       if (session.status === 'complete' || session.payment_status === 'paid' || session.payment_status === 'no_payment_required') {
         const planKey = session.metadata && session.metadata.planKey;
@@ -461,10 +379,9 @@ async function confirmPayment(req, res) {
 // 5. Cancel subscription (at period end)
 // ─────────────────────────────────────────────────────────────
 
-async function cancelSubscription(req, res) {
-  const { userId } = req.body || {};
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
+async function cancelSubscription(req, res, userId) {
+  // The subscription id is read from the authenticated caller own profile
+  // row, so a caller can only ever cancel their own subscription.
   const profile = await getUserProfile(userId);
   const subId = profile && profile.stripe_subscription_id;
   if (!subId) return res.status(400).json({ error: 'No active subscription found' });
@@ -483,13 +400,13 @@ async function cancelSubscription(req, res) {
 // 6. Customer portal (manage billing, change plan, cancel)
 // ─────────────────────────────────────────────────────────────
 
-async function createPortalSession(req, res) {
-  const { userId } = req.body || {};
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
+async function createPortalSession(req, res, userId) {
+  // The Stripe customer is read from the authenticated caller own profile
+  // row. This is the operation that previously allowed anyone holding a user
+  // id to obtain a billing-portal link for that account.
   const profile = await getUserProfile(userId);
   const customerId = profile && profile.stripe_customer_id;
-  if (!customerId) return res.status(400).json({ error: 'No Stripe customer found for this user' });
+  if (!customerId) return res.status(400).json({ error: 'No billing account found' });
 
   const stripe = getStripe();
   const portal = await stripe.billingPortal.sessions.create({

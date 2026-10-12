@@ -111,4 +111,43 @@ async function authenticate(req) {
   return { userId: user.id, plan: plan };
 }
 
-module.exports = { authenticate, verifyUser, getRealPlan, checkRateLimit };
+/**
+ * Admin authorisation.
+ *
+ * Admin identity is a real, verified Supabase user whose id appears in
+ * ADMIN_USER_IDS (comma-separated UUIDs). There is deliberately NO password
+ * and NO fallback value: a shared secret that has to reach the browser in
+ * order to be typed in is what caused the admin data exposure this replaces.
+ *
+ * Fails closed. If ADMIN_USER_IDS is unset the admin endpoints are off
+ * (503) rather than open — so a missing environment variable can never
+ * expose the data again.
+ */
+function getAdminIds() {
+  return String(process.env.ADMIN_USER_IDS || '')
+    .split(',')
+    .map(function (s) { return s.trim(); })
+    .filter(Boolean);
+}
+
+async function requireAdmin(req) {
+  const admins = getAdminIds();
+  if (!admins.length) {
+    const e = new Error('Admin access is not configured.');
+    e.status = 503;
+    throw e;
+  }
+  // Throws 401 when the bearer token is missing or not a live session.
+  const user = await verifyUser(req);
+  if (admins.indexOf(user.id) === -1) {
+    // Generic: an ordinary signed-in user learns nothing about this endpoint.
+    const e = new Error('Forbidden');
+    e.status = 403;
+    throw e;
+  }
+  return { userId: user.id, email: user.email };
+}
+
+module.exports = {
+  authenticate, verifyUser, getRealPlan, checkRateLimit, requireAdmin, getAdminIds
+};

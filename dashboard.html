@@ -896,6 +896,20 @@
       currentUserName = name;
     };
 
+    // C-2: /api/payment now derives the caller identity from a verified
+    // Supabase session, so every billing request must carry its access
+    // token. Read fresh each time rather than cached, so a refreshed token
+    // is picked up. Identity is no longer sent in the request body - the
+    // server ignores it.
+    async function paymentHeaders() {
+      var h = { 'Content-Type': 'application/json' };
+      try {
+        var s = window.cvAuth ? await window.cvAuth.getSession() : null;
+        if (s && s.access_token) h['Authorization'] = 'Bearer ' + s.access_token;
+      } catch (e) {}
+      return h;
+    }
+
     // Toggle billing period
     window._toggleBilling = function() {
       isAnnual = !isAnnual;
@@ -949,10 +963,8 @@
       try {
         var res = await fetch('/api/payment?action=create-checkout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: await paymentHeaders(),
           body: JSON.stringify({
-            userId: currentUserId,
-            email: currentUserEmail,
             fullName: currentUserName || currentUserEmail,
             planKey: planKey,
           })
@@ -995,8 +1007,8 @@
       try {
         var r = await fetch('/api/payment?action=create-portal', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ userId: currentUserId })
+          headers: await paymentHeaders(),
+          body: JSON.stringify({})
         });
         var d = await r.json();
         if (d.url || d.portal_url) {
@@ -1018,8 +1030,8 @@
       try {
         var res = await fetch('/api/payment?action=cancel', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: currentUserId })
+          headers: await paymentHeaders(),
+          body: JSON.stringify({})
         });
         var data = await res.json();
         if (data.cancelled) {
@@ -1058,8 +1070,8 @@
         try {
           var r = await fetch('/api/payment?action=confirm-payment', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ userId: currentUserId, sessionId: stripeSessionId })
+            headers: await paymentHeaders(),
+            body: JSON.stringify({ sessionId: stripeSessionId })
           });
           var d = await r.json();
           if (d.updated && d.plan !== 'free') {

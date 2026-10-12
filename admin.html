@@ -671,13 +671,10 @@
         <span>CV&nbsp;<span style="color:var(--muted);font-weight:600;">Central</span></span>
       </div>
       <h1>Admin Access</h1>
-      <p>Founder-only. Enter the admin password to continue.</p>
+      <p>Administrator accounts only. Access is granted server-side &mdash; signing in does not by itself grant it.</p>
       <form id="pwForm" novalidate>
-        <div class="pw-field">
-          <input type="password" id="pwInput" placeholder="Admin password" autocomplete="current-password" autofocus>
-        </div>
         <p class="pw-error" id="pwError"></p>
-        <button type="submit" class="btn-unlock">Unlock Dashboard</button>
+        <button type="submit" class="btn-unlock">Sign in</button>
       </form>
     </div>
   </div>
@@ -879,11 +876,25 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
   <script>
   (async function() {
 
-    var ADMIN_PASSWORD = 'CVCentral2026!';
-    var SESSION_KEY = 'cvcentral_admin_unlocked';
+    // SECURITY (remediation of audit finding C-1): this page no longer holds
+    // an admin password. It previously compared a typed password against a
+    // literal in this file — which is publicly served — and then sent that
+    // same literal to the admin APIs as `x-admin-key`. Anyone who viewed
+    // source could read every profile and every CV.
+    //
+    // Admin access is now a real Supabase session. The browser only supplies
+    // its access token; the server decides whether that user is an admin by
+    // checking ADMIN_USER_IDS. Nothing in this file grants any privilege.
+    var accessToken = null;
+
+    function authHeaders() {
+      return { 'Authorization': 'Bearer ' + (accessToken || '') };
+    }
 
     var allProfiles = [];
     var allCVs = [];
@@ -903,22 +914,14 @@
 
     document.getElementById('pwForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      var pw = document.getElementById('pwInput').value;
-      if (pw === ADMIN_PASSWORD) {
-        sessionStorage.setItem(SESSION_KEY, 'true');
-        document.getElementById('pwError').textContent = '';
-        showAdminApp();
-        init();
-      } else {
-        document.getElementById('pwError').textContent = 'Incorrect password.';
-        document.getElementById('pwInput').value = '';
-        document.getElementById('pwInput').focus();
-      }
+      // login.html has no post-sign-in redirect parameter, so come back here
+      // manually after signing in rather than implying one exists.
+      window.location.href = 'login.html';
     });
 
-    document.getElementById('lockBtn').addEventListener('click', function() {
-      sessionStorage.removeItem(SESSION_KEY);
-      showPasswordGate();
+    document.getElementById('lockBtn').addEventListener('click', async function() {
+      accessToken = null;
+      try { await window.cvAuth.signOut(); } catch (err) { window.location.href = 'login.html'; }
     });
 
     document.getElementById('refreshBtn').addEventListener('click', function() {
@@ -947,11 +950,30 @@
     document.getElementById('tabBtnFeedback').addEventListener('click', function() { switchTab('feedback'); });
     document.getElementById('tabBtnAnalytics').addEventListener('click', function() { switchTab('analytics'); });
 
-    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+    /* ---- Session-based admin gate (C-1) ----
+       The browser cannot decide who is an admin — it only presents its
+       Supabase access token and lets the API answer. A 403 is a valid user
+       who is not an admin; a 503 means ADMIN_USER_IDS is unset server-side.
+       In every failure case no data is requested or shown. */
+    function showGate(message) {
+      showPasswordGate();
+      var err = document.getElementById('pwError');
+      if (err) err.textContent = message || '';
+    }
+
+    var adminSession = null;
+    try {
+      adminSession = window.cvAuth ? await window.cvAuth.getSession() : null;
+    } catch (e) {
+      adminSession = null;
+    }
+
+    if (!adminSession) {
+      showGate('Sign in with an administrator account to continue.');
+    } else {
+      accessToken = adminSession.access_token;
       showAdminApp();
       init();
-    } else {
-      showPasswordGate();
     }
 
     /* ---- Init ---- */
@@ -966,7 +988,13 @@
       document.getElementById('rlsBanner').style.display = 'none';
 
       try {
-        var res = await fetch('/api/admin-data', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var res = await fetch('/api/admin-data', { headers: authHeaders() });
+        if (res.status === 401 || res.status === 403 || res.status === 503) {
+          showGate(res.status === 503
+            ? 'Admin access is not configured on the server.'
+            : 'This account does not have administrator access.');
+          return;
+        }
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load admin data');
 
@@ -1004,7 +1032,7 @@
       list.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading feedback&hellip;</div>';
 
       try {
-        var res = await fetch('/api/admin-feedback', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var res = await fetch('/api/admin-feedback', { headers: authHeaders() });
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load feedback');
 
@@ -1095,7 +1123,7 @@
           try {
             var res = await fetch('/api/admin-feedback?id=' + encodeURIComponent(id), {
               method: 'DELETE',
-              headers: { 'x-admin-key': ADMIN_PASSWORD }
+              headers: authHeaders()
             });
             var data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Delete failed');
@@ -1116,7 +1144,7 @@
       body.innerHTML = '<div class="special-row" style="padding:2rem 0;text-align:center;color:var(--muted);"><span class="spinner"></span> Loading analytics&hellip;</div>';
 
       try {
-        var res = await fetch('/api/admin-analytics', { headers: { 'x-admin-key': ADMIN_PASSWORD } });
+        var res = await fetch('/api/admin-analytics', { headers: authHeaders() });
         var data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load analytics');
 
@@ -1347,7 +1375,7 @@
         btn.addEventListener('click', function() {
           var cvId = String(this.dataset.cvid);
           var cv = allCVs.find(function(c) { return String(c.id) === cvId; });
-          if (cv) downloadCVData(cv, userName);
+          if (cv) downloadCVData(cv, userName).catch(function(){});
         });
       });
 
@@ -1363,8 +1391,24 @@
     });
 
     /* ---- CV Data Download ---- */
-    function downloadCVData(cv, ownerName) {
-      var data = cv.cv_data || {};
+    async function downloadCVData(cv, ownerName) {
+      // C-1: the list endpoint returns CV metadata only, so content is
+      // fetched one CV at a time. Bulk CV content can no longer be pulled
+      // out of this API in a single request.
+      var full = cv;
+      if (!full.cv_data) {
+        try {
+          var res = await fetch('/api/admin-data?cvId=' + encodeURIComponent(cv.id),
+                                { headers: authHeaders() });
+          if (!res.ok) { alert('Could not load this CV.'); return; }
+          var payload = await res.json();
+          full = payload.cv || cv;
+        } catch (e) {
+          alert('Could not load this CV.');
+          return;
+        }
+      }
+      var data = full.cv_data || {};
       var lines = [];
 
       lines.push('CV CENTRAL - CV DATA EXPORT');
@@ -1458,7 +1502,10 @@
     document.getElementById('exportBtn').addEventListener('click', function() {
       if (filtered.length === 0) return;
 
-      var rows = [['Name', 'Email', 'Plan', 'Registered', 'CVs Saved', 'Last Active', 'Target Role']];
+      // 'Target Role' was read from bulk cv_data. That is no longer returned
+      // by /api/admin-data (C-1), so the column is omitted rather than
+      // reinstating bulk CV content for a single CSV field.
+      var rows = [['Name', 'Email', 'Plan', 'Registered', 'CVs Saved', 'Last Active']];
 
       filtered.forEach(function(p) {
         var userCVs = cvsByUser[p.id] || [];
@@ -1467,19 +1514,13 @@
           ? new Date(lastCV.updated_at).toLocaleDateString('en-GB')
           : (p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : '');
 
-        var targetRole = '';
-        if (lastCV && lastCV.cv_data && lastCV.cv_data.personal) {
-          targetRole = lastCV.cv_data.personal.targetRole || '';
-        }
-
         rows.push([
           p.full_name || '',
           p.email || '',
           (p.plan || 'free').toUpperCase(),
           p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : '',
           userCVs.length,
-          lastActive,
-          targetRole
+          lastActive
         ]);
       });
 
